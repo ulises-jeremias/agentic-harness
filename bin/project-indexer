@@ -51,7 +51,7 @@ case "${1:-}" in
     echo "  - repos/     (cloned repos)"
     echo "  - projects/  (symlinks)"
     echo ""
-    echo "Next: project-indexer clone owner/my-project"
+    echo "Next: project-indexer clone dots-ai/internal-skillshouse-app"
     ;;
 
   clone)

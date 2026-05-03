@@ -30,7 +30,7 @@
 | Deferred / background work | `./bin/devcompanion queue` |
 
 > **Customize this table** to match your installed skills and team tools.
-> If using [dots-ai](https://github.com/ulises-jeremias/dots-ai), skills are installed via `dots-skills sync` and agents via `~/.config/opencode/agents/` or `~/.claude/agents/`.
+> **dots-ai installs**: add `dots-ai-assistant` as the entry point for dots-ai repo work and `dots-ai-dev-companion` for generic client delivery.
 
 ---
 
@@ -50,68 +50,6 @@
 - Assume we are inside a repo without verifying
 - Commit without code review
 - Skip the plan phase for non-trivial work
-
----
-
-## Session Bootstrap & Auto-detection
-
-At session start and throughout the conversation, **proactively detect** context from the user's words and activate the appropriate workspace features. Do NOT wait for explicit commands.
-
-### 1. Pack Detection
-
-When the user mentions a client, project, or domain — load the matching pack immediately:
-
-| User cue (any language) | Pack | Action |
-|------------------------|------|--------|
-| Client name, project code, domain keyword | Matching pack | `./bin/workspace-context load packs/<name>.yaml` |
-| Any project name | — | Check `packs/` for a matching YAML file |
-
-> **Customize this table** with your actual client/project triggers and pack files.
-
-After loading a pack, read its `process_docs` and `repos` to prime your context.
-
-### 2. Persona Detection
-
-When the user indicates a work mode — activate the matching persona constraints:
-
-| User cue | Persona file | Behavior |
-|----------|-------------|----------|
-| "mode reviewer", "just review", "analyze this" | `personas/reviewer.md` | Analyze and critique only, no changes |
-| "mode implementer", "let's code", "implement this" | `personas/implementer.md` | Write code, bias toward action |
-| "mode researcher", "investigate", "explore this" | `personas/researcher.md` | Explore and summarize, no implementation |
-| "mode architect", "design this", "ADR" | `personas/architect.md` | System design, tradeoffs, decisions |
-| "mode writer", "write docs", "documentation only" | `personas/writer.md` | Documentation and prose only |
-
-Read the persona file and adopt its constraints for the remainder of the session (or until changed).
-
-### 3. Project Detection
-
-When the user references a specific repo or project name:
-
-1. Check `projects/` symlinks for a match
-2. Set `workdir` to that repo for subsequent operations
-3. Run `dev-assistant` discovery if this is the first interaction with this repo in the session
-4. If the repo belongs to a known pack, auto-load that pack too
-
-### 4. Deferred Work Detection
-
-Route to `./bin/devcompanion queue` when the user signals asynchronous intent:
-
-- "do this later", "async", "background", "queue this", "defer"
-- "when you have time", "no rush", "batch this"
-- "review X for me" (when X is a different project from current context)
-
-### 5. Knowledge Auto-check
-
-Before asking the user ANY factual question:
-
-1. Search `knowledge/` for the answer (`./bin/assistant-memory search "topic"`)
-2. Check `knowledge/todos/pending.md` for related pending items
-3. Only ask the user if the answer is not found
-
-After learning something new (correction, preference, ID, decision):
-
-- Save immediately with `./bin/assistant-memory add --type learning "..."`
 
 ---
 
@@ -139,7 +77,7 @@ After learning something new (correction, preference, ID, decision):
 | `ui-ux-pro-max` | UI/UX design, components, layouts |
 | `github-cli-workflow` | Push branch, create draft PR (GitHub) |
 | `gitlab-cli-workflow` | Push branch, create draft MR (GitLab) |
-| `workstation-triage` | Workstation health diagnostics |
+| `dots-ai-workstation-triage` | Workstation health diagnostics |
 
 ### Subagents
 
@@ -151,16 +89,8 @@ After learning something new (correction, preference, ID, decision):
 | `refactor-cleaner` | Dead code removal, simplification |
 | `explore` | Fast codebase search |
 | `docs-lookup` | Documentation and API references |
-| `architect` | System design and architecture decisions |
-| `build-error-resolver` | Build, TypeScript, lint, and CI failures |
-| `database-reviewer` | PostgreSQL, schema design, query optimization |
-| `performance-optimizer` | Performance profiling and optimization |
-| `planner` | Feature planning and task breakdown |
-| `typescript-reviewer` | TypeScript type safety improvements |
-| `e2e-runner` | Playwright end-to-end testing |
 
-> **Add your team's custom skills here** as you configure them.
-> With [dots-ai](https://github.com/ulises-jeremias/dots-ai) installed, all these agents are available out of the box.
+> **dots-ai installs**: agents are deployed with the `dots-ai-` prefix by `dots-ai` (e.g. `dots-ai-code-reviewer`, `dots-ai-security-reviewer`). Update this table accordingly. **Add your team's custom skills here** as you configure them.
 
 ---
 
@@ -197,7 +127,6 @@ personas/implementer.md    # Write code, bias toward action
 personas/reviewer.md       # Analyze and critique, no changes
 personas/researcher.md     # Explore and summarize, no implementation
 personas/architect.md      # System design, tradeoffs, ADRs
-personas/writer.md         # Documentation and prose only
 ```
 
 → [`docs/PERSONAS.md`](docs/PERSONAS.md)
@@ -248,7 +177,32 @@ or tell the user to let the worker pick it up.
 ./bin/project-indexer list                             # list indexed projects
 ```
 
-→ [`docs/PROJECTS.md`](docs/PROJECTS.md) · [`docs/DEVCOMPANION.md`](docs/DEVCOMPANION.md)
+### Client engagements: lock the LLM before queuing
+
+Before queuing background jobs for a client repo, **verify the active LLM
+policy** so the runner cannot fall back to OpenCode / Ollama / dots-ai
+credentials. The policy is read by both `dots-devcompanion` (workstation) and
+this workspace's `bin/devcompanion` when wired to the workstation runner.
+
+```bash
+# 1. Wire the workspace CLI to the workstation runner (one-time per machine).
+export AI_WORKSPACE_RUNNER_DIR="$HOME/.local/share/dots-ai/dev-companion/runner"
+
+# 2. Pick the policy from the engagement's env file (~/.config/dots-ai/env.d/<client>.env).
+export ANTHROPIC_API_KEY="<client key>"
+export DOTS_AI_DEVCOMPANION_LLM_ALLOWLIST="anthropic"
+export DOTS_AI_DEVCOMPANION_LLM_STRICT="1"
+
+# 3. Confirm — never invokes the model.
+dots-devcompanion llm-status
+```
+
+If `llm-status` does not show the expected provider, **stop and fix the
+policy**; do not queue jobs. Cursor/Copilot-only engagements: use
+`./bin/devcompanion run-once --no-llm` (skeleton plan) and drive the LLM
+inside the IDE with the client's account.
+
+→ [`docs/PROJECTS.md`](docs/PROJECTS.md) · [`docs/DEVCOMPANION.md`](docs/DEVCOMPANION.md) · [`dots-ai: DEV_COMPANION_LLM.md`](https://github.com/ulises-jeremias/dots-ai/blob/main/docs/DEV_COMPANION_LLM.md)
 
 ---
 
@@ -257,7 +211,7 @@ or tell the user to let the worker pick it up.
 | AI Tool | Config read |
 |---------|-------------|
 | Claude Code | `AGENTS.md` |
-| OpenCode / Cursor | `CLAUDE.md` → symlink to `AGENTS.md` |
+| opencode / Cursor | `CLAUDE.md` → symlink to `AGENTS.md` |
 | Gemini CLI | `GEMINI.md` → symlink to `AGENTS.md` |
 | GitHub Copilot | `.github/copilot-instructions.md` → symlink to `AGENTS.md` |
 
@@ -269,4 +223,3 @@ or tell the user to let the worker pick it up.
 - Customize this file to reflect your team's skills, routing, and conventions
 - See [`docs/WORKFLOWS.md`](docs/WORKFLOWS.md) for detailed task patterns
 - See [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md) for the agentic harness philosophy
-- See [dots-ai](https://github.com/ulises-jeremias/dots-ai) for the workstation tooling layer

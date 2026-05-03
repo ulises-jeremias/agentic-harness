@@ -30,6 +30,18 @@ If `AI_WORKSPACE_RUNNER_DIR` is set and points to a directory containing a
 `runner` module with a `main()` entry point, it will be used for full
 LLM-powered execution.
 
+> [!IMPORTANT]
+> When the workstation baseline is installed, set
+> `AI_WORKSPACE_RUNNER_DIR=$HOME/.local/share/dots-ai/dev-companion/runner`
+> so this CLI delegates to the same runner that `dots-devcompanion run-once`
+> uses. Otherwise the workspace falls back to the built-in skeleton even when
+> the workstation provides full LLM support.
+
+```bash
+# One-time setup: align the workspace with the workstation runner.
+export AI_WORKSPACE_RUNNER_DIR="$HOME/.local/share/dots-ai/dev-companion/runner"
+```
+
 ---
 
 ## When to use devcompanion vs interactive session
@@ -172,17 +184,52 @@ Do not edit these manually — they are regenerated on every `queue`, `done`, an
 
 ---
 
-## LLM provider order
+## LLM provider order and policy
 
-When `dots_devcompanion_runner` is available, it uses this fallback chain:
+When `dots_ai_devcompanion_runner` is available, it picks a provider through an
+**explicit policy layer** (see
+[`dots-ai/docs/DEV_COMPANION_LLM.md`](https://github.com/ulises-jeremias/dots-ai/blob/main/docs/DEV_COMPANION_LLM.md)).
+By default the order is:
 
-1. **opencode** (local, free) — preferred
-2. **Ollama** (local, free) — if opencode unavailable
-3. **Anthropic** (cloud) — if `ANTHROPIC_API_KEY` set
-4. **OpenAI** (cloud) — if `OPENAI_API_KEY` set
-5. **Skeleton plan** — if no provider available
+1. **opencode** (local, free)
+2. **Ollama** (local, free)
+3. **Anthropic** (cloud) — if `ANTHROPIC_API_KEY` is set
+4. **OpenAI** (cloud) — if `OPENAI_API_KEY` is set
+5. **Skeleton plan** — if nothing is allowed/available
 
-Without `dots_devcompanion_runner`, the built-in skeleton runner is used.
+> [!WARNING]
+> For client engagements that mandate a single AI account (e.g. only their
+> Anthropic key, only their OpenAI key, only OpenCode against their endpoint)
+> you **must** lock the runner with the policy variables below before queuing
+> jobs. Otherwise the runner will silently use OpenCode/big-pickle if
+> available.
+
+```bash
+# Example: only Anthropic with the client's key, fail closed otherwise.
+export ANTHROPIC_API_KEY="<from client secret store>"
+export DOTS_AI_DEVCOMPANION_LLM_ALLOWLIST="anthropic"
+export DOTS_AI_DEVCOMPANION_LLM_STRICT="1"
+
+dots-devcompanion llm-status         # verify, never invokes the model
+./bin/devcompanion run-once         # honors the same env vars
+```
+
+Per-job overrides go inside the `.job` file's `llm` block (subset only — a
+job can never widen the global allowlist):
+
+```json
+"llm": {
+  "enabled": true,
+  "allowlist": ["anthropic"],
+  "model": "claude-3-7-sonnet-latest",
+  "strict": true
+}
+```
+
+For Cursor/Copilot-only engagements there is no headless adapter today; use
+`run-once --no-llm` (skeleton plan + IDE-driven execution). See
+[`dots-ai/docs/DEV_COMPANION_LLM.md`](https://github.com/ulises-jeremias/dots-ai/blob/main/docs/DEV_COMPANION_LLM.md)
+for the full reference.
 
 ---
 
@@ -191,8 +238,15 @@ Without `dots_devcompanion_runner`, the built-in skeleton runner is used.
 | Variable | Purpose |
 |----------|---------|
 | `AI_WORKSPACE_DC_HOME` | Override queue home directory |
+| `AI_WORKSPACE_RUNNER_DIR` | Path to the workstation runner (set to `~/.local/share/dots-ai/dev-companion/runner` when both are installed) |
 | `ANTHROPIC_API_KEY` | Enable Anthropic LLM provider |
 | `OPENAI_API_KEY` | Enable OpenAI LLM provider |
+| `DOTS_AI_DEVCOMPANION_LLM_ALLOWLIST` | Comma-separated providers allowed (ordered) |
+| `DOTS_AI_DEVCOMPANION_LLM_DENYLIST` | Comma-separated providers always blocked |
+| `DOTS_AI_DEVCOMPANION_LLM_PINNED_PROVIDER` | Force a single provider |
+| `DOTS_AI_DEVCOMPANION_LLM_PINNED_MODEL` | Override the pinned provider's default model |
+| `DOTS_AI_DEVCOMPANION_LLM_STRICT` | `1`/`true` → fail closed when no allowed provider is available |
+| `DOTS_AI_DEVCOMPANION_LLM_CONFIG` | Override the policy file path (`~/.config/dots-ai/devcompanion-llm.json` by default) |
 
 ---
 

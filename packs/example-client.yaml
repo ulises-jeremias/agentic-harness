@@ -50,3 +50,30 @@ ai:
     - Always check AGENTS.md in each repo before working
     - Use conventional commits
     - Create draft PRs, never merge directly
+
+# ── DevCompanion LLM policy (CLIENT-RESTRICTED MODE EXAMPLE) ──────────────────
+# Replace this block per engagement. The runner enforces these via env vars;
+# this section documents the contract and feeds the AGENTS.md runbook.
+#
+# IMPORTANT: declare ONLY what the client agreement permits. The runner will
+# fail closed (status: policy_violation, exit code 2) when strict=true and no
+# allowed provider is reachable, instead of silently using OpenCode/big-pickle.
+devcompanion:
+  llm:
+    mode: client-restricted
+    # allowlist preserves order: try the first one first.
+    allowlist: ["anthropic"]          # e.g. ["anthropic"], ["openai"], ["opencode"]
+    denylist: ["opencode", "ollama"]  # explicit denies for belt-and-suspenders
+    pinned_provider: null             # set when only one provider is allowed
+    pinned_model: "claude-3-7-sonnet-latest"
+    strict: true                      # fail closed
+    runbook: |
+      1. Source the engagement env file:
+           source ~/.config/dots-ai/env.d/<client>.env
+         which must export ANTHROPIC_API_KEY (or the right key for this client)
+         and the DOTS_AI_DEVCOMPANION_LLM_* variables matching this block.
+      2. Verify before queuing jobs (no model call):
+           dots-devcompanion llm-status
+      3. If using Cursor/Copilot only: prefer
+           ./bin/devcompanion run-once --no-llm
+         and drive the LLM inside the IDE with the client's account.

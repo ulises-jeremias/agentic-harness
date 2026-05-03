@@ -1,6 +1,6 @@
 # Contributing
 
-This repo is your **personal AI workspace** — a fork-and-own framework. Contributions here mean extending it for your own needs. If you want to contribute back to the upstream, open a PR at [github.com/ulises-jeremias/ai-workspace](https://github.com/ulises-jeremias/ai-workspace).
+This repo is your **personal AI workspace** — a fork-and-own framework. Contributions here mean extending it for your own needs. If you want to contribute back to the upstream starter, open a PR there.
 
 ---
 
@@ -22,8 +22,8 @@ This repo is your **personal AI workspace** — a fork-and-own framework. Contri
 
 | If it's... | Put it in |
 |-----------|-----------|
-| Machine setup, dotfiles, shell config | Your workstation/dotfiles repo (e.g. [dots-ai](https://github.com/ulises-jeremias/dots-ai)) |
-| Reusable skill definitions | Your skills pack / `dots-skills` managed directory |
+| Machine setup, dotfiles, shell config | Your workstation/dotfiles repo |
+| Reusable skill definitions | Your skills pack / opencode skills repo |
 | Team-wide patterns and examples | Your team's knowledge base |
 
 ---
@@ -66,7 +66,6 @@ Common scopes: `knowledge`, `bin`, `docs`, `templates`, `personas`, `packs`, `ci
 - [ ] CLI scripts are executable (`chmod +x bin/my-script`)
 - [ ] Docs files use UPPERCASE names (`docs/MY-DOC.md`)
 - [ ] No team-specific names, URLs, or tool instances hardcoded
-- [ ] Pre-commit passes locally (`pre-commit run --all-files`)
 
 ---
 
@@ -78,10 +77,3 @@ When adding a new tool process (e.g., a new project management tool):
 - [ ] Use placeholder IDs, not real ones
 - [ ] Document the skill/CLI invocation pattern
 - [ ] Add an entry to the routing table in `AGENTS.md`
-
----
-
-## Related projects
-
-- [dots-ai](https://github.com/ulises-jeremias/dots-ai) — Workstation AI layer (skills, agents, CLI helpers)
-- [dotfiles](https://github.com/ulises-jeremias/dotfiles) — Desktop configuration (HorneroConfig)

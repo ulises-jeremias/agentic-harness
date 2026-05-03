@@ -1,20 +1,49 @@
 #!/usr/bin/env bash
 # scripts/workspace-init.sh
-# Interactive setup wizard for a fresh AI Workspace clone.
+# Setup script for a fresh AI Workspace clone.
+# Runs non-interactively — all steps use defaults automatically.
 #
 # Usage:
-#   ./scripts/workspace-init.sh
+#   ./scripts/workspace-init.sh [OPTIONS]
+#
+# Options:
+#   --user-workspace              Create/switch to user-workspace/<git-username> (default)
+#   --account-workspace=NAME      Create/switch to account-workspace/<name>
+#   -h, --help                    Show this help
 
 set -euo pipefail
 
 WORKSPACE_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-# ── non-interactive detection ─────────────────────────────────────────────────
-# If stdin is not a terminal (piped, CI, AI tool), use defaults automatically.
-INTERACTIVE=true
-if [[ ! -t 0 ]]; then
-  INTERACTIVE=false
-fi
+# ── Parse flags ───────────────────────────────────────────────────────────────
+WORKSPACE_MODE="user"
+ACCOUNT_NAME=""
+
+for arg in "$@"; do
+  case "${arg}" in
+    --user-workspace)
+      WORKSPACE_MODE="user"
+      ;;
+    --account-workspace=*)
+      WORKSPACE_MODE="account"
+      ACCOUNT_NAME="${arg#*=}"
+      ;;
+    -h | --help)
+      printf 'Usage: %s [OPTIONS]\n\n' "$0"
+      printf 'Options:\n'
+      printf '  --user-workspace              Create/switch to user-workspace/<git-username> (default)\n'
+      printf '  --account-workspace=NAME      Create/switch to account-workspace/<name>\n'
+      printf '  -h, --help                    Show this help\n'
+      exit 0
+      ;;
+    *)
+      printf 'Unknown flag: %s\n' "${arg}" >&2
+      printf 'Run %s --help for usage.\n' "$0" >&2
+      exit 1
+      ;;
+  esac
+done
+
 
 # ── colors ────────────────────────────────────────────────────────────────────
 _color() { [[ -t 1 ]] && printf '\033[%sm%s\033[0m' "$1" "$2" || printf '%s' "$2"; }
@@ -24,57 +53,60 @@ yellow() { _color "1;33" "$*"; echo; }
 bold()   { _color "1;37" "$*"; echo; }
 dim()    { _color "0;37" "$*"; echo; }
 
-ask() {
-  # ask <prompt> <default>
-  # In non-interactive mode, returns default immediately without prompting.
-  local prompt="${1}" default="${2:-}"
-  if [[ "${INTERACTIVE}" == "false" ]]; then
-    echo "${default}"
-    return
+# ── git username detection ────────────────────────────────────────────────────
+_git_username() {
+  local name=""
+
+  # 1. Try GitHub CLI — most reliable, returns the actual login handle
+  if command -v gh &>/dev/null; then
+    name=$(gh api user --jq .login 2>/dev/null || true)
   fi
-  if [[ -n "${default}" ]]; then
-    printf '%s [%s]: ' "${prompt}" "${default}"
-  else
-    printf '%s: ' "${prompt}"
+
+  # 2. Fall back to git config user.name, slugified
+  if [[ -z "${name}" ]]; then
+    name=$(git config user.name 2>/dev/null || true)
+    # Lowercase, spaces → hyphens, strip anything that isn't [a-z0-9-]
+    name=$(printf '%s' "${name}" | tr '[:upper:]' '[:lower:]' | tr ' ' '-' | tr -cd 'a-z0-9-')
   fi
-  read -r answer
-  echo "${answer:-${default}}"
+
+  # 3. Fall back to system user
+  if [[ -z "${name}" ]]; then
+    name=$(whoami 2>/dev/null || echo "user")
+  fi
+
+  printf '%s' "${name}"
 }
 
+# ── banner ────────────────────────────────────────────────────────────────────
 echo ""
 blue "╔══════════════════════════════════════════════╗"
-blue "║      AI Workspace — Setup Wizard             ║"
+blue "║      AI Workspace — Setup                    ║"
 blue "╚══════════════════════════════════════════════╝"
 echo ""
-dim "This wizard will create your local config files."
-dim "All changes are gitignored — safe to run anytime."
+dim "Setting up your workspace. All steps use defaults automatically."
 echo ""
 
 # ── Step 1: Make bin scripts executable ──────────────────────────────────────
-bold "Step 1/5 — Make bin scripts executable"
+bold "Step 1/6 — Make bin scripts executable"
 chmod +x "${WORKSPACE_ROOT}"/bin/* 2>/dev/null || true
 green "  ✓ bin/* executable"
 echo ""
 
 # ── Step 2: Create project directories ───────────────────────────────────────
-bold "Step 2/5 — Initialize project directories"
+bold "Step 2/6 — Initialize project directories"
 mkdir -p "${WORKSPACE_ROOT}/repos" "${WORKSPACE_ROOT}/projects"
 green "  ✓ repos/ and projects/ created"
 echo ""
 
 # ── Step 3: Configure .workspace.yaml ────────────────────────────────────────
-bold "Step 3/5 — Configure local workspace"
+bold "Step 3/6 — Configure local workspace"
 workspace_yaml="${WORKSPACE_ROOT}/.workspace.yaml"
 
 if [[ -f "${workspace_yaml}" ]]; then
   yellow "  .workspace.yaml already exists — skipping"
 else
-  echo ""
-  dim "  Let's set up your workspace configuration."
-  echo ""
-
-  default_org=$(ask "  Your GitHub org or username" "my-org")
-  clone_dir=$(ask "  Where to clone repos (relative to workspace)" "./repos")
+  default_org="my-org"
+  clone_dir="./repos"
 
   cat > "${workspace_yaml}" << EOF
 # Local workspace configuration (gitignored — customize freely)
@@ -92,11 +124,12 @@ projects:
     description: My organization's projects
 EOF
   green "  ✓ .workspace.yaml created"
+  dim "  Edit .workspace.yaml to set your GitHub org and clone directory"
 fi
 echo ""
 
 # ── Step 4: Configure projects.yaml ──────────────────────────────────────────
-bold "Step 4/5 — Set up project index"
+bold "Step 4/6 — Set up project index"
 projects_yaml="${WORKSPACE_ROOT}/projects.yaml"
 
 if [[ -f "${projects_yaml}" ]]; then
@@ -109,7 +142,7 @@ fi
 echo ""
 
 # ── Step 5: Symlinks for AI tools ─────────────────────────────────────────────
-bold "Step 5/5 — Set up AI tool symlinks"
+bold "Step 5/6 — Set up AI tool symlinks"
 
 # CLAUDE.md → AGENTS.md
 if [[ ! -e "${WORKSPACE_ROOT}/CLAUDE.md" ]]; then
@@ -137,21 +170,89 @@ else
 fi
 
 echo ""
+
+# ── Step 6: Git branch setup ──────────────────────────────────────────────────
+bold "Step 6/6 — Git branch setup"
+
+# Determine target branch name
+if [[ "${WORKSPACE_MODE}" == "user" ]]; then
+  GIT_USERNAME="$(_git_username)"
+  BRANCH_NAME="user-workspace/${GIT_USERNAME}"
+else
+  if [[ -z "${ACCOUNT_NAME}" ]]; then
+    printf '  Error: --account-workspace requires a name (e.g. --account-workspace=acme)\n' >&2
+    exit 1
+  fi
+  BRANCH_NAME="account-workspace/${ACCOUNT_NAME}"
+fi
+
+dim "  Target branch: ${BRANCH_NAME}"
+echo ""
+
+# Check if inside a git repo
+if ! git -C "${WORKSPACE_ROOT}" rev-parse --git-dir &>/dev/null 2>&1; then
+  yellow "  No git repository detected — skipping branch setup."
+  yellow "  Clone from GitHub to enable workspace branching."
+  echo ""
+else
+  CURRENT_BRANCH=$(git -C "${WORKSPACE_ROOT}" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
+
+  if [[ "${CURRENT_BRANCH}" == "${BRANCH_NAME}" ]]; then
+    # Already on the right branch
+    green "  ✓ Already on branch '${BRANCH_NAME}'"
+    yellow "  Tip: stay in sync with main — git pull origin main --rebase"
+
+  elif git -C "${WORKSPACE_ROOT}" show-ref --verify --quiet "refs/heads/${BRANCH_NAME}" 2>/dev/null; then
+    # Branch exists locally → switch to it
+    git -C "${WORKSPACE_ROOT}" checkout "${BRANCH_NAME}"
+    green "  ✓ Switched to existing branch '${BRANCH_NAME}'"
+    yellow "  Tip: sync with main — git pull origin main --rebase"
+
+  elif git -C "${WORKSPACE_ROOT}" ls-remote --exit-code --heads origin "${BRANCH_NAME}" &>/dev/null 2>&1; then
+    # Branch exists on remote → track it
+    git -C "${WORKSPACE_ROOT}" checkout -b "${BRANCH_NAME}" "origin/${BRANCH_NAME}"
+    green "  ✓ Tracking remote branch 'origin/${BRANCH_NAME}'"
+    yellow "  Tip: sync with main — git pull origin main --rebase"
+
+  else
+    # Create new branch from current HEAD
+    git -C "${WORKSPACE_ROOT}" checkout -b "${BRANCH_NAME}"
+    green "  ✓ Created branch '${BRANCH_NAME}'"
+
+    # Attempt to push and set upstream
+    if git -C "${WORKSPACE_ROOT}" remote get-url origin &>/dev/null 2>&1; then
+      if git -C "${WORKSPACE_ROOT}" push -u origin "${BRANCH_NAME}" 2>/dev/null; then
+        green "  ✓ Pushed to origin/${BRANCH_NAME}"
+      else
+        yellow "  Could not push to remote — branch created locally only."
+        yellow "  Push manually: git push -u origin ${BRANCH_NAME}"
+      fi
+    else
+      dim "  No remote configured — branch created locally."
+    fi
+  fi
+fi
+echo ""
+
+# ── Done ──────────────────────────────────────────────────────────────────────
 green "╔══════════════════════════════════════════════╗"
 green "║  Setup complete!                             ║"
 green "╚══════════════════════════════════════════════╝"
 echo ""
 blue "Next steps:"
-echo "  1. Clone your first repo:"
+echo "  1. Edit your workspace config:"
+dim "       \$EDITOR .workspace.yaml   # set your GitHub org and clone dir"
+echo ""
+echo "  2. Clone your first repo:"
 dim "       ./bin/project-indexer clone owner/my-project"
 echo ""
-echo "  2. Open in your AI tool:"
+echo "  3. Open in your AI tool:"
 dim "       opencode   # or: claude / cursor / gemini"
 echo ""
-echo "  3. (Optional) Queue a background job:"
+echo "  4. (Optional) Queue a background job:"
 dim "       ./bin/devcompanion queue my-project --template code-review"
 echo ""
-echo "  4. Read the docs:"
+echo "  5. Read the docs:"
 dim "       docs/METHODOLOGY.md   — How the workspace is designed"
 dim "       docs/WORKFLOWS.md     — Common task patterns"
 dim "       docs/PERSONAS.md      — Work mode personas"

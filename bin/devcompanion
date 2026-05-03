@@ -5,7 +5,7 @@ bin/devcompanion — standalone background job queue for AI Workspace.
 Manages a job queue in ~/.local/share/ai-workspace/dev-companion/
 (no dependency on any external workstation runner).
 
-If a workstation runner (dots_devcompanion_runner) is available, it will be
+If a workstation runner (dots_ai_devcompanion_runner) is available, it will be
 used for run-once. Otherwise, a built-in skeleton runner is used.
 
 Usage:
@@ -49,11 +49,10 @@ QUEUE_FAILED     = _DC_HOME / "queue" / "failed"
 # Optional external runner (used if available, falls back to skeleton)
 # Set AI_WORKSPACE_RUNNER_DIR to point at a directory containing a
 # runner module with a main() entry point for full LLM-powered execution.
-# If dots-ai is installed, dots-devcompanion provides this runner.
 _RUNNER_DIR = Path(
     os.environ.get("AI_WORKSPACE_RUNNER_DIR", "")
-    or Path.home() / ".local" / "share" / "dots-ai" / "dev-companion" / "runner"
-)
+    or Path.home() / ".local" / "share" / "ai-workspace" / "runner"
+) / "runner"
 
 
 # ── colors ────────────────────────────────────────────────────────────────────
@@ -79,14 +78,13 @@ def err(msg: str):  print(f"{_red('[devcompanion]')} {msg}", file=sys.stderr)
 # ── workstation runner import ─────────────────────────────────────────────────
 
 def _import_runner():
-    """Try to import the dots-ai devcompanion runner. Returns (module, None) or (None, reason)."""
-    runner_module = _RUNNER_DIR / "runner"
+    """Try to import the workstation runner. Returns (module, None) or (None, reason)."""
     if not _RUNNER_DIR.is_dir():
         return None, f"runner dir not found: {_RUNNER_DIR}"
     if str(_RUNNER_DIR) not in sys.path:
         sys.path.insert(0, str(_RUNNER_DIR))
     try:
-        import dots_devcompanion_runner as r
+        import dots_ai_devcompanion_runner as r
         return r, None
     except ImportError as e:
         return None, str(e)
@@ -324,7 +322,7 @@ def cmd_queue(args):
         err("Provide --request or --template")
         sys.exit(1)
 
-    # Build job dict
+    # Build job dict (schema-compatible with workstation)
     job_id = args.id or f"{args.project}-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
     job = {
         "id":         job_id,
@@ -359,7 +357,7 @@ def cmd_queue(args):
 
 
 def cmd_run_once(args):
-    """Run the oldest pending job. Uses dots-ai runner if available, else skeleton."""
+    """Run the oldest pending job. Uses workstation runner if available, else skeleton."""
     QUEUE_PENDING.mkdir(parents=True, exist_ok=True)
     job_files = sorted(QUEUE_PENDING.glob("*.job"))
     if not job_files:
@@ -375,7 +373,7 @@ def cmd_run_once(args):
 
     no_llm = getattr(args, "no_llm", False)
 
-    # ── Try dots-ai runner first ──────────────────────────────────────────
+    # ── Try workstation runner first ──────────────────────────────────────
     runner, reason = _import_runner()
     if runner and not no_llm:
         argv = ["--job", str(job_file), "--out", str(out_dir)]
@@ -384,7 +382,7 @@ def cmd_run_once(args):
             rc = 0  # treat no explicit return as success
     else:
         if runner is None:
-            warn(f"dots-ai runner not available ({reason}). Using skeleton runner.")
+            warn(f"Workstation runner not available ({reason}). Using skeleton runner.")
         elif no_llm:
             log("--no-llm flag set. Using skeleton runner.")
         rc = _skeleton_run(job_file, out_dir, no_llm=True)
@@ -594,10 +592,6 @@ def cmd_help(_args=None):
 {_cyan('Queue path:')}
   {_DC_HOME / "queue"}
   (override with AI_WORKSPACE_DC_HOME env var)
-
-{_cyan('Runner integration:')}
-  If dots-ai is installed, uses dots-devcompanion for LLM-powered execution.
-  Without dots-ai, the built-in skeleton runner is used.
 
 {_cyan('Examples:')}
   devcompanion queue my-api --template code-review
