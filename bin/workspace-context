@@ -47,7 +47,7 @@ cmd_snapshot() {
       name=$(basename "$link")
       target=$(readlink -f "$link" 2>/dev/null || echo "(broken)")
       printf "  %-30s → %s\n" "${name}" "${target}"
-      (( count++ ))
+      (( count+=1 ))
     done < <(find "${PROJECTS_DIR}" -maxdepth 1 -type l -print0 2>/dev/null | sort -z)
     if [[ $count -eq 0 ]]; then
       dim "  (no projects indexed — run: bin/project-indexer clone owner/repo)"

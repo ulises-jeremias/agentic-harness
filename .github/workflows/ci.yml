@@ -16,9 +16,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          # This repo is not a Python package and intentionally does not carry
+          # requirements.txt/pyproject.toml. `cache: pip` fails hard when no
+          # dependency manifest is present, so we keep setup-python simple here.
 
       - name: Install pre-commit
-        run: pip install pre-commit
+        run: pip install --upgrade pre-commit
 
       - name: Install shellcheck
         run: sudo apt-get install -y shellcheck
@@ -26,5 +29,8 @@ jobs:
       - name: Install markdownlint-cli
         run: npm install -g markdownlint-cli
 
+      - name: Show pre-commit version
+        run: pre-commit --version && markdownlint --version
+
       - name: Run pre-commit
-        run: pre-commit run --all-files
+        run: pre-commit run --all-files --show-diff-on-failure

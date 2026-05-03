@@ -20,3 +20,15 @@ request: |
 # Example:
 #   devcompanion queue my-repo --template code-review
 #   devcompanion queue my-repo --template code-review --request "focus on auth module"
+#
+# LLM policy override (client engagements only). The job-level "llm" block can
+# only RESTRICT the global policy (it cannot widen it). When omitted, the
+# runner uses the engagement env (DOTS_AI_DEVCOMPANION_LLM_*) verbatim.
+#
+# Example payload merged into the generated .job file:
+#   "llm": {
+#     "enabled": true,
+#     "allowlist": ["anthropic"],
+#     "model": "claude-3-7-sonnet-latest",
+#     "strict": true
+#   }

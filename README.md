@@ -2,10 +2,7 @@
 
 > A portable agentic harness — persistent memory, project context, and workflow orchestration for your AI assistant.
 
-[![CI](https://github.com/ulises-jeremias/ai-workspace/actions/workflows/ci.yml/badge.svg)](https://github.com/ulises-jeremias/ai-workspace/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-
-Works with Claude Code, OpenCode, Cursor, Gemini CLI, and GitHub Copilot.
+Works with Claude Code, opencode, Cursor, Gemini CLI, and GitHub Copilot.
 
 ---
 
@@ -25,22 +22,16 @@ Your AI Tool  ←→  AI Workspace  ←→  Your Repos
                routing, skills
 ```
 
-### Companion to dots-ai
-
-This workspace is designed to work alongside [dots-ai](https://github.com/ulises-jeremias/dots-ai) — the workstation layer that distributes AI skills, agents, MCP templates, and CLI helpers. While `dots-ai` manages the **tooling installation**, this workspace manages the **runtime context** — memory, project switching, and orchestration.
-
-You can use this workspace **standalone** (works perfectly without `dots-ai`) or as its natural runtime companion.
-
 ---
 
 ## Quick Start
 
 ```bash
 # 1. Clone as your personal workspace
-git clone https://github.com/ulises-jeremias/ai-workspace.git ~/.ai-workspace
+git clone <this-repo> ~/.ai-workspace
 cd ~/.ai-workspace
 
-# 2. Run setup wizard
+# 2. Run setup — creates your personal branch and configures the workspace
 ./scripts/workspace-init.sh
 
 # 3. Index your repos
@@ -50,14 +41,22 @@ cd ~/.ai-workspace
 opencode        # or: claude / cursor / gemini
 ```
 
-### One-liner (fresh start, no upstream history)
+### Workspace branch modes
+
+The setup script manages a personal (or shared) Git branch automatically — no more `rm -rf .git && git init`.
 
 ```bash
-git clone https://github.com/ulises-jeremias/ai-workspace.git ~/.ai-workspace \
-  && cd ~/.ai-workspace \
-  && rm -rf .git && git init \
-  && ./scripts/workspace-init.sh
+# Personal workspace (default) — creates branch: user-workspace/<git-username>
+./scripts/workspace-init.sh
+
+# Shared team workspace — creates branch: account-workspace/<name>
+./scripts/workspace-init.sh --account-workspace=my-team
 ```
+
+If the branch already exists (locally or on the remote), the script switches to it and reminds you to pull from `main`. The setup runs non-interactively — no Enter-pressing required.
+
+> [!TIP]
+> Edit `.workspace.yaml` after setup to set your GitHub org and default clone directory.
 
 ---
 
@@ -66,10 +65,9 @@ git clone https://github.com/ulises-jeremias/ai-workspace.git ~/.ai-workspace \
 ```text
 ai-workspace/
 ├── AGENTS.md              # AI orchestration instructions (main config)
-├── CLAUDE.md              # Symlink → AGENTS.md (OpenCode / Cursor)
+├── CLAUDE.md              # Symlink → AGENTS.md (opencode / Cursor)
 ├── GEMINI.md              # Symlink → AGENTS.md (Gemini CLI)
 ├── CONTRIBUTING.md        # How to extend the workspace
-├── LICENSE                # MIT
 ├── bin/
 │   ├── project-indexer    # Clone repos + manage symlinks
 │   ├── assistant-memory   # Knowledge base CLI
@@ -128,22 +126,6 @@ Packs bundle project-specific context (repos, process docs, IDs) so you can swit
 
 ---
 
-## Integration with dots-ai
-
-If you have [dots-ai](https://github.com/ulises-jeremias/dots-ai) installed:
-
-| dots-ai provides | This workspace provides |
-|------------------|------------------------|
-| Skills installation (`dots-skills`) | Runtime skill routing |
-| Agent definitions (subagents) | Orchestration layer (`AGENTS.md`) |
-| CLI helpers (`dots-*`) | Project management (`bin/`) |
-| Dev companion runner | Dev companion queue + templates |
-| Health check (`dots-doctor`) | Workspace state (`bin/workspace-context`) |
-
-The `devcompanion` in this workspace can delegate to `dots-devcompanion` for LLM-powered execution when available.
-
----
-
 ## Validation
 
 ```bash
@@ -167,10 +149,3 @@ The `devcompanion` in this workspace can delegate to `dots-devcompanion` for LLM
 | DevCompanion: "No LLM provider" | Set `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` |
 | Pending jobs stuck | Run `./bin/devcompanion status` |
 | Skills not loading | Check your AI tool's skill pack configuration |
-| dots-ai not detected | Install from [github.com/ulises-jeremias/dots-ai](https://github.com/ulises-jeremias/dots-ai) |
-
----
-
-## License
-
-MIT — see [LICENSE](LICENSE)

@@ -17,4 +17,4 @@ request: |
   our control, document it clearly and create a GitHub issue instead.
 
 # Example:
-#   devcompanion queue my-project --template fix-ci
+#   devcompanion queue dots-ai --template fix-ci

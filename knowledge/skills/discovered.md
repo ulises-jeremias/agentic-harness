@@ -1,34 +1,17 @@
 # Discovered Skills
 
-> New skills or capabilities identified during work sessions.
+Reusable skill discoveries captured by the assistant.
 
-## Format
+Add entries here when you learn about portable skills, agents, or workflow patterns that should be reused across sessions.
+
+## Template
+Use this shape when adding a new entry:
 
 ```markdown
-## [Date] - Skill Name
+## YYYY-MM-DD - Skill or pattern name
 
-**Context**: Where it was discovered
-**What**: Description of the skill
-**How**: How to use it
-**Status**: [pending-review | added-to-agents | not-relevant]
+**Context**: Where this was discovered.
+**What**: What the skill or pattern does.
+**Use when**: Trigger conditions.
+**Notes**: Links, command names, or caveats using placeholder-safe examples.
 ```
-
----
-
-## Entries
-
-<!-- Add new discoveries below -->
-
-## 2026-04-01 - devcompanion
-
-**Context**: Using orchestrator workspace
-**What**: Queue system for deferred work — manages background jobs, plans, and artifacts
-**How**:
-- `./bin/devcompanion queue <project> --template <name>`
-- `./bin/devcompanion run-once`
-- `./bin/devcompanion status`
-**Status**: added-to-agents
-
----
-
-*Add new entries at the top, newest first*
