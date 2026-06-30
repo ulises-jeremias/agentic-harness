@@ -12,8 +12,10 @@ from __future__ import annotations
 
 import os
 import re
+import shutil
 import sys
-from datetime import date
+import tempfile
+from datetime import date, timedelta
 from pathlib import Path
 
 WORKSPACE_ROOT = Path(__file__).resolve().parent.parent
@@ -302,11 +304,44 @@ def cmd_todo(_args: list[str]):
         print(_dim("(no todos file found)"))
 
 
-def cmd_review_stale(_args: list[str]):
-    """Show entries past their stale_after date."""
-    from datetime import date
+def _update_frontmatter_field(content: str, field: str, value: str) -> str:
+    """Update a frontmatter field in a markdown file content, preserving the rest."""
+    lines = content.splitlines()
+    if not lines or lines[0].strip() != "---":
+        return content
+    end = next((i for i, l in enumerate(lines[1:], 1) if l.strip() == "---"), None)
+    if end is None:
+        return content
+    found = False
+    for i in range(1, end):
+        if lines[i].startswith(f"{field}:"):
+            lines[i] = f"{field}: {value}"
+            found = True
+            break
+    if not found:
+        lines.insert(end, f"{field}: {value}")
+    return "\n".join(lines)
+
+
+def cmd_review_stale(args: list[str]):
+    """Show stale entries and optionally re-confirm, edit, or delete in batch."""
+    auto_renew = False
+    delete_all = False
+    non_interactive = False
+    parsed: list[str] = []
+    for a in args:
+        if a == "--auto-renew":
+            auto_renew = True
+            non_interactive = True
+        elif a == "--delete":
+            delete_all = True
+            non_interactive = True
+        else:
+            parsed.append(a)
+
     today = date.today().isoformat()
-    stale = []
+    next_year = (date.today() + timedelta(days=365)).isoformat()
+    stale: list[tuple[Path, dict, str]] = []
 
     for md_file in sorted(KNOWLEDGE.rglob("*.md")):
         content = _read(md_file)
@@ -323,17 +358,80 @@ def cmd_review_stale(_args: list[str]):
         print()
         return
 
+    if non_interactive:
+        if auto_renew:
+            count = 0
+            for md_file, fm, _ in stale:
+                content = _read(md_file)
+                new_content = _update_frontmatter_field(content, "stale_after", next_year)
+                new_content = _update_frontmatter_field(new_content, "updated", today)
+                _write(md_file, new_content)
+                count += 1
+            print(_green(f"✓ Renewed {count} stale entries (stale_after → {next_year})"))
+        elif delete_all:
+            count = 0
+            for md_file, fm, _ in stale:
+                confirm = os.environ.get("FORCE", "") == "1"
+                if not confirm:
+                    rel = md_file.relative_to(WORKSPACE_ROOT)
+                    print(f"Would DELETE {_yellow(str(rel))}")
+                else:
+                    md_file.unlink()
+                    count += 1
+            if not os.environ.get("FORCE"):
+                print(_dim("  (dry-run — set FORCE=1 to actually delete)"))
+            else:
+                print(_green(f"✓ Deleted {count} stale entries"))
+        print()
+        return
+
+    # Interactive batch
+    renewed = 0
+    edited = 0
+    deleted = 0
+
     for md_file, fm, stale_after in stale:
         rel = md_file.relative_to(WORKSPACE_ROOT)
-        tags = fm.get("tags", "")
-        project = fm.get("project", "")
+        print(f"\n{'='*60}")
         print(f"  📄 {_cyan(str(rel))}  (stale since {stale_after})")
-        if tags:
-            print(f"     tags={tags}")
-        if project:
-            print(f"     project={project}")
+        print(f"  tags={fm.get('tags', '—')}  project={fm.get('project', '—')}")
+        print(f"  confidence={fm.get('confidence', '—')}")
         print()
-    print(f"  {len(stale)} stale entry(-ies). Review and update, or remove stale_after if still valid.\n")
+        # Show short preview
+        content = _read(md_file)
+        body_lines = content.splitlines()
+        preview = " ".join(line.strip() for line in body_lines if line.strip() and not line.startswith("---"))[:200]
+        print(f"  {_dim('Preview:')} {preview}...")
+        print()
+        print(f"  {_dim('[r]')}enew (extend stale_after 1y)  {_dim('[e]')}dit  {_dim('[d]')}elete  {_dim('[s]')}kip")
+        choice = input(f"  {_blue('Action')} [r/e/d/s]: ").strip().lower() if sys.stdin.isatty() else "s"
+
+        if choice == "r":
+            new_content = _update_frontmatter_field(content, "stale_after", next_year)
+            new_content = _update_frontmatter_field(new_content, "updated", today)
+            _write(md_file, new_content)
+            renewed += 1
+            print(_green(f"  ✓ Renewed until {next_year}"))
+        elif choice == "e":
+            new_content = _update_frontmatter_field(content, "updated", today)
+            new_content = _update_frontmatter_field(new_content, "stale_after", "")
+            _write(md_file, new_content)
+            edited += 1
+            print(_green("  ✓ Cleared stale_after — file updated"))
+        elif choice == "d":
+            md_file.unlink()
+            deleted += 1
+            print(_yellow("  ✗ Deleted"))
+        else:
+            print(_dim("  — Skipped"))
+
+    print()
+    print(f"{_blue('=== Batch Summary ===')}")
+    print(f"  Renewed: {renewed}")
+    print(f"  Edited (cleared stale): {edited}")
+    print(f"  Deleted: {deleted}")
+    print(f"  Skipped: {len(stale) - renewed - edited - deleted}")
+    print()
 
 
 def cmd_review(_args: list[str]):
@@ -423,7 +521,9 @@ def usage():
   assistant-memory list [type]                   List entries by type
   assistant-memory todo                          Show pending todos
   assistant-memory review                        Review key items (session start)
-  assistant-memory review --stale                List entries past stale_after date
+  assistant-memory review --stale                Review stale entries (interactive batch)
+  assistant-memory review --stale --auto-renew   Auto-extend all stale entries by 1 year
+  assistant-memory review --stale --delete       Delete stale entries (use FORCE=1 to execute)
   assistant-memory inject                        Output context block for injection
   assistant-memory help                          Show this help
 
