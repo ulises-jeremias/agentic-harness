@@ -26,11 +26,30 @@ import json
 import os
 import re
 import shutil
+import signal
 import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+# ── cancellation ──────────────────────────────────────────────────────────────
+
+_CANCELLED = False
+
+
+def _handle_sig(signum: int, _frame) -> None:
+    global _CANCELLED
+    if _CANCELLED:
+        sys.exit(1)
+    _CANCELLED = True
+    print(file=sys.stderr)
+    warn("Received signal — cancelling (press again to force exit)")
+
+
+signal.signal(signal.SIGINT, _handle_sig)
+signal.signal(signal.SIGTERM, _handle_sig)
+
 
 # ── paths ─────────────────────────────────────────────────────────────────────
 
@@ -383,6 +402,12 @@ def cmd_run(args: list[str]) -> int:
         else:
             warn(f"Could not create worktree (non-fatal): {result.stderr.strip()}")
 
+    # Check cancellation before dispatching
+    if _CANCELLED:
+        warn("Run cancelled before dispatch")
+        finalize_run(loop_dir, run_dir, rid, worktree_path, trace_file, "cancelled")
+        return 1
+
     # Dispatch to runner (dots-ai or skeleton)
     runner_dir = Path(
         os.environ.get("AI_WORKSPACE_RUNNER_DIR", "")
@@ -443,15 +468,76 @@ def cmd_run(args: list[str]) -> int:
             capture_output=True,
         )
 
+    finalize_run(loop_dir, run_dir, rid, worktree_path, trace_file, "completed")
+    return 0
+
+
+def finalize_run(
+    loop_dir: Path,
+    run_dir: Path,
+    rid: str,
+    worktree_path: Path | None,
+    trace_file: Path,
+    status: str,
+) -> None:
+    """Clean up worktree, finalize trace, and close the loop."""
+    global _CANCELLED
+    if _CANCELLED and status != "cancelled":
+        status = "cancelled"
+
+    # Cleanup worktree
+    if worktree_path and worktree_path.is_dir():
+        subprocess.run(
+            ["git", "-C", str(WORKSPACE_ROOT), "worktree", "remove",
+             str(worktree_path), "--force"],
+            capture_output=True,
+        )
+
     # Finalize trace
     trace_file.write_text(
         trace_file.read_text(encoding="utf-8")
-        + json.dumps({"ts": utc_now(), "kind": "run_end", "status": "completed"}) + "\n",
+        + json.dumps({"ts": utc_now(), "kind": "run_end", "status": status}) + "\n",
         encoding="utf-8",
     )
 
-    ok(f"Run {rid} complete. Artifacts at: {run_dir.relative_to(WORKSPACE_ROOT)}")
-    return 0
+    if status == "completed":
+        # Loop closure: extract learning events from trace and sync to knowledge
+        _close_loop(run_dir, rid)
+        ok(f"Run {rid} complete. Artifacts at: {run_dir.relative_to(WORKSPACE_ROOT)}")
+    else:
+        warn(f"Run {rid} finished with status: {status}")
+
+
+def _close_loop(run_dir: Path, rid: str) -> None:
+    """Extract learning/decision events from trace and sync to knowledge."""
+    trace_file = run_dir / "trace.jsonl"
+    if not trace_file.exists():
+        return
+
+    added = 0
+    for line in trace_file.read_text(encoding="utf-8").splitlines():
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if event.get("kind") == "decision" and event.get("tag") == "learning":
+            content = event.get("content", "")
+            if content:
+                add_script = WORKSPACE_ROOT / "bin" / "assistant-memory"
+                if add_script.exists():
+                    subprocess.run(
+                        [sys.executable, str(add_script), "add",
+                         "--type", "learning",
+                         "--from-loop", rid,
+                         content],
+                        capture_output=True,
+                    )
+                    added += 1
+        if event.get("kind") == "run_start":
+            loop_name = event.get("run_id", rid)
+
+    if added:
+        ok(f"Synced {added} learning event(s) from run {rid} to knowledge base")
 
 
 def cmd_status(args: list[str]) -> int:
