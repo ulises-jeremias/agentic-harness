@@ -85,6 +85,13 @@ projects/
 .ruff_cache/
 .mypy_cache/
 
+# Per-tool local overrides (users may add their own; don't commit personal overrides)
+# Template files (.*.local.md) ARE committed; user edits to them should be gitignored
+# Uncomment to gitignore your personal overlay edits:
+# .claude/CLAUDE.local.md
+# .opencode/AGENTS.local.md
+# .cursor/rules.local.md
+
 # Spreadsheets and large work files (keep out of the repo)
 *.xlsx
 *.xls
