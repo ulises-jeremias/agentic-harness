@@ -186,6 +186,20 @@ cmd_use_persona() {
   cat "${persona_file}"
 }
 
+# ── validate ──────────────────────────────────────────────────────────────────
+
+cmd_validate() {
+  local surface="${1:-all}"
+  local script="${WORKSPACE_ROOT}/scripts/validate-context.sh"
+
+  if [[ ! -f "${script}" ]]; then
+    echo "Validation script not found: ${script}"
+    exit 1
+  fi
+
+  bash "${script}" --surface "${surface}"
+}
+
 # ── main ──────────────────────────────────────────────────────────────────────
 
 cmd="${1:-snapshot}"
@@ -196,21 +210,26 @@ case "${cmd}" in
   load)        cmd_load_pack "${1:-}" ;;
   personas)    cmd_personas ;;
   use-persona) cmd_use_persona "${1:-}" ;;
+  validate)    cmd_validate "${1:-all}" ;;
   help|--help|-h)
     cat <<'EOF'
 workspace-context — AI Workspace session state snapshot
 
 Usage:
-  workspace-context                         Print session context snapshot
-  workspace-context snapshot                Same as above
-  workspace-context load packs/<pack>.yaml  Load a context pack
-  workspace-context personas                List available personas
-  workspace-context use-persona <name>      Activate a persona
+  workspace-context                               Print session context snapshot
+  workspace-context snapshot                      Same as above
+  workspace-context load packs/<pack>.yaml        Load a context pack
+  workspace-context personas                      List available personas
+  workspace-context use-persona <name>            Activate a persona
+  workspace-context validate [surface]            Validate context schemas
+                                                  surface: all|packs|jobs|personas
 
 Examples:
   workspace-context
   workspace-context load packs/my-client.yaml
   workspace-context use-persona reviewer
+  workspace-context validate
+  workspace-context validate packs
 EOF
     ;;
   *)
