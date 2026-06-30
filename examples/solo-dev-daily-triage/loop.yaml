@@ -1,0 +1,31 @@
+# Sample LOOP.md frontmatter — copy contents to loops/daily-triage/LOOP.md
+# (The --- markers below are for the LOOP.md frontmatter format, not YAML doc separators)
+name: daily-triage
+tier: L1
+cadence: 1d
+goal: Review new issues, propose labels and priority — report only, no changes
+allowlist: []
+deny:
+  - merge
+  - close
+  - label
+  - comment
+  - push
+exit_conditions:
+  - goal_met
+  - budget_exhausted
+budget:
+  max_tokens: 25000
+  max_runs_per_day: 1
+  max_wall_seconds: 300
+verifier: null
+request: |
+  You are the daily issue triage loop.
+  1. List open GitHub issues created in the last 24 hours (gh issue list --state open --search "created:>DATE").
+  2. For each issue, propose:
+     - Priority: critical / high / medium / low
+     - Labels: based on title, body, and existing label taxonomy
+     - 1-sentence summary
+  3. Write a Markdown table to report.md. Columns: #, Title, Proposed labels, Priority, Summary.
+  4. Do NOT apply labels or post comments — this is L1 (observation only).
+  5. If any issue appears to be a security vulnerability: escalate.

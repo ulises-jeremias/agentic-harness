@@ -1,0 +1,31 @@
+# Sample pack for a two-repo project — copy to packs/my-project.yaml
+name: my-project
+description: Two-repo project for PR babysitter example
+
+repos:
+  - name: my-api
+    path: projects/my-api
+    stack: Python / FastAPI
+    role: backend
+
+  - name: my-frontend
+    path: projects/my-frontend
+    stack: TypeScript / React
+    role: frontend
+
+process_docs:
+  - knowledge/processes/general.md
+
+ids:
+  github_org: "my-org"
+  # slack_channel: "#my-project-dev"
+
+conventions:
+  branch_pattern: "feat/<ticket>-<description>"
+  commit_format: conventional
+  pr_target: main
+
+ai:
+  delivery_skill: workflow-generic-project
+  discovery_skill: dev-assistant
+  language: english
