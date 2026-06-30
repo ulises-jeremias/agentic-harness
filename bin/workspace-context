@@ -156,6 +156,20 @@ PYEOF
     echo ""
   fi
 
+  # dots-ai integration (skill catalog discovery)
+  dots_ai_catalog="${HOME}/.local/share/dots-ai/skills/skill-catalog.yaml"
+  if [[ -f "${dots_ai_catalog}" ]]; then
+    blue "── dots-ai Skills ─────────────────────────────────────────"
+    total_skills=$(python3 -c "
+import yaml, sys
+data = yaml.safe_load(open('${dots_ai_catalog}'))
+skills = data.get('skills', [])
+print(len(skills))
+" 2>/dev/null || echo "?")
+    echo "  Catalog: ${total_skills} skills available"
+    echo ""
+  fi
+
   # Loop spend summary (7d) — shown when loops/ directory exists
   loops_dir="${WORKSPACE_ROOT}/loops"
   if [[ -d "${loops_dir}" ]]; then
