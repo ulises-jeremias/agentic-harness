@@ -87,13 +87,62 @@ cmd_snapshot() {
   fi
   echo ""
 
-  # Active persona (if any)
+  # Active persona (if any) — emit constraints block for AI tool enforcement
   if [[ -d "${PERSONAS_DIR}" ]]; then
     active_persona="${WORKSPACE_ROOT}/.active-persona"
     if [[ -f "${active_persona}" ]]; then
       persona=$(cat "${active_persona}")
+      persona_file="${PERSONAS_DIR}/${persona}.md"
       blue "── Active Persona ─────────────────────────────────────────"
-      echo "  ${persona}"
+      echo "  Persona: ${persona}"
+      echo ""
+      if [[ -f "${persona_file}" ]]; then
+        python3 - "${persona_file}" "${persona}" <<'PYEOF'
+import json, pathlib, sys, re
+from typing import Any
+
+file_path, persona_name = pathlib.Path(sys.argv[1]), sys.argv[2]
+content = file_path.read_text(encoding="utf-8")
+
+# Extract YAML frontmatter
+lines = content.splitlines()
+if lines and lines[0].strip() == "---":
+    end = next((i for i, l in enumerate(lines[1:], 1) if l.strip() == "---"), None)
+    if end:
+        fm = "\n".join(lines[1:end])
+        import yaml
+        try:
+            meta: dict[str, Any] = yaml.safe_load(fm) or {}
+        except Exception:
+            meta = {}
+    else:
+        meta = {}
+else:
+    meta = {}
+
+allow = meta.get("allow", [])
+deny = meta.get("deny", [])
+handoffs = meta.get("handoffs", [])
+output_fmt = meta.get("output_format", "")
+
+print("  <persona-constraints>")
+print(f"    persona: {persona_name}")
+if allow:
+    print(f"    allow: [{', '.join(allow)}]")
+if deny:
+    print(f"    deny: [{', '.join(deny)}]")
+if output_fmt:
+    print(f"    output_format: {output_fmt}")
+if handoffs:
+    print("    handoffs:")
+    for h in handoffs:
+        when = h.get("when", "")
+        to = h.get("to", "")
+        print(f'      - when: "{when}"')
+        print(f"        to: {to}")
+print("  </persona-constraints>")
+PYEOF
+      fi
       echo ""
     fi
   fi

@@ -40,6 +40,29 @@ Activating a persona prevents scope creep. If you want a review, you don't want 
 
 This writes `.active-persona` to the workspace root, which `workspace-context` snapshots at session start.
 
+### Persona enforcement
+
+When a persona is active, `workspace-context` emits a `<persona-constraints>`
+block in the session snapshot with the persona's allow/deny lists, output
+format, and handoff rules:
+
+```xml
+<persona-constraints>
+    persona: implementer
+    allow: [read, write, commit, run_commands, create_pr]
+    deny: [design]
+    output_format: code
+    handoffs:
+      - when: "task requires architectural decisions"
+        to: architect
+      - when: "result needs review"
+        to: reviewer
+</persona-constraints>
+```
+
+The AI tool **must respect this block** — it defines the operational
+boundaries for the current session.
+
 ### List available personas
 
 ```bash
