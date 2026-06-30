@@ -1,0 +1,67 @@
+name: Smoke
+on:
+  pull_request:
+    paths-ignore:
+      - "knowledge/**"
+      - "docs/**"
+      - "examples/**"
+      - "**.md"
+  push:
+    branches: [main]
+    paths-ignore:
+      - "knowledge/**"
+      - "docs/**"
+      - "examples/**"
+      - "**.md"
+
+jobs:
+  conformance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check tool symlinks
+        run: |
+          for link in CLAUDE.md GEMINI.md .github/copilot-instructions.md; do
+            if [ -L "$link" ] || [ -f "$link" ]; then
+              target=$(readlink "$link" 2>/dev/null || echo "(file)")
+              echo "ok $link -> $target"
+            else
+              echo "missing symlink: $link"
+              exit 1
+            fi
+          done
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install jsonschema PyYAML
+
+      - name: Check Python syntax (bin/ + scripts/)
+        run: |
+          errors=0
+          for f in bin/* scripts/*.sh; do
+            [ -f "$f" ] || continue
+            shebang=$(head -1 "$f")
+            case "$shebang" in
+              *python*)
+                python -m py_compile "$f" && echo "ok python $f" || { echo "FAIL python $f"; errors=$((errors+1)); }
+                ;;
+              *bash*)
+                bash -n "$f" && echo "ok bash $f" || { echo "FAIL bash $f"; errors=$((errors+1)); }
+                ;;
+            esac
+          done
+          exit $errors
+
+      - name: Run workspace context validation
+        run: |
+          bash scripts/validate-context.sh
+
+      - name: Check workspace-context generates valid output
+        run: |
+          bash bin/workspace-context validate all > /dev/null 2>&1 && echo "ok validate all"
+          bash bin/workspace-context snapshot > /dev/null 2>&1 && echo "ok snapshot"
