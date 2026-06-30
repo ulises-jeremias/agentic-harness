@@ -34,3 +34,19 @@ jobs:
 
       - name: Run pre-commit
         run: pre-commit run --all-files --show-diff-on-failure
+
+  validate-context:
+    name: Validate context schemas
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install jsonschema PyYAML
+
+      - name: Validate packs, job templates, and personas
+        run: bash scripts/validate-context.sh
