@@ -107,6 +107,58 @@ cmd_snapshot() {
     echo ""
   fi
 
+  # Loop spend summary (7d) — shown when loops/ directory exists
+  loops_dir="${WORKSPACE_ROOT}/loops"
+  if [[ -d "${loops_dir}" ]]; then
+    blue "── Loop Spend (7d) ────────────────────────────────────────"
+    python3 - "${loops_dir}" <<'PYEOF'
+import json, pathlib, sys
+from datetime import datetime, timezone, timedelta
+
+loops_dir = pathlib.Path(sys.argv[1])
+cutoff = datetime.now(timezone.utc) - timedelta(days=7)
+
+total_tokens = 0
+total_runs = 0
+failed_runs = 0
+
+for trace in sorted(loops_dir.rglob("trace.jsonl")):
+    for line in trace.read_text(encoding="utf-8").splitlines():
+        try:
+            ev = json.loads(line)
+            ts_str = ev.get("ts", "")
+            try:
+                ts = datetime.fromisoformat(ts_str.replace("Z", "+00:00"))
+            except (ValueError, AttributeError):
+                continue
+            if ts < cutoff:
+                continue
+            if ev.get("kind") == "run_start":
+                total_runs += 1
+            elif ev.get("kind") == "run_end" and ev.get("status") != "completed":
+                failed_runs += 1
+            total_tokens += ev.get("prompt_tokens", 0) + ev.get("completion_tokens", 0)
+        except (json.JSONDecodeError, TypeError):
+            pass
+
+if total_runs == 0:
+    print("  (no loop runs in the last 7 days)")
+else:
+    success = total_runs - failed_runs
+    print(f"  Runs: {total_runs}  Success: {success}  Failed: {failed_runs}")
+    print(f"  Tokens (approx): {total_tokens:,}")
+PYEOF
+    echo ""
+  fi
+
+  # AGENTS.md spec hash (for reproducibility)
+  agents_md="${WORKSPACE_ROOT}/AGENTS.md"
+  if [[ -f "${agents_md}" ]]; then
+    spec_hash=$(python3 -c "import hashlib, pathlib; h=hashlib.sha256(pathlib.Path('${agents_md}').read_bytes()).hexdigest()[:12]; print(h)" 2>/dev/null || echo "?")
+    echo "Spec       : AGENTS.md@${spec_hash}"
+    echo ""
+  fi
+
   blue "──────────────────────────────────────────────────────────"
   echo ""
 }
