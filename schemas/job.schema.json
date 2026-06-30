@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/ulises-jeremias/ai-workspace/main/schemas/job.schema.json",
+  "title": "AI Workspace Job Template",
+  "description": "A reusable job template for bin/devcompanion queue.",
+  "type": "object",
+  "required": ["name", "description", "request"],
+  "additionalProperties": true,
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Kebab-case identifier (matches the filename without .yaml)."
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1,
+      "description": "One-line summary shown in devcompanion templates."
+    },
+    "request": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The default task prompt sent to the runner."
+    },
+    "inputs": {
+      "type": "array",
+      "description": "Declared inputs this template expects (env vars, file paths).",
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string" },
+          "type": {
+            "type": "string",
+            "enum": ["env", "file", "flag"]
+          },
+          "required": { "type": "boolean", "default": false },
+          "description": { "type": "string" }
+        }
+      }
+    },
+    "outputs": {
+      "type": "array",
+      "description": "Artifacts this job is expected to produce.",
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string" },
+          "type": {
+            "type": "string",
+            "enum": ["file", "pr", "comment", "label"]
+          },
+          "required": { "type": "boolean", "default": false },
+          "description": { "type": "string" }
+        }
+      }
+    },
+    "exit_criteria": {
+      "type": "array",
+      "description": "Conditions that mark this job as complete.",
+      "items": {
+        "type": "string",
+        "enum": [
+          "goal_met",
+          "budget_exhausted",
+          "human_escalation",
+          "safe_to_commit",
+          "requires_pr",
+          "max_iterations"
+        ]
+      }
+    },
+    "max_cost": {
+      "type": "object",
+      "description": "Cost budget for this job.",
+      "properties": {
+        "tokens": { "type": "integer", "minimum": 0 },
+        "usd": { "type": "number", "minimum": 0 }
+      }
+    },
+    "requires_pack": {
+      "oneOf": [
+        { "type": "boolean" },
+        { "type": "string", "description": "Regex that the active pack name must match." }
+      ],
+      "description": "Whether this template requires an active context pack."
+    },
+    "llm": {
+      "type": "object",
+      "description": "Optional per-job LLM policy override (can only restrict, not widen).",
+      "additionalProperties": true
+    }
+  }
+}

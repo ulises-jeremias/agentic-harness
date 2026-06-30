@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/ulises-jeremias/ai-workspace/main/schemas/pack.schema.json",
+  "title": "AI Workspace Pack",
+  "description": "Context bundle for a project or client, loaded via bin/workspace-context.",
+  "type": "object",
+  "required": ["name", "description"],
+  "additionalProperties": true,
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Unique identifier for this pack (used in logging and profile references)."
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable summary of this pack's purpose."
+    },
+    "repos": {
+      "type": "array",
+      "description": "Repos in scope for this pack.",
+      "items": {
+        "type": "object",
+        "required": ["name", "path"],
+        "additionalProperties": true,
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "path": { "type": "string", "minLength": 1 },
+          "description": { "type": "string" },
+          "stack": { "type": "string" },
+          "role": { "type": "string" }
+        }
+      }
+    },
+    "process_docs": {
+      "type": "array",
+      "description": "Paths to process/knowledge docs to auto-inject for this pack.",
+      "items": { "type": "string" }
+    },
+    "ids": {
+      "type": "object",
+      "description": "External system IDs (JIRA project, ClickUp space, Slack channel, …).",
+      "additionalProperties": { "type": "string" }
+    },
+    "conventions": {
+      "type": "object",
+      "description": "Project conventions for the AI to follow.",
+      "additionalProperties": true,
+      "properties": {
+        "branch_pattern": { "type": "string" },
+        "commit_format": { "type": "string" },
+        "pr_target": { "type": "string" },
+        "deploy_envs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "trigger": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "ai": {
+      "type": "object",
+      "description": "AI behavior configuration for this pack.",
+      "additionalProperties": true,
+      "properties": {
+        "delivery_skill": { "type": "string" },
+        "discovery_skill": { "type": "string" },
+        "language": { "type": "string" },
+        "persona": { "type": "string" },
+        "notes": { "type": "string" }
+      }
+    },
+    "devcompanion": {
+      "type": "object",
+      "description": "DevCompanion LLM policy for this engagement.",
+      "additionalProperties": true
+    },
+    "org": {
+      "type": "object",
+      "description": "Optional organization metadata (GitHub org, teams, etc.).",
+      "additionalProperties": true
+    },
+    "platform": {
+      "type": "object",
+      "description": "Optional platform metadata (infrastructure, tooling, etc.).",
+      "additionalProperties": true
+    }
+  }
+}

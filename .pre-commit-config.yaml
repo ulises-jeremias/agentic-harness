@@ -18,6 +18,16 @@ repos:
         args: ["--config", ".markdownlint.json"]
         exclude: "^knowledge/"
 
+  - repo: local
+    hooks:
+      - id: validate-context
+        name: Validate context schemas (packs, jobs, personas)
+        language: python
+        additional_dependencies: [jsonschema, PyYAML]
+        entry: bash scripts/validate-context.sh
+        pass_filenames: false
+        files: "^(packs/|templates/jobs/|personas/|schemas/)"
+
   # shellcheck disabled - bin/* are Python scripts, not shell scripts
   # - repo: https://github.com/shellcheck-py/shellcheck-py
   #   rev: v0.10.0.1

@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/ulises-jeremias/ai-workspace/main/schemas/persona-frontmatter.schema.json",
+  "title": "AI Workspace Persona Frontmatter",
+  "description": "YAML frontmatter block for personas/*.md files.",
+  "type": "object",
+  "required": ["name"],
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Machine-readable identifier (matches filename without .md)."
+    },
+    "allow": {
+      "type": "array",
+      "description": "Action types this persona is permitted to take.",
+      "items": {
+        "type": "string",
+        "enum": [
+          "read",
+          "write",
+          "commit",
+          "run_commands",
+          "create_pr",
+          "design",
+          "document",
+          "review",
+          "deploy"
+        ]
+      }
+    },
+    "deny": {
+      "type": "array",
+      "description": "Action types this persona must not take.",
+      "items": { "type": "string" }
+    },
+    "handoffs": {
+      "type": "array",
+      "description": "Conditions that trigger a persona switch.",
+      "items": {
+        "type": "object",
+        "required": ["when", "to"],
+        "properties": {
+          "when": { "type": "string" },
+          "to": { "type": "string" }
+        }
+      }
+    },
+    "output_format": {
+      "type": "string",
+      "description": "Expected output structure for this persona.",
+      "enum": ["code", "review", "design", "prose", "mixed"]
+    }
+  }
+}

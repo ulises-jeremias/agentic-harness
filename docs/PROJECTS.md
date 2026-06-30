@@ -92,6 +92,21 @@ User: "work on my-project"
 
 ---
 
+## projects.yaml
+
+`projects.yaml` is **auto-generated** by `bin/devcompanion` from the
+`projects/` symlinks. It is gitignored and should never be edited by hand.
+
+```bash
+# Regenerate at any time
+./bin/devcompanion projects
+```
+
+The file is written with a `# Auto-generated — do not edit manually` header
+so editors and AI tools know not to treat it as a source of truth.
+
+---
+
 ## Why No Aliases?
 
 | Aliases | No Aliases |

@@ -323,6 +323,20 @@ cmd_use_persona() {
   cat "${persona_file}"
 }
 
+# ── validate ──────────────────────────────────────────────────────────────────
+
+cmd_validate() {
+  local surface="${1:-all}"
+  local script="${WORKSPACE_ROOT}/scripts/validate-context.sh"
+
+  if [[ ! -f "${script}" ]]; then
+    echo "Validation script not found: ${script}"
+    exit 1
+  fi
+
+  bash "${script}" --surface "${surface}"
+}
+
 # ── main ──────────────────────────────────────────────────────────────────────
 
 cmd="${1:-snapshot}"
@@ -341,6 +355,7 @@ case "${cmd}" in
   profiles)    cmd_list_profiles ;;
   personas)    cmd_personas ;;
   use-persona) cmd_use_persona "${1:-}" ;;
+  validate)    cmd_validate "${1:-all}" ;;
   help|--help|-h)
     cat <<'EOF'
 workspace-context — AI Workspace session state snapshot
@@ -353,6 +368,8 @@ Usage:
   workspace-context profiles                      List available profiles
   workspace-context personas                      List available personas
   workspace-context use-persona <name>            Activate a persona
+  workspace-context validate [surface]            Validate context schemas
+                                                  surface: all|packs|jobs|personas
 
 Examples:
   workspace-context
@@ -360,6 +377,8 @@ Examples:
   workspace-context load --profile oss-contrib
   workspace-context profiles
   workspace-context use-persona reviewer
+  workspace-context validate
+  workspace-context validate packs
 EOF
     ;;
   *)
