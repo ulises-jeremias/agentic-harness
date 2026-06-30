@@ -73,6 +73,8 @@ projects.yaml
 # Active session state (machine-local, should not be committed)
 .active-persona
 .active-pack
+.active-profile
+.persona-history
 
 # Cloned repositories (gitignored - use project-indexer to manage)
 repos/

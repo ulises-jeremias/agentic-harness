@@ -1,0 +1,14 @@
+# Profile: OSS contribution session
+# Load with: workspace-context load --profile oss-contrib
+#
+# Activates the implementer persona and an optional OSS pack overlay.
+# Designed for open-source contribution workflows (fork → PR).
+
+name: oss-contrib
+description: Open-source contribution session — implementer persona, fork-first workflow
+persona: implementer
+# pack: oss-ephemeral  # uncomment when you have an OSS pack defined
+skills:
+  - github-cli-workflow
+loops:
+  - pr-babysitter
