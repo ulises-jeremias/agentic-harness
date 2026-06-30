@@ -205,6 +205,9 @@ PYEOF
   if [[ -f "${agents_md}" ]]; then
     spec_hash=$(python3 -c "import hashlib, pathlib; h=hashlib.sha256(pathlib.Path('${agents_md}').read_bytes()).hexdigest()[:12]; print(h)" 2>/dev/null || echo "?")
     echo "Spec       : AGENTS.md@${spec_hash}"
+    if git -C "${WORKSPACE_ROOT}" status --porcelain AGENTS.md 2>/dev/null | grep -q .; then
+      yellow "  ⚠ AGENTS.md has uncommitted changes — spec hash may not reflect active file"
+    fi
     echo ""
   fi
 

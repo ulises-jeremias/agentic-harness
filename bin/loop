@@ -341,10 +341,19 @@ def cmd_run(args: list[str]) -> int:
     log(f"Starting run {rid} for '{loop_name}' (tier={tier})")
     log(f"Run artifacts: {run_dir.relative_to(WORKSPACE_ROOT)}")
 
-    # Write initial trace entry
+    # Write initial trace entry with AGENTS.md spec hash
+    agents_md = WORKSPACE_ROOT / "AGENTS.md"
+    agents_md_hash = hashlib.sha256(agents_md.read_bytes()).hexdigest()[:12] if agents_md.exists() else "?"
+
     trace_file = run_dir / "trace.jsonl"
     trace_file.write_text(
-        json.dumps({"ts": utc_now(), "kind": "run_start", "run_id": rid, "tier": tier}) + "\n",
+        json.dumps({
+            "ts": utc_now(),
+            "kind": "run_start",
+            "run_id": rid,
+            "tier": tier,
+            "agents_md_hash": agents_md_hash,
+        }) + "\n",
         encoding="utf-8",
     )
 
