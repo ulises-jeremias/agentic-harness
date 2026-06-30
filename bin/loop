@@ -1,0 +1,645 @@
+#!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.10"
+# dependencies = []
+# ///
+"""
+bin/loop — Loop engineering CLI for AI Workspace.
+
+A "loop" is a recurring AI-driven process with durable state, safety gates,
+and cost budgets. Inspired by loop engineering principles (Cobus Greyling,
+Boris Cherny, Peter Steinberger, Addy Osmani — 2026).
+
+Usage:
+    loop init <pattern>           Scaffold a loop from a starter template
+    loop run <loop>               Execute a loop run (one iteration)
+    loop status [loop]            Show loop status (all, or one)
+    loop audit [loop]             Summarize past runs (success rate, cost)
+    loop cost <loop>              Estimate cost for one run
+    loop sync                     Regenerate knowledge todos from completed runs
+    loop help                     Show this help
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any
+
+# ── paths ─────────────────────────────────────────────────────────────────────
+
+WORKSPACE_ROOT = Path(__file__).resolve().parent.parent
+LOOPS_DIR = WORKSPACE_ROOT / "loops"
+TEMPLATES_DIR = WORKSPACE_ROOT / "templates" / "loops"
+WORKTREES_HOME = Path(
+    os.environ.get("AI_WORKSPACE_WORKTREES_DIR", "")
+    or Path.home() / ".local" / "share" / "ai-workspace" / "worktrees"
+)
+
+# ── colors ────────────────────────────────────────────────────────────────────
+
+_USE_COLOR = sys.stdout.isatty() and not os.environ.get("NO_COLOR")
+
+
+def _c(code: str, text: str) -> str:
+    return f"\033[{code}m{text}\033[0m" if _USE_COLOR else text
+
+
+def blue(t: str) -> str:
+    return _c("1;34", t)
+
+
+def green(t: str) -> str:
+    return _c("1;32", t)
+
+
+def yellow(t: str) -> str:
+    return _c("1;33", t)
+
+
+def red(t: str) -> str:
+    return _c("1;31", t)
+
+
+def dim(t: str) -> str:
+    return _c("0;37", t)
+
+
+def log(msg: str) -> None:
+    print(f"{blue('[loop]')} {msg}")
+
+
+def ok(msg: str) -> None:
+    print(f"{green('[loop]')} {msg}")
+
+
+def warn(msg: str) -> None:
+    print(f"{yellow('[loop]')} {msg}", file=sys.stderr)
+
+
+def err(msg: str) -> None:
+    print(f"{red('[loop]')} {msg}", file=sys.stderr)
+
+
+# ── helpers ───────────────────────────────────────────────────────────────────
+
+def utc_now() -> str:
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def run_id() -> str:
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    import uuid
+    return f"{ts}-{uuid.uuid4().hex[:6]}"
+
+
+def parse_loop_md(loop_dir: Path) -> dict[str, Any]:
+    """Parse LOOP.md frontmatter (YAML between --- delimiters)."""
+    loop_md = loop_dir / "LOOP.md"
+    if not loop_md.exists():
+        return {}
+
+    text = loop_md.read_text(encoding="utf-8")
+    lines = text.splitlines()
+    if not lines or lines[0].strip() != "---":
+        return {}
+
+    end = next((i for i, l in enumerate(lines[1:], 1) if l.strip() == "---"), None)
+    if end is None:
+        return {}
+
+    yaml_block = "\n".join(lines[1:end])
+    try:
+        import yaml  # type: ignore
+        return yaml.safe_load(yaml_block) or {}
+    except ImportError:
+        return _parse_simple_yaml(yaml_block)
+
+
+def _parse_simple_yaml(text: str) -> dict[str, Any]:
+    """Minimal YAML parser for loop frontmatter (no PyYAML required)."""
+    result: dict[str, Any] = {}
+    current_key: str | None = None
+    list_items: list[str] = []
+    in_budget = False
+    budget: dict[str, Any] = {}
+
+    for line in text.splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+
+        if stripped == "budget:":
+            in_budget = True
+            current_key = "budget"
+            continue
+
+        if in_budget and line.startswith("  ") and ":" in stripped:
+            k, _, v = stripped.partition(":")
+            try:
+                budget[k.strip()] = int(v.strip())
+            except ValueError:
+                budget[k.strip()] = v.strip()
+            continue
+        else:
+            in_budget = False
+            if "budget" in result and isinstance(result.get("budget"), dict):
+                pass
+            elif current_key == "budget":
+                result["budget"] = budget
+                budget = {}
+
+        if stripped.startswith("- ") and current_key:
+            list_items.append(stripped[2:].strip().strip('"').strip("'"))
+            result[current_key] = list_items[:]
+            continue
+        elif ":" in stripped and not stripped.startswith("-"):
+            if current_key and isinstance(result.get(current_key), list):
+                list_items = []
+            k, _, v = stripped.partition(":")
+            current_key = k.strip()
+            val = v.strip().strip('"').strip("'")
+            if val:
+                result[current_key] = val
+            else:
+                list_items = []
+                result[current_key] = list_items
+
+    if current_key == "budget":
+        result["budget"] = budget
+
+    return result
+
+
+def parse_state_md(loop_dir: Path) -> dict[str, Any]:
+    """Parse STATE.md frontmatter."""
+    state_md = loop_dir / "STATE.md"
+    if not state_md.exists():
+        return {}
+    return parse_loop_md(loop_dir.__class__(str(loop_dir).replace("STATE.md", "")) / "STATE.md")
+
+
+def write_state_md(loop_dir: Path, state: dict[str, Any]) -> None:
+    """Write STATE.md with updated frontmatter."""
+    state_md = loop_dir / "STATE.md"
+    lines = ["---"]
+    for k, v in state.items():
+        if isinstance(v, list):
+            lines.append(f"{k}:")
+            for item in v:
+                lines.append(f"  - {item}")
+        elif isinstance(v, dict):
+            lines.append(f"{k}:")
+            for dk, dv in v.items():
+                lines.append(f"  {dk}: {dv}")
+        else:
+            lines.append(f"{k}: {v}")
+    lines.append("---")
+    lines.append("")
+    state_md.write_text("\n".join(lines), encoding="utf-8")
+
+
+def list_loops() -> list[Path]:
+    """Return all loop directories sorted by name."""
+    if not LOOPS_DIR.is_dir():
+        return []
+    return sorted([d for d in LOOPS_DIR.iterdir() if d.is_dir() and (d / "LOOP.md").exists()])
+
+
+def list_templates() -> list[Path]:
+    """Return available loop templates."""
+    if not TEMPLATES_DIR.is_dir():
+        return []
+    return sorted(TEMPLATES_DIR.glob("*.yaml"))
+
+
+# ── commands ──────────────────────────────────────────────────────────────────
+
+def cmd_init(args: list[str]) -> int:
+    """Scaffold a new loop from a starter template."""
+    if not args:
+        err("Usage: loop init <pattern>")
+        print("\nAvailable patterns:")
+        for t in list_templates():
+            print(f"  {t.stem}")
+        return 1
+
+    pattern = args[0]
+    template_file = TEMPLATES_DIR / f"{pattern}.yaml"
+    if not template_file.exists():
+        err(f"Template '{pattern}' not found.")
+        print("\nAvailable patterns:")
+        for t in list_templates():
+            print(f"  {t.stem}")
+        return 1
+
+    # Parse the template for defaults
+    text = template_file.read_text(encoding="utf-8")
+    name_match = re.search(r"^name:\s+(\S+)", text, re.MULTILINE)
+    loop_name = name_match.group(1) if name_match else pattern
+
+    loop_dir = LOOPS_DIR / loop_name
+    if loop_dir.exists():
+        warn(f"Loop '{loop_name}' already exists at {loop_dir}")
+        return 1
+
+    loop_dir.mkdir(parents=True)
+    runs_dir = loop_dir / "runs"
+    runs_dir.mkdir()
+
+    # Build LOOP.md from template
+    loop_md = loop_dir / "LOOP.md"
+    loop_md.write_text(
+        "---\n"
+        + "\n".join(
+            line for line in text.splitlines()
+            if not line.startswith("#") or line.strip() == "#"
+        )
+        + "\n---\n\n"
+        f"# {loop_name.replace('-', ' ').title()} Loop\n\n"
+        "<!-- Describe the goal, constraints, and escalation rules here. -->\n",
+        encoding="utf-8",
+    )
+
+    # Build initial STATE.md
+    write_state_md(
+        loop_dir,
+        {
+            "last_run": "never",
+            "last_run_status": "not_run",
+            "last_run_id": "",
+            "runs_today": 0,
+            "pending": [],
+            "escalations": [],
+        },
+    )
+
+    ok(f"Initialized loop '{loop_name}' at {loop_dir.relative_to(WORKSPACE_ROOT)}")
+    print(f"\n  Edit {loop_dir.relative_to(WORKSPACE_ROOT)}/LOOP.md to customize.")
+    print(f"  Then run: ./bin/loop run {loop_name}")
+    return 0
+
+
+def cmd_run(args: list[str]) -> int:
+    """Execute one loop run."""
+    if not args:
+        err("Usage: loop run <loop-name>")
+        return 1
+
+    loop_name = args[0]
+    loop_dir = LOOPS_DIR / loop_name
+    if not loop_dir.exists():
+        err(f"Loop '{loop_name}' not found. Run: ./bin/loop init {loop_name}")
+        return 1
+
+    meta = parse_loop_md(loop_dir)
+    tier = meta.get("tier", "L1")
+    budget = meta.get("budget", {})
+    max_runs = int(budget.get("max_runs_per_day", 10))
+
+    # Load current state
+    state_md = loop_dir / "STATE.md"
+    state = {
+        "last_run": "never",
+        "last_run_status": "not_run",
+        "last_run_id": "",
+        "runs_today": 0,
+        "pending": [],
+        "escalations": [],
+    }
+    if state_md.exists():
+        loaded = parse_loop_md(loop_dir.__class__(str(loop_dir)) / "STATE.md")
+        state.update(loaded)
+
+    # Budget gate: check runs_today
+    runs_today = int(state.get("runs_today", 0))
+    last_run_ts = state.get("last_run", "never")
+    if last_run_ts != "never":
+        try:
+            last_dt = datetime.fromisoformat(last_run_ts.replace("Z", "+00:00"))
+            today = datetime.now(timezone.utc).date()
+            if last_dt.date() != today:
+                runs_today = 0  # Reset on new day
+        except ValueError:
+            runs_today = 0
+
+    if runs_today >= max_runs:
+        warn(f"Budget: max_runs_per_day ({max_runs}) reached for today. Skipping.")
+        return 0
+
+    # Create run directory
+    rid = run_id()
+    run_dir = loop_dir / "runs" / rid
+    run_dir.mkdir(parents=True)
+
+    log(f"Starting run {rid} for '{loop_name}' (tier={tier})")
+    log(f"Run artifacts: {run_dir.relative_to(WORKSPACE_ROOT)}")
+
+    # Write initial trace entry
+    trace_file = run_dir / "trace.jsonl"
+    trace_file.write_text(
+        json.dumps({"ts": utc_now(), "kind": "run_start", "run_id": rid, "tier": tier}) + "\n",
+        encoding="utf-8",
+    )
+
+    # Create git worktree (if in a git repo)
+    worktree_path: Path | None = None
+    if subprocess.run(
+        ["git", "-C", str(WORKSPACE_ROOT), "rev-parse", "--git-dir"],
+        capture_output=True,
+    ).returncode == 0:
+        worktree_base = WORKTREES_HOME / loop_name / rid
+        worktree_base.mkdir(parents=True, exist_ok=True)
+        result = subprocess.run(
+            ["git", "-C", str(WORKSPACE_ROOT), "worktree", "add",
+             str(worktree_base), "HEAD"],
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode == 0:
+            worktree_path = worktree_base
+            log(f"Worktree: {worktree_path}")
+            trace_file.write_text(
+                trace_file.read_text(encoding="utf-8")
+                + json.dumps({"ts": utc_now(), "kind": "worktree_created",
+                              "path": str(worktree_path)}) + "\n",
+                encoding="utf-8",
+            )
+        else:
+            warn(f"Could not create worktree (non-fatal): {result.stderr.strip()}")
+
+    # Dispatch to runner (dots-ai or skeleton)
+    runner_dir = Path(
+        os.environ.get("AI_WORKSPACE_RUNNER_DIR", "")
+        or Path.home() / ".local" / "share" / "ai-workspace" / "runner"
+    )
+
+    plan_md = run_dir / "plan.md"
+    request = meta.get("request", f"Execute the '{loop_name}' loop.")
+
+    runner_mod = None
+    if runner_dir.is_dir():
+        if str(runner_dir) not in sys.path:
+            sys.path.insert(0, str(runner_dir))
+        try:
+            import dots_ai_devcompanion_runner as r  # type: ignore
+            runner_mod = r
+        except ImportError:
+            pass
+
+    if runner_mod is not None:
+        try:
+            runner_mod.main(request=request, output_dir=str(run_dir))
+        except Exception as e:
+            err(f"Runner error: {e}")
+    else:
+        warn("No runner found — writing skeleton plan.md")
+        plan_md.write_text(
+            f"# Loop Run: {loop_name}\n\n"
+            f"**Run ID**: {rid}  \n"
+            f"**Tier**: {tier}  \n"
+            f"**Started**: {utc_now()}  \n\n"
+            "## Goal\n\n"
+            f"{meta.get('goal', '(no goal defined in LOOP.md)')}\n\n"
+            "## Request\n\n"
+            f"{request}\n\n"
+            "## Status\n\n"
+            "⚠ No runner available. Install dots-ai to enable full loop execution.\n"
+            "See: https://github.com/ulises-jeremias/dots-ai\n",
+            encoding="utf-8",
+        )
+
+    # Update state
+    new_state = {
+        "last_run": utc_now(),
+        "last_run_status": "completed",
+        "last_run_id": rid,
+        "runs_today": runs_today + 1,
+        "pending": [],
+        "escalations": [],
+    }
+    write_state_md(loop_dir, new_state)
+
+    # Cleanup worktree on success
+    if worktree_path and worktree_path.is_dir():
+        subprocess.run(
+            ["git", "-C", str(WORKSPACE_ROOT), "worktree", "remove",
+             str(worktree_path), "--force"],
+            capture_output=True,
+        )
+
+    # Finalize trace
+    trace_file.write_text(
+        trace_file.read_text(encoding="utf-8")
+        + json.dumps({"ts": utc_now(), "kind": "run_end", "status": "completed"}) + "\n",
+        encoding="utf-8",
+    )
+
+    ok(f"Run {rid} complete. Artifacts at: {run_dir.relative_to(WORKSPACE_ROOT)}")
+    return 0
+
+
+def cmd_status(args: list[str]) -> int:
+    """Show loop status."""
+    target = args[0] if args else None
+    loops = [LOOPS_DIR / target] if target else list_loops()
+
+    if not loops:
+        print("No loops found. Run: ./bin/loop init <pattern>")
+        return 0
+
+    print("")
+    print(blue("── Loop Status ──────────────────────────────────────────"))
+    for loop_dir in loops:
+        if not loop_dir.exists():
+            err(f"Loop '{loop_dir.name}' not found.")
+            continue
+        meta = parse_loop_md(loop_dir)
+        tier = meta.get("tier", "?")
+        cadence = meta.get("cadence", "?")
+        runs = list(sorted((loop_dir / "runs").glob("*"))) if (loop_dir / "runs").is_dir() else []
+        state_file = loop_dir / "STATE.md"
+        last_status = "not_run"
+        if state_file.exists():
+            # Read STATE.md directly (parse_loop_md would read LOOP.md)
+            state_text = state_file.read_text(encoding="utf-8")
+            lines = state_text.splitlines()
+            # Extract frontmatter
+            if lines and lines[0].strip() == "---":
+                end = next((i for i, l in enumerate(lines[1:], 1) if l.strip() == "---"), None)
+                if end:
+                    for l in lines[1:end]:
+                        if l.strip().startswith("last_run_status:"):
+                            last_status = l.split(":", 1)[1].strip()
+                            break
+        print(
+            f"  {dim(loop_dir.name):<35} tier={tier}  cadence={cadence}  "
+            f"runs={len(runs)}  last={last_status}"
+        )
+    print("")
+    return 0
+
+
+def cmd_audit(args: list[str]) -> int:
+    """Summarize past runs."""
+    target = args[0] if args else None
+    loops = [LOOPS_DIR / target] if target else list_loops()
+
+    print("")
+    print(blue("── Loop Audit ───────────────────────────────────────────"))
+    for loop_dir in loops:
+        if not loop_dir.exists():
+            continue
+        runs_dir = loop_dir / "runs"
+        if not runs_dir.is_dir():
+            continue
+        runs = sorted(runs_dir.iterdir())
+        if not runs:
+            print(f"\n  {loop_dir.name}: no runs yet")
+            continue
+
+        completed = 0
+        failed = 0
+        total_tokens = 0
+
+        for run in runs:
+            trace = run / "trace.jsonl"
+            if not trace.exists():
+                continue
+            for line in trace.read_text(encoding="utf-8").splitlines():
+                try:
+                    event = json.loads(line)
+                    if event.get("kind") == "run_end":
+                        if event.get("status") == "completed":
+                            completed += 1
+                        else:
+                            failed += 1
+                    if event.get("kind") in ("prompt", "completion"):
+                        total_tokens += event.get("prompt_tokens", 0)
+                        total_tokens += event.get("completion_tokens", 0)
+                except json.JSONDecodeError:
+                    pass
+
+        total = completed + failed
+        rate = f"{completed/total*100:.0f}%" if total else "—"
+        print(
+            f"\n  {dim(loop_dir.name)}\n"
+            f"    runs={total}  success={completed}  failed={failed}  "
+            f"rate={rate}  tokens≈{total_tokens:,}"
+        )
+
+    print("")
+    return 0
+
+
+def cmd_cost(args: list[str]) -> int:
+    """Estimate cost for one run."""
+    if not args:
+        err("Usage: loop cost <loop-name>")
+        return 1
+
+    loop_name = args[0]
+    loop_dir = LOOPS_DIR / loop_name
+    meta = parse_loop_md(loop_dir) if loop_dir.exists() else {}
+
+    tier = meta.get("tier", "L1")
+    budget = meta.get("budget", {})
+    max_tokens = budget.get("max_tokens", "?")
+    cadence = meta.get("cadence", "?")
+
+    cost_tiers = {
+        "daily-triage": ("low", "~$0.01-0.05"),
+        "issue-triage": ("low", "~$0.01-0.05"),
+        "changelog-drafter": ("low", "~$0.01-0.05"),
+        "post-merge-cleanup": ("low", "~$0.01-0.05"),
+        "dep-sweeper": ("medium", "~$0.05-0.20"),
+        "pr-babysitter": ("high", "~$0.20-1.00/run"),
+        "ci-sweeper": ("very-high", "~$0.50-2.00/run"),
+    }
+    tier_label, est = cost_tiers.get(loop_name, ("unknown", "—"))
+
+    print(f"\n  Loop: {loop_name}")
+    print(f"  Tier: {tier}")
+    print(f"  Cadence: {cadence}")
+    print(f"  Budget max_tokens: {max_tokens}")
+    print(f"  Cost tier: {tier_label}")
+    print(f"  Estimated per run: {est}")
+    print("")
+    return 0
+
+
+def cmd_sync() -> int:
+    """Regenerate knowledge todos from completed loop runs."""
+    knowledge_todos = WORKSPACE_ROOT / "knowledge" / "todos" / "pending.md"
+    if not LOOPS_DIR.is_dir():
+        return 0
+
+    entries = []
+    for loop_dir in sorted(LOOPS_DIR.iterdir()):
+        if not (loop_dir / "STATE.md").exists():
+            continue
+        state = parse_loop_md(loop_dir / "STATE.md")
+        escalations = state.get("escalations", []) or []
+        for esc in escalations:
+            entries.append(f"- [ ] [loop-escalation] {loop_dir.name}: {esc}")
+
+    if entries and knowledge_todos.exists():
+        existing = knowledge_todos.read_text(encoding="utf-8")
+        header = "<!-- loop-escalations -->"
+        block = "\n".join(entries) + "\n"
+        if header in existing:
+            existing = re.sub(
+                r"<!-- loop-escalations -->.*?<!-- /loop-escalations -->",
+                f"{header}\n{block}<!-- /loop-escalations -->",
+                existing,
+                flags=re.DOTALL,
+            )
+        else:
+            existing += f"\n{header}\n{block}<!-- /loop-escalations -->\n"
+        knowledge_todos.write_text(existing, encoding="utf-8")
+        ok(f"Synced {len(entries)} escalation(s) to {knowledge_todos.relative_to(WORKSPACE_ROOT)}")
+
+    return 0
+
+
+# ── main ──────────────────────────────────────────────────────────────────────
+
+def main() -> None:
+    argv = sys.argv[1:]
+    if not argv or argv[0] in ("-h", "--help", "help"):
+        print(__doc__)
+        sys.exit(0)
+
+    command = argv[0]
+    rest = argv[1:]
+
+    match command:
+        case "init":
+            sys.exit(cmd_init(rest))
+        case "run":
+            sys.exit(cmd_run(rest))
+        case "status":
+            sys.exit(cmd_status(rest))
+        case "audit":
+            sys.exit(cmd_audit(rest))
+        case "cost":
+            sys.exit(cmd_cost(rest))
+        case "sync":
+            sys.exit(cmd_sync())
+        case "templates":
+            for t in list_templates():
+                print(f"  {t.stem}")
+        case _:
+            err(f"Unknown command: {command}")
+            print("Run 'bin/loop help' for usage.")
+            sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
