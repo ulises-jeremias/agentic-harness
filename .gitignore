@@ -74,6 +74,10 @@ projects.yaml
 .active-persona
 .active-pack
 
+# Loop state and run artifacts (machine-local)
+loops/*/STATE.md
+loops/*/runs/
+
 # Cloned repositories (gitignored - use project-indexer to manage)
 repos/
 
