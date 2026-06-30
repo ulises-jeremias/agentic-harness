@@ -127,32 +127,130 @@ def cmd_add(args: list[str]):
         sys.exit(1)
 
 
+def _parse_frontmatter(content: str) -> tuple[dict, str]:
+    """Extract YAML-like frontmatter from a markdown block entry if present."""
+    lines = content.strip().splitlines()
+    if not lines or lines[0].strip() != "---":
+        return {}, content
+    end = next((i for i, l in enumerate(lines[1:], 1) if l.strip() == "---"), None)
+    if end is None:
+        return {}, content
+    fm: dict = {}
+    for line in lines[1:end]:
+        if ":" in line:
+            k, _, v = line.partition(":")
+            raw = v.strip()
+            # Simple list: [a, b, c] or starts with -
+            if raw.startswith("[") and raw.endswith("]"):
+                fm[k.strip()] = [x.strip().strip('"').strip("'") for x in raw[1:-1].split(",") if x.strip()]
+            else:
+                fm[k.strip()] = raw.strip('"').strip("'")
+    return fm, "\n".join(lines[end + 1:])
+
+
 def cmd_search(args: list[str]):
-    query = args[0] if args else ""
-    if not query:
-        print("Usage: assistant-memory search <query>")
+    # Parse flags
+    query_parts: list[str] = []
+    tag_filter: str | None = None
+    project_filter: str | None = None
+    since_filter: str | None = None
+    min_conf: str | None = None
+
+    i = 0
+    while i < len(args):
+        match args[i]:
+            case "--tag":
+                tag_filter = args[i + 1]; i += 2
+            case "--project":
+                project_filter = args[i + 1]; i += 2
+            case "--since":
+                since_filter = args[i + 1]; i += 2
+            case "--min-confidence":
+                min_conf = args[i + 1]; i += 2
+            case _:
+                query_parts.append(args[i]); i += 1
+
+    query = " ".join(query_parts)
+    if not query and not tag_filter and not project_filter:
+        print("Usage: assistant-memory search [--tag T] [--project P] [--since YYYY-MM-DD] [--min-confidence low|med|high] <query>")
         sys.exit(1)
 
-    print(f"\n{_blue(f'=== Searching for: {query} ===')}\n")
-    query_lower = query.lower()
+    label = query if query else "(filtered)"
+    print(f"\n{_blue(f'=== Searching: {label} ===')}\n")
+    query_lower = query.lower() if query else ""
+    conf_order = {"low": 0, "med": 1, "high": 2}
+    min_conf_val = conf_order.get(min_conf or "", -1)
     found_any = False
 
     for md_file in sorted(KNOWLEDGE.rglob("*.md")):
         content = _read(md_file)
-        lines = content.splitlines()
-        matched_lines = [
-            (i + 1, line) for i, line in enumerate(lines)
-            if query_lower in line.lower()
-        ]
+
+        # Attempt frontmatter extraction (for tagged entries)
+        fm, body = _parse_frontmatter(content)
+
+        # Frontmatter-based filters
+        if tag_filter and fm:
+            entry_tags = fm.get("tags", [])
+            if isinstance(entry_tags, str):
+                entry_tags = [entry_tags]
+            if tag_filter not in entry_tags:
+                continue
+        elif tag_filter:
+            pass  # No frontmatter — can't filter by tag
+
+        if project_filter and fm:
+            if fm.get("project", "").lower() != project_filter.lower():
+                continue
+        elif project_filter:
+            pass
+
+        if since_filter and fm:
+            entry_date = fm.get("created", "")
+            if entry_date and entry_date < since_filter:
+                continue
+        elif since_filter:
+            pass
+
+        if min_conf_val >= 0 and fm:
+            entry_conf = conf_order.get(fm.get("confidence", ""), -1)
+            if entry_conf < min_conf_val:
+                continue
+        elif min_conf_val >= 0:
+            pass
+
+        # Text search
+        if query_lower:
+            lines = content.splitlines()
+            matched_lines = [
+                (i + 1, line) for i, line in enumerate(lines)
+                if query_lower in line.lower()
+            ]
+            if not matched_lines:
+                continue
+        else:
+            matched_lines = None
+
+        found_any = True
+        rel = md_file.relative_to(WORKSPACE_ROOT)
+        print(f"📄 {_cyan(str(rel))}:")
+        if fm:
+            meta = []
+            if fm.get("tags"):
+                meta.append(f"tags={fm['tags']}")
+            if fm.get("project"):
+                meta.append(f"project={fm['project']}")
+            if fm.get("created"):
+                meta.append(f"created={fm['created']}")
+            if meta:
+                print(f"   {_dim(' | '.join(meta))}")
         if matched_lines:
-            found_any = True
-            rel = md_file.relative_to(WORKSPACE_ROOT)
-            print(f"📄 {_cyan(str(rel))}:")
             for lineno, line in matched_lines[:5]:
                 print(f"   {_dim(str(lineno) + ':')} {line.strip()}")
             if len(matched_lines) > 5:
                 print(f"   {_dim(f'... and {len(matched_lines) - 5} more matches')}")
-            print()
+        else:
+            print(f"   {_dim('(matched by filter)')}")
+        print()
 
     if not found_any:
         print(_dim("  (no results found)"))
@@ -198,6 +296,40 @@ def cmd_todo(_args: list[str]):
         print(path.read_text(encoding="utf-8"))
     else:
         print(_dim("(no todos file found)"))
+
+
+def cmd_review_stale(_args: list[str]):
+    """Show entries past their stale_after date."""
+    from datetime import date
+    today = date.today().isoformat()
+    stale = []
+
+    for md_file in sorted(KNOWLEDGE.rglob("*.md")):
+        content = _read(md_file)
+        fm, _ = _parse_frontmatter(content)
+        if not fm:
+            continue
+        stale_after = fm.get("stale_after", "")
+        if stale_after and stale_after < today:
+            stale.append((md_file, fm, stale_after))
+
+    print(f"\n{_blue('=== Stale Knowledge Entries ===')}\n")
+    if not stale:
+        print(_dim(f"  (no entries past their stale_after date as of {today})"))
+        print()
+        return
+
+    for md_file, fm, stale_after in stale:
+        rel = md_file.relative_to(WORKSPACE_ROOT)
+        tags = fm.get("tags", "")
+        project = fm.get("project", "")
+        print(f"  📄 {_cyan(str(rel))}  (stale since {stale_after})")
+        if tags:
+            print(f"     tags={tags}")
+        if project:
+            print(f"     project={project}")
+        print()
+    print(f"  {len(stale)} stale entry(-ies). Review and update, or remove stale_after if still valid.\n")
 
 
 def cmd_review(_args: list[str]):
@@ -281,10 +413,13 @@ def usage():
 
 {_cyan('Usage:')}
   assistant-memory add --type <type> <content>   Add new entry
-  assistant-memory search <query>                Search knowledge base
+  assistant-memory search [--tag T] [--project P] [--since YYYY-MM-DD]
+                   [--min-confidence low|med|high] <query>
+                                                 Search knowledge base (with filters)
   assistant-memory list [type]                   List entries by type
   assistant-memory todo                          Show pending todos
   assistant-memory review                        Review key items (session start)
+  assistant-memory review --stale                List entries past stale_after date
   assistant-memory inject                        Output context block for injection
   assistant-memory help                          Show this help
 
@@ -315,7 +450,7 @@ def main():
         "search":  cmd_search,
         "list":    cmd_list,
         "todo":    cmd_todo,
-        "review":  cmd_review,
+        "review":  lambda args: cmd_review_stale(args) if args and args[0] == "--stale" else cmd_review(args),
         "inject":  cmd_inject,
         "help":    lambda _: usage(),
         "--help":  lambda _: usage(),
