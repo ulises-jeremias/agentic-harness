@@ -1,0 +1,9 @@
+# Sample profile for OSS contribution sessions
+# Copy to profiles/oss-contrib.yaml or use the bundled version
+name: oss-contrib
+description: Open-source contribution session — implementer persona, fork-first workflow
+persona: implementer
+skills:
+  - github-cli-workflow
+loops:
+  - pr-babysitter
