@@ -24,22 +24,38 @@ Your AI Tool  ←→  AI Workspace  ←→  Your Repos
 
 ---
 
-## Quick Start
+## Quick Start — Loop Engineering Mode
+
+> You shouldn't be prompting coding agents anymore. You should be designing loops
+> that prompt your agents. — *Peter Steinberger*
 
 ```bash
 # 1. Clone as your personal workspace
 git clone <this-repo> ~/.ai-workspace
 cd ~/.ai-workspace
-
-# 2. Run setup — creates your personal branch and configures the workspace
 ./scripts/workspace-init.sh
 
-# 3. Index your repos
+# 2. Index a repo
 ./bin/project-indexer clone owner/my-repo
 
-# 4. Open in your AI tool — reads AGENTS.md automatically
+# 3. Start a daily issue triage loop (L1 = observe only, no writes)
+./bin/loop init daily-triage
+./bin/loop run daily-triage
+
+# 4. Review what the loop found
+cat loops/daily-triage/runs/*/report.md
+
+# 5. Check cost and status
+./bin/loop status
+./bin/loop audit daily-triage
+
+# 6. Open in your AI tool for interactive sessions
 opencode        # or: claude / cursor / gemini
 ```
+
+**The loop runs autonomously between your sessions.** Wire it to a scheduler once you're happy with L1 output and ready to upgrade to L2 (PR-gated).
+
+See [docs/LOOPS.md](docs/LOOPS.md) for the full loop reference and anti-patterns.
 
 ### Workspace branch modes
 

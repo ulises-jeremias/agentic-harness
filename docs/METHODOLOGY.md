@@ -1,27 +1,28 @@
-# Methodology — The Agentic Harness
+# Methodology — From Prompting to Loops
 
-> Why this workspace exists and how it's designed to work.
-
----
-
-## The Problem
-
-AI tools are **stateless by default**. Every session starts fresh. Your AI assistant doesn't remember:
-
-- What you told it about your project last week
-- The ID of that ClickUp space you looked up three times
-- The convention you corrected it on
-- The todo you said "we'll handle that later"
-
-You end up re-teaching the AI every session. The AI repeats the same mistakes. Patterns get lost.
+> How this workspace is designed and why it works.
 
 ---
 
-## The Solution: Ralph Loop
+## The Discipline Stack
 
-> *Named after Geoffrey Huntley's "RALPH" model — see [ghuntley.com/loop](https://ghuntley.com/loop/)*
+Three disciplines layer on top of each other to take you from "typing prompts" to "designing autonomous AI processes":
 
-The AI Workspace implements the **Ralph Loop** — a four-phase feedback cycle:
+| Layer | Question | What it does |
+|-------|----------|-------------|
+| **Context engineering** | What does the agent *know* before it acts? | Schemas, packs, personas, knowledge base |
+| **Harness engineering** | What *scaffolds and observes* the agent? | Routing, telemetry, contracts, sub-agent dispatch |
+| **Loop engineering** | How does work *repeat autonomously*? | Schedulers, STATE/LOOP spine, maker/checker, cost budgets |
+
+Each layer builds on the one below. You can use context engineering alone; to get loops, you need all three.
+
+---
+
+## Layer 0 — The Ralph Loop Foundation
+
+> *Named after Geoffrey Huntley's "RALPH" model — [ghuntley.com/loop](https://ghuntley.com/loop/)*
+
+Everything builds on the Ralph Loop — a four-phase feedback cycle:
 
 ```text
 ┌─────────────────────────────────────────────────────────┐
@@ -33,80 +34,133 @@ The AI Workspace implements the **Ralph Loop** — a four-phase feedback cycle:
 └─────────────────────────────────────────────────────────┘
 ```
 
-### Layer 1 — Backing Specs
+1. **Backing Specs** (`AGENTS.md`) — the invariant that doesn't change session-to-session
+2. **Context Engineering** — inject the right information at the right time
+3. **Persistent Memory** (`knowledge/`) — what we learned carries forward
+4. **Fix the Loop** — specs and knowledge improve over time
 
-`AGENTS.md` is the backing spec. It tells the AI:
-
-- What this workspace is for
-- How to route tasks (which skill/subagent to use)
-- What rules to follow
-- What knowledge base to check
-
-Every session, the AI reads `AGENTS.md` first. This is the **invariant** — the spec that doesn't change session to session.
-
-### Layer 2 — Context Engineering
-
-Context engineering means giving the AI exactly the right information at the right time:
-
-- **Personas** constrain scope (reviewer sees but doesn't touch)
-- **Packs** inject project-specific context (IDs, repos, conventions)
-- **`workspace-context`** snapshots current state (todos, learnings, active project)
-
-Good context engineering means the AI doesn't need to ask — it already knows.
-
-### Layer 3 — Persistent Memory
-
-`knowledge/` is the persistent memory layer:
-
-- **Learnings**: corrections, patterns, preferences
-- **Processes**: tool IDs, workflows, conventions
-- **Todos**: deferred work
-- **Skills**: new capabilities discovered
-
-Every session should end with new discoveries saved. `assistant-memory add` is the write operation. `assistant-memory inject` is the read operation (paste at session start for maximum context).
-
-### Layer 4 — Fix the Loop
-
-The loop improves itself. When you correct the AI, it saves the correction. When it discovers a better pattern, it documents it. When a skill is missing from `AGENTS.md`, you add it.
-
-The workspace gets smarter over time because the specs improve.
+The Ralph Loop turns each session into a training run for the next one.
 
 ---
 
-## Architecture Principles
+## Layer 1 — Context Engineering
 
-### Stateless Sessions, Stateful Workspace
+> *What does the agent know before it acts?*
 
-The AI session is stateless — each conversation is fresh. But the **workspace is stateful** — `knowledge/` persists across sessions. The gap between them is closed by `assistant-memory inject` and persona/pack loading.
+Context engineering is the practice of giving the agent exactly the right information — no more, no less — so it can act correctly without asking.
 
-### Orchestrator, Not Expert
+### Surfaces
 
-The orchestrator session (`AGENTS.md`) doesn't try to be an expert at everything. It:
+| Surface | What it provides | Where |
+|---------|-----------------|-------|
+| `AGENTS.md` | Orchestration rules, routing table, skill list | Repo root |
+| `packs/*.yaml` | Project-specific context: repos, IDs, conventions | `packs/` |
+| `personas/*.md` | Behavioral constraints: allow/deny/handoffs | `personas/` |
+| `profiles/*.yaml` | Composable sessions: pack + persona + skills | `profiles/` |
+| `knowledge/` | Persistent cross-session memory | `knowledge/` |
 
-1. Understands what type of task this is
-2. Delegates to the right skill or subagent
-3. Reports results
-4. Saves knowledge
+### Rules for good context engineering
 
-Specialists (code-reviewer, security-reviewer, etc.) are better than a generalist at everything.
+1. **Validate every surface** — use `workspace-context validate` to catch schema violations before they confuse the agent
+2. **Tag knowledge entries** — `tags`, `project`, `created`, `stale_after` let you filter at retrieval time
+3. **Keep personas narrow** — a reviewer persona that can accidentally commit is a safety hazard
+4. **Load before you work** — `workspace-context load --profile <name>` is one command to prime the session
 
-### Portable by Design
+---
 
-The workspace works with any AI tool that reads a file at session start:
+## Layer 2 — Harness Engineering
 
-| Tool | File |
+> *What scaffolds and observes the agent during the run?*
+
+The harness is the scaffolding that wraps the agent: routing, telemetry, contracts, sub-agent dispatch. It makes the agent's behavior observable and reproducible.
+
+### Components
+
+| Component | Role |
+|-----------|------|
+| `AGENTS.md` routing table | Dispatch the right skill or sub-agent per task type |
+| `workspace-context` snapshot | Record the spec hash and active pack at session start |
+| Job templates (`templates/jobs/`) | Declared contract: inputs, outputs, exit criteria |
+| `devcompanion` job queue | Background work with artifact output |
+| Schema validation CI | Catch malformed context before it reaches the agent |
+
+### The AGENTS.md spec hash
+
+Every session records which version of `AGENTS.md` it ran under:
+
+```text
+Spec       : AGENTS.md@ca723537e215
+```
+
+When you update `AGENTS.md`, the hash changes. Mismatches indicate that a session ran on a stale spec.
+
+---
+
+## Layer 3 — Loop Engineering
+
+> *How does work repeat autonomously?*
+> "You shouldn't be prompting coding agents anymore. You should be designing loops that prompt your agents."
+> — Peter Steinberger
+
+A **loop** is a recurring goal: you define a purpose and the AI iterates — with sub-agents, verification, and external state — until the goal is met or the loop decides to hand off to you.
+
+### The 6 parts of a loop
+
+| Part | Role |
 |------|------|
-| Claude Code | `AGENTS.md` |
-| opencode | `AGENTS.md` |
-| Cursor | `CLAUDE.md` → symlink |
-| Gemini CLI | `GEMINI.md` → symlink |
-| GitHub Copilot | `.github/copilot-instructions.md` → symlink |
+| **Automation / Scheduling** | When does the loop fire? (cron, timer, trigger) |
+| **Worktree isolation** | Each run gets its own git worktree |
+| **Skills** | Reusable task prompts (from `dots-ai`) |
+| **Plugins / Connectors** | MCP and CLI reach (GitHub, ClickUp, CI) |
+| **Sub-agents** | Maker (implementer) + Checker (verifier) |
+| **Memory / State spine** | `LOOP.md` (intent) + `STATE.md` (current state) |
 
-One source of truth, multiple tool surfaces.
+### Rollout tiers
 
-### Fork-and-Own
+Always start at L1. Graduate to L3 only with a proven allowlist.
 
-This framework is designed to be cloned and customized. There's no "right" configuration — your `AGENTS.md`, your `knowledge/`, your personas are yours. The upstream provides the scaffolding; you provide the specificity.
+| Tier | Autonomy | When |
+|------|----------|------|
+| **L1** | Report-only | Exploring a new loop pattern |
+| **L2** | PR-gated | Actions verified, but humans merge |
+| **L3** | Unattended on allowlist | High-confidence, narrow scope |
+
+### Quick start
+
+```bash
+# Scaffold from a reference pattern
+./bin/loop init daily-triage
+
+# Run once to see what it would do (L1 = report only)
+./bin/loop run daily-triage
+
+# Review the output
+cat loops/daily-triage/runs/<id>/report.md
+
+# Check cost so far
+./bin/loop audit daily-triage
+```
+
+See [docs/LOOPS.md](LOOPS.md) for the full reference.
+
+---
+
+## Glossary
+
+| Term | Definition |
+|------|-----------|
+| **backing spec** | `AGENTS.md` — the invariant orchestration instructions |
+| **pack** | `packs/*.yaml` — project/client context bundle |
+| **persona** | `personas/*.md` — behavioral constraint (allow/deny/handoffs) |
+| **profile** | `profiles/*.yaml` — pack + persona + skills composition |
+| **knowledge** | `knowledge/` — persistent cross-session memory |
+| **harness** | Scaffolding that wraps an agent (routing, contracts, telemetry) |
+| **loop** | Recurring autonomous process with STATE/LOOP spine |
+| **loop tier** | L1 (report) / L2 (PR-gated) / L3 (unattended on allowlist) |
+| **maker** | Implementer sub-agent in a loop |
+| **checker/verifier** | Verifier sub-agent in a loop; signs off before writes |
+| **worktree** | Isolated git working tree created per loop run |
+| **exit condition** | DSL signal that ends a loop iteration (goal_met, budget_exhausted, …) |
 
 ---
 
@@ -116,39 +170,50 @@ This framework is designed to be cloned and customized. There's no "right" confi
 Session Start
     │
     ▼
-1. AI reads AGENTS.md
+1. AI reads AGENTS.md (spec hash recorded)
     │
     ▼
-2. (Optional) Load pack or persona
+2. Load pack or profile
+    ./bin/workspace-context load --profile oss-contrib
     │
     ▼
-3. Run: ./bin/workspace-context (inject state)
+3. Prime context
+    ./bin/workspace-context         # state snapshot
+    ./bin/assistant-memory inject   # knowledge dump
     │
     ▼
-4. Work: discover → delegate → implement
+4. Work (discover → delegate → implement)
     │
     ▼
-5. Save: ./bin/assistant-memory add --type learning "..."
+5. Save
+    ./bin/assistant-memory add --type learning "..."
     │
     ▼
 Session End
+    │
+    ▼
+Loop runs autonomously between sessions (if configured)
 ```
 
 ---
 
-## Key Commands at Each Phase
+## Key Commands
 
 ```bash
-# Session start
-./bin/workspace-context                    # get state snapshot
-./bin/assistant-memory inject              # inject knowledge context
-./bin/workspace-context use-persona reviewer  # activate a persona
+# Context
+./bin/workspace-context validate          # check schema violations
+./bin/workspace-context load --profile oss-contrib
+./bin/assistant-memory search --tag oss "deploy"
+./bin/assistant-memory review --stale     # check decayed entries
 
-# During work
-./bin/assistant-memory search "topic"      # check what we know
-./bin/devcompanion queue my-project --template code-review  # queue background work
+# Loops
+./bin/loop init daily-triage              # scaffold from template
+./bin/loop run daily-triage              # one iteration
+./bin/loop status                        # all loops at a glance
+./bin/loop audit                         # cost and success rate
+./bin/loop cost daily-triage             # estimate per run
 
-# Session end
-./bin/assistant-memory add --type learning "Always do X before Y in this repo"
-./bin/assistant-memory add --type todo "Follow up on the auth migration"
+# Background work (one-shot)
+./bin/devcompanion queue my-project --template code-review
+./bin/devcompanion run-once
 ```
