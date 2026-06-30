@@ -130,7 +130,19 @@ personas/researcher.md     # Explore and summarize, no implementation
 personas/architect.md      # System design, tradeoffs, ADRs
 ```
 
-→ [`docs/PERSONAS.md`](docs/PERSONAS.md)
+### Persona enforcement
+
+When `workspace-context` runs with an active persona (via `use-persona`), the
+snapshot emits a `<persona-constraints>` XML block detailing the persona's
+allow/deny action list, output format, and handoff rules.
+
+**You MUST respect this block when it appears.** An active persona means your
+toolset, write permissions, and handoff triggers are constrained — operate only
+within the declared `allow` list. If a task requires actions outside your
+persona's scope, use the handoff mechanism to switch personas rather than
+violating constraints.
+
+→ [`docs/PERSONAS.md`](docs/PERSONAS.md) for persona lifecycle.
 
 ---
 
