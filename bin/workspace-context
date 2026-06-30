@@ -424,6 +424,98 @@ cmd_use_persona() {
   cat "${persona_file}"
 }
 
+# ── handoff ────────────────────────────────────────────────────────────────────
+
+cmd_handoff() {
+  local to_persona="${1:-}"
+  if [[ -z "${to_persona}" ]]; then
+    echo "Usage: workspace-context handoff <persona>"
+    echo "Transition from the active persona to another, validating handoff rules."
+    exit 1
+  fi
+
+  local active_persona_file="${WORKSPACE_ROOT}/.active-persona"
+  local from=""
+  if [[ -f "${active_persona_file}" ]]; then
+    from=$(cat "${active_persona_file}")
+  else
+    echo "No active persona to handoff from. Use 'workspace-context use-persona <name>' first."
+    exit 1
+  fi
+
+  local to_file="${PERSONAS_DIR}/${to_persona}.md"
+  if [[ ! -f "${to_file}" ]]; then
+    echo "Target persona not found: ${to_persona}"
+    cmd_personas
+    exit 1
+  fi
+
+  # Validate handoff rules from the current persona's frontmatter
+  local from_file="${PERSONAS_DIR}/${from}.md"
+  if [[ -f "${from_file}" ]]; then
+    python3 - "${from_file}" "${from}" "${to_persona}" <<'PYEOF'
+import json, pathlib, sys, yaml
+
+file_path, from_name, to_name = pathlib.Path(sys.argv[1]), sys.argv[2], sys.argv[3]
+content = file_path.read_text(encoding="utf-8")
+
+lines = content.splitlines()
+if lines and lines[0].strip() == "---":
+    end = next((i for i, l in enumerate(lines[1:], 1) if l.strip() == "---"), None)
+    if end:
+        try:
+            meta = yaml.safe_load("\n".join(lines[1:end])) or {}
+        except Exception:
+            meta = {}
+    else:
+        meta = {}
+else:
+    meta = {}
+
+handoffs = meta.get("handoffs", [])
+allowed_targets = [h.get("to", "") for h in handoffs]
+
+if allowed_targets and to_name not in allowed_targets:
+    allowed = ", ".join(sorted(set(allowed_targets)))
+    print(f"  [warn] handoff from '{from_name}' to '{to_name}' is not in the declared handoff targets ({allowed})", file=sys.stderr)
+    print(f"  [warn] proceeding anyway — update 'handoffs' in {file_path.name} if this is intentional", file=sys.stderr)
+else:
+    print(f"  handoff: {from_name} → {to_name}")
+    matching = [h for h in handoffs if h.get("to") == to_name]
+    for h in matching:
+        when = h.get("when", "")
+        if when:
+            print(f"  reason: {when}")
+PYEOF
+  fi
+
+  local history_file="${WORKSPACE_ROOT}/.persona-history"
+  local ts
+  ts=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
+  echo "${ts} handoff: ${from} → ${to_persona}" >> "${history_file}"
+  echo "${to_persona}" > "${active_persona_file}"
+
+  green "Handoff: ${from} → ${to_persona}"
+  echo ""
+  cat "${to_file}"
+}
+
+# ── history ────────────────────────────────────────────────────────────────────
+
+cmd_history() {
+  local history_file="${WORKSPACE_ROOT}/.persona-history"
+  local limit="${1:-10}"
+  if [[ ! -f "${history_file}" ]]; then
+    echo "No persona transitions recorded yet."
+    exit 0
+  fi
+  echo "Recent persona transitions (last ${limit}):"
+  echo ""
+  tail -"${limit}" "${history_file}" | while IFS= read -r line; do
+    echo "  ${line}"
+  done
+}
+
 # ── validate ──────────────────────────────────────────────────────────────────
 
 cmd_validate() {
@@ -456,6 +548,8 @@ case "${cmd}" in
   profiles)    cmd_list_profiles ;;
   personas)    cmd_personas ;;
   use-persona) cmd_use_persona "${1:-}" ;;
+  handoff)     cmd_handoff "${1:-}" ;;
+  history)     cmd_history "${1:-10}" ;;
   validate)    cmd_validate "${1:-all}" ;;
   help|--help|-h)
     cat <<'EOF'
@@ -469,6 +563,8 @@ Usage:
   workspace-context profiles                      List available profiles
   workspace-context personas                      List available personas
   workspace-context use-persona <name>            Activate a persona
+  workspace-context handoff <name>                Transition to a different persona (validates rules)
+  workspace-context history [count]               Show recent persona transitions
   workspace-context validate [surface]            Validate context schemas
                                                   surface: all|packs|jobs|personas|knowledge|loops
 
@@ -478,6 +574,8 @@ Examples:
   workspace-context load --profile oss-contrib
   workspace-context profiles
   workspace-context use-persona reviewer
+  workspace-context handoff implementer
+  workspace-context history
   workspace-context validate
   workspace-context validate packs
 EOF
