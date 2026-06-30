@@ -147,6 +147,127 @@ cmd_load_pack() {
   echo ""
 }
 
+# ── load profile ─────────────────────────────────────────────────────────────
+
+cmd_load_profile() {
+  local profile_name="${1:-}"
+
+  if [[ -z "${profile_name}" ]]; then
+    echo "Usage: workspace-context load --profile <name>"
+    echo ""
+    echo "Available profiles:"
+    for f in "${WORKSPACE_ROOT}/profiles/"*.yaml; do
+      [[ -f "$f" ]] || continue
+      printf "  %s\n" "$(basename "${f}" .yaml)"
+    done
+    exit 1
+  fi
+
+  local profile_file="${WORKSPACE_ROOT}/profiles/${profile_name}.yaml"
+  if [[ ! -f "${profile_file}" ]]; then
+    echo "Profile not found: ${profile_name}"
+    echo "Looked in: ${profile_file}"
+    exit 1
+  fi
+
+  # Parse profile with Python (stdlib only — no PyYAML needed for this simple YAML)
+  local pack persona
+  pack=$(python3 -c "
+import re, pathlib
+text = pathlib.Path('${profile_file}').read_text()
+for line in text.splitlines():
+    m = re.match(r'^pack:\s+(\S+)', line)
+    if m:
+        print(m.group(1))
+        break
+" 2>/dev/null || true)
+
+  persona=$(python3 -c "
+import re, pathlib
+text = pathlib.Path('${profile_file}').read_text()
+for line in text.splitlines():
+    m = re.match(r'^persona:\s+(\S+)', line)
+    if m:
+        print(m.group(1))
+        break
+" 2>/dev/null || true)
+
+  # Store active profile
+  echo "${profile_name}" > "${WORKSPACE_ROOT}/.active-profile"
+
+  green "Profile loaded: ${profile_name}"
+  echo ""
+
+  # Activate persona (if declared)
+  if [[ -n "${persona}" ]]; then
+    local persona_file="${WORKSPACE_ROOT}/personas/${persona}.md"
+    if [[ -f "${persona_file}" ]]; then
+      echo "${persona}" > "${WORKSPACE_ROOT}/.active-persona"
+      green "  Persona: ${persona}"
+      echo ""
+      # Print persona enforcement hint block for AI context
+      echo "=== Persona Constraints (${persona}) ==="
+      grep -A5 '^deny:\|^allow:' "${persona_file}" 2>/dev/null | grep -v '^---' | head -20 || true
+      cat "${persona_file}"
+      echo ""
+    else
+      echo "  (persona '${persona}' not found in personas/)"
+    fi
+  fi
+
+  # Activate pack (if declared and exists)
+  if [[ -n "${pack}" ]]; then
+    local pack_file="${WORKSPACE_ROOT}/packs/${pack}.yaml"
+    if [[ -f "${pack_file}" ]]; then
+      echo "${pack_file}" > "${WORKSPACE_ROOT}/.active-pack"
+      green "  Pack: ${pack}"
+      echo ""
+      echo "=== Pack Context ==="
+      cat "${pack_file}"
+      echo ""
+    else
+      echo "  (pack '${pack}' not found — skipped)"
+    fi
+  fi
+
+  # Print profile summary
+  echo "=== Profile Summary ==="
+  cat "${profile_file}"
+  echo ""
+}
+
+# ── list profiles ────────────────────────────────────────────────────────────
+
+cmd_list_profiles() {
+  local profiles_dir="${WORKSPACE_ROOT}/profiles"
+  blue "── Available Profiles ─────────────────────────────────────"
+  if [[ -d "${profiles_dir}" ]]; then
+    local found=0
+    for f in "${profiles_dir}"/*.yaml; do
+      [[ -f "$f" ]] || continue
+      name=$(basename "${f}" .yaml)
+      desc=$(python3 -c "
+import re, pathlib
+text = pathlib.Path('${f}').read_text()
+for line in text.splitlines():
+    m = re.match(r'^description:\s+(.+)', line)
+    if m:
+        print(m.group(1))
+        break
+" 2>/dev/null || true)
+      printf "  %-25s %s\n" "${name}" "${desc}"
+      found=$((found + 1))
+    done
+    if [[ $found -eq 0 ]]; then
+      dim "  (no profiles defined — create profiles/*.yaml to get started)"
+    fi
+  else
+    dim "  (no profiles/ directory)"
+  fi
+  echo ""
+  echo "Usage: workspace-context load --profile <name>"
+}
+
 # ── list personas ─────────────────────────────────────────────────────────────
 
 cmd_personas() {
@@ -180,7 +301,23 @@ cmd_use_persona() {
     exit 1
   fi
 
-  echo "${persona}" > "${WORKSPACE_ROOT}/.active-persona"
+  local history_file="${WORKSPACE_ROOT}/.persona-history"
+  local active_persona_file="${WORKSPACE_ROOT}/.active-persona"
+
+  # Log the transition for audit trail
+  local from=""
+  if [[ -f "${active_persona_file}" ]]; then
+    from=$(cat "${active_persona_file}")
+  fi
+
+  local ts
+  ts=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
+  if [[ -n "${from}" && "${from}" != "${persona}" ]]; then
+    echo "${ts} transition: ${from} → ${persona}" >> "${history_file}"
+    yellow "Persona transition logged: ${from} → ${persona}"
+  fi
+
+  echo "${persona}" > "${active_persona_file}"
   green "Activated persona: ${persona}"
   echo ""
   cat "${persona_file}"
@@ -207,7 +344,15 @@ shift || true
 
 case "${cmd}" in
   snapshot|"") cmd_snapshot ;;
-  load)        cmd_load_pack "${1:-}" ;;
+  load)
+    # Distinguish --profile from a bare pack path
+    if [[ "${1:-}" == "--profile" ]]; then
+      cmd_load_profile "${2:-}"
+    else
+      cmd_load_pack "${1:-}"
+    fi
+    ;;
+  profiles)    cmd_list_profiles ;;
   personas)    cmd_personas ;;
   use-persona) cmd_use_persona "${1:-}" ;;
   validate)    cmd_validate "${1:-all}" ;;
@@ -219,6 +364,8 @@ Usage:
   workspace-context                               Print session context snapshot
   workspace-context snapshot                      Same as above
   workspace-context load packs/<pack>.yaml        Load a context pack
+  workspace-context load --profile <name>         Load a composable profile (pack+persona)
+  workspace-context profiles                      List available profiles
   workspace-context personas                      List available personas
   workspace-context use-persona <name>            Activate a persona
   workspace-context validate [surface]            Validate context schemas
@@ -227,6 +374,8 @@ Usage:
 Examples:
   workspace-context
   workspace-context load packs/my-client.yaml
+  workspace-context load --profile oss-contrib
+  workspace-context profiles
   workspace-context use-persona reviewer
   workspace-context validate
   workspace-context validate packs

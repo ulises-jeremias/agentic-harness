@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/ulises-jeremias/ai-workspace/main/schemas/profile.schema.json",
+  "title": "AI Workspace Session Profile",
+  "description": "A composable session profile that bundles a pack, persona, and optional skills/loops into a single loadable unit.",
+  "type": "object",
+  "required": ["name"],
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "description": "Kebab-case profile name (used as filename and .active-profile value)."
+    },
+    "description": {
+      "type": "string",
+      "description": "What this profile is for."
+    },
+    "pack": {
+      "type": "string",
+      "description": "Pack name (without .yaml) to load from packs/ when this profile activates."
+    },
+    "persona": {
+      "type": "string",
+      "enum": ["implementer", "reviewer", "researcher", "architect", "writer"],
+      "description": "Persona to activate (must match a file in personas/)."
+    },
+    "skills": {
+      "type": "array",
+      "description": "Optional list of extra skills to enable for this profile.",
+      "items": { "type": "string" }
+    },
+    "loops": {
+      "type": "array",
+      "description": "Optional list of loop names to associate with this profile.",
+      "items": { "type": "string" }
+    }
+  }
+}
