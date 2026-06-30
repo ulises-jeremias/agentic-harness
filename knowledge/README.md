@@ -1,3 +1,8 @@
+---
+type: index
+updated: 2026-06-30
+---
+
 # Knowledge Base
 
 > Persistent memory for your AI workspace. Stores learned patterns, processes, tool preferences, and pending tasks across sessions.

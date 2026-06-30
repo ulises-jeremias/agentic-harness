@@ -421,7 +421,7 @@ Usage:
   workspace-context personas                      List available personas
   workspace-context use-persona <name>            Activate a persona
   workspace-context validate [surface]            Validate context schemas
-                                                  surface: all|packs|jobs|personas
+                                                  surface: all|packs|jobs|personas|knowledge|loops
 
 Examples:
   workspace-context

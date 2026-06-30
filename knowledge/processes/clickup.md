@@ -1,3 +1,10 @@
+---
+type: process
+updated: 2026-06-30
+scopes: [clickup]
+confidence: medium
+---
+
 # ClickUp Patterns
 
 > Your ClickUp setup and common patterns.

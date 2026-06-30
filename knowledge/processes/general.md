@@ -1,3 +1,9 @@
+---
+type: process
+updated: 2026-06-30
+confidence: high
+---
+
 # General Process Patterns
 
 > Cross-tool workflow patterns discovered during sessions.
