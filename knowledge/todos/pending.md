@@ -1,3 +1,10 @@
+---
+type: todo
+updated: 2026-06-30
+auto_generated: true
+source: devcompanion
+---
+
 # Pending Items
 
 > Auto-generated from the devcompanion queue. Do not edit manually.

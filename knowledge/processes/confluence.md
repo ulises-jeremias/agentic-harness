@@ -1,3 +1,10 @@
+---
+type: process
+updated: 2026-06-30
+scopes: [confluence]
+confidence: medium
+---
+
 # Confluence Patterns
 
 > Your Confluence setup and common patterns.

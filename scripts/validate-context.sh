@@ -26,7 +26,7 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --surface) SURFACE="$2"; shift 2 ;;
     -h|--help)
-      echo "Usage: $0 [--surface packs|jobs|personas|all]"
+      echo "Usage: $0 [--surface packs|jobs|personas|knowledge|loops|all]"
       exit 0 ;;
     *) echo "Unknown flag: $1" >&2; exit 1 ;;
   esac
@@ -72,6 +72,17 @@ if file_path.suffix == ".md":
 # Parse YAML
 if _YAML:
     instance = yaml.safe_load(content)
+    # Convert YAML date/datetime objects to ISO strings for schema validation
+    import datetime
+    def _to_json(obj):
+        if isinstance(obj, dict):
+            return {k: _to_json(v) for k, v in obj.items()}
+        elif isinstance(obj, list):
+            return [_to_json(v) for v in obj]
+        elif isinstance(obj, (datetime.date, datetime.datetime)):
+            return obj.isoformat()
+        return obj
+    instance = _to_json(instance) if isinstance(instance, dict) else instance
 else:
     # Fallback: try JSON (only works for .json files)
     try:
@@ -161,6 +172,48 @@ run_personas() {
   if [[ $found -eq 0 ]]; then ok "personas/ (no files)"; fi
 }
 
+run_knowledge() {
+  info "Validating knowledge/ frontmatter ..."
+  local schema="${SCHEMAS}/knowledge.schema.json"
+  if [[ ! -f "$schema" ]]; then
+    fail "Schema not found: $schema"
+    return 1
+  fi
+  local found=0
+  for f in "${WORKSPACE_ROOT}/knowledge/"*.md "${WORKSPACE_ROOT}/knowledge/"*/*.md; do
+    [[ -e "$f" ]] || continue
+    found=$((found + 1))
+    if validate_file "$f" "$schema" 2>&1; then
+      ok "$(basename "$f")"
+    else
+      fail "$(basename "$f") — schema violation"
+      ERRORS=$((ERRORS + 1))
+    fi
+  done
+  if [[ $found -eq 0 ]]; then ok "knowledge/ (no files)"; fi
+}
+
+run_loops() {
+  info "Validating templates/loops/ ..."
+  local schema="${SCHEMAS}/loop.schema.json"
+  if [[ ! -f "$schema" ]]; then
+    fail "Schema not found: $schema"
+    return 1
+  fi
+  local found=0
+  for f in "${WORKSPACE_ROOT}/templates/loops/"*.yaml; do
+    [[ -e "$f" ]] || continue
+    found=$((found + 1))
+    if validate_file "$f" "$schema" 2>&1; then
+      ok "$(basename "$f")"
+    else
+      fail "$(basename "$f") — schema violation"
+      ERRORS=$((ERRORS + 1))
+    fi
+  done
+  if [[ $found -eq 0 ]]; then ok "templates/loops/ (no files)"; fi
+}
+
 # ── dispatch ──────────────────────────────────────────────────────────────────
 echo ""
 echo "Context Validation"
@@ -170,7 +223,9 @@ case "$SURFACE" in
   packs)    run_packs ;;
   jobs)     run_jobs ;;
   personas) run_personas ;;
-  all)      run_packs; run_jobs; run_personas ;;
+  knowledge) run_knowledge ;;
+  loops)    run_loops ;;
+  all)      run_packs; run_jobs; run_personas; run_knowledge; run_loops ;;
   *)        echo "Unknown surface: $SURFACE" >&2; exit 1 ;;
 esac
 

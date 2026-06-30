@@ -1,3 +1,10 @@
+---
+type: process
+updated: 2026-06-30
+scopes: [jira]
+confidence: medium
+---
+
 # JIRA Patterns
 
 > Your JIRA setup and common patterns.

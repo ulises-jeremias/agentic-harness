@@ -1,3 +1,9 @@
+---
+type: learning
+updated: 2026-06-30
+confidence: high
+---
+
 # General Learnings
 
 > Patterns, methodology notes, and insights from AI workspace sessions.

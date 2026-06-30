@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/ulises-jeremias/ai-workspace/main/schemas/knowledge.schema.json",
+  "title": "AI Workspace Knowledge Entry",
+  "description": "YAML frontmatter block for knowledge/*.md files.",
+  "type": "object",
+  "required": ["type", "updated"],
+  "additionalProperties": false,
+  "properties": {
+    "type": {
+      "type": "string",
+      "description": "Category of knowledge entry.",
+      "enum": ["learning", "process", "skill", "todo", "index"]
+    },
+    "updated": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+      "description": "Date of last update in ISO 8601 (YYYY-MM-DD)."
+    },
+    "scopes": {
+      "type": "array",
+      "description": "Domains, tools, or projects this entry applies to.",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "confidence": {
+      "type": "string",
+      "description": "How established this knowledge is.",
+      "enum": ["high", "medium", "low"]
+    },
+    "auto_generated": {
+      "type": "boolean",
+      "description": "True if this file is machine-generated and should not be edited manually.",
+      "default": false
+    },
+    "source": {
+      "type": "string",
+      "description": "Origin of this knowledge (e.g. session, manual, migration)."
+    }
+  }
+}

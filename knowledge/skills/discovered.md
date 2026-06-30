@@ -1,6 +1,12 @@
+---
+type: skill
+updated: 2026-06-30
+confidence: medium
+---
+
 # Discovered Skills
 
-Reusable skill discoveries captured by the assistant.
+> Reusable skill discoveries captured by the assistant.
 
 Add entries here when you learn about portable skills, agents, or workflow patterns that should be reused across sessions.
 
