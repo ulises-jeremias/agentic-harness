@@ -83,6 +83,7 @@ def cmd_add(args: list[str]):
     type_ = ""
     content = ""
     source_skill = ""
+    from_loop = ""
     tags: list[str] = []
     i = 0
     while i < len(args):
@@ -91,6 +92,9 @@ def cmd_add(args: list[str]):
             i += 2
         elif args[i] == "--from-skill" and i + 1 < len(args):
             source_skill = args[i + 1]
+            i += 2
+        elif args[i] == "--from-loop" and i + 1 < len(args):
+            from_loop = args[i + 1]
             i += 2
         elif args[i] == "--tags" and i + 1 < len(args):
             tags = [t.strip() for t in args[i + 1].split(",") if t.strip()]
@@ -101,7 +105,7 @@ def cmd_add(args: list[str]):
 
     if not type_ or not content:
         print("Usage: assistant-memory add --type <type> <content>")
-        print("       assistant-memory add --type <type> --from-skill <name> [--tags a,b,c] <content>")
+        print("       assistant-memory add --type <type> --from-skill <name> [--from-loop <id>] [--tags a,b,c] <content>")
         print("Types: skill, process, learning, todo")
         sys.exit(1)
 
@@ -136,6 +140,8 @@ def cmd_add(args: list[str]):
     elif type_ == "learning":
         path = KNOWLEDGE / "learnings" / "general.md"
         ctx = source_skill if source_skill else "Session"
+        if from_loop:
+            ctx = f"loop:{from_loop}"
         row = f"| {today} | {content} | {ctx} |"
         _prepend_table_row(path, "| Date | Learning | Context |", row)
         print(_green(f"✓ Added learning to {path.relative_to(WORKSPACE_ROOT)}"))
