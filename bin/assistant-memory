@@ -82,10 +82,18 @@ def _prepend_table_row(path: Path, header_row: str, new_row: str):
 def cmd_add(args: list[str]):
     type_ = ""
     content = ""
+    source_skill = ""
+    tags: list[str] = []
     i = 0
     while i < len(args):
         if args[i] == "--type" and i + 1 < len(args):
             type_ = args[i + 1]
+            i += 2
+        elif args[i] == "--from-skill" and i + 1 < len(args):
+            source_skill = args[i + 1]
+            i += 2
+        elif args[i] == "--tags" and i + 1 < len(args):
+            tags = [t.strip() for t in args[i + 1].split(",") if t.strip()]
             i += 2
         else:
             content = args[i]
@@ -93,6 +101,7 @@ def cmd_add(args: list[str]):
 
     if not type_ or not content:
         print("Usage: assistant-memory add --type <type> <content>")
+        print("       assistant-memory add --type <type> --from-skill <name> [--tags a,b,c] <content>")
         print("Types: skill, process, learning, todo")
         sys.exit(1)
 
@@ -100,8 +109,15 @@ def cmd_add(args: list[str]):
 
     if type_ == "skill":
         path = KNOWLEDGE / "skills" / "discovered.md"
+        fm_parts = [f"created: {today}"]
+        if source_skill:
+            fm_parts.append(f"source_skill: {source_skill}")
+        if tags:
+            fm_parts.append(f"tags: [{', '.join(tags)}]")
+        frontmatter = "---\n" + "\n".join(fm_parts) + "\n---\n\n" if fm_parts else ""
         entry = (
             f"\n## {today} - Discovered\n\n"
+            f"{frontmatter}"
             f"**What**: {content}\n"
             f"**Status**: pending-review\n\n"
             "---\n"
@@ -112,18 +128,24 @@ def cmd_add(args: list[str]):
     elif type_ == "process":
         path = KNOWLEDGE / "processes" / "general.md"
         row = f"| {today} | {content} | New pattern |"
+        if source_skill:
+            row = f"| {today} | {content} | from {source_skill} |"
         _prepend_table_row(path, "| Date | What | Notes |", row)
         print(_green(f"✓ Added process pattern to {path.relative_to(WORKSPACE_ROOT)}"))
 
     elif type_ == "learning":
         path = KNOWLEDGE / "learnings" / "general.md"
-        row = f"| {today} | {content} | Session |"
+        ctx = source_skill if source_skill else "Session"
+        row = f"| {today} | {content} | {ctx} |"
         _prepend_table_row(path, "| Date | Learning | Context |", row)
         print(_green(f"✓ Added learning to {path.relative_to(WORKSPACE_ROOT)}"))
 
     elif type_ == "todo":
         path = KNOWLEDGE / "todos" / "pending.md"
-        entry = f"- [ ] {today} - {content}\n"
+        entry = f"- [ ] {today} - {content}"
+        if source_skill:
+            entry += f" (from {source_skill})"
+        entry += "\n"
         _prepend_after_marker(path, "<!-- Add pending items with date added -->", entry)
         print(_green(f"✓ Added todo to {path.relative_to(WORKSPACE_ROOT)}"))
 
@@ -514,10 +536,11 @@ def usage():
 {_blue('assistant-memory')} — Manage assistant knowledge base
 
 {_cyan('Usage:')}
-  assistant-memory add --type <type> <content>   Add new entry
+  assistant-memory add --type <type> [--from-skill <name>] [--tags a,b,c] <content>
+                                                  Add new entry (with optional origin tracking)
   assistant-memory search [--tag T] [--project P] [--since YYYY-MM-DD]
                    [--min-confidence low|med|high] <query>
-                                                 Search knowledge base (with filters)
+                                                  Search knowledge base (with filters)
   assistant-memory list [type]                   List entries by type
   assistant-memory todo                          Show pending todos
   assistant-memory review                        Review key items (session start)
@@ -527,18 +550,23 @@ def usage():
   assistant-memory inject                        Output context block for injection
   assistant-memory help                          Show this help
 
-{_cyan('Types for add:')}
+{Cyan('Types for add:')}
   skill      New skill or tool discovery
   process    Process pattern (workflow, tool usage)
   learning   General session learning
   todo       Pending item to follow up
 
-{_cyan('Examples:')}
+{Cyan('Add flags:')}
+  --from-skill <name>   Origin skill name (for cross-repo traceability)
+  --tags a,b,c          Comma-separated tags (applied to frontmatter for skill type)
+
+{Cyan('Examples:')}
   assistant-memory add --type learning "Always run tests before committing"
+  assistant-memory add --type skill --from-skill dots-ai-workspace-knowledge-sync --tags jira,workflow "New workflow pattern"
   assistant-memory add --type todo "Investigate slow query in reports endpoint"
   assistant-memory search "deploy"
   assistant-memory list
-  assistant-memory inject   # paste output at start of session
+  assistant-memory inject   # paste output at end of session
 """)
 
 
