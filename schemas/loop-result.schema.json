@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/ulises-jeremias/ai-workspace/main/schemas/loop-result.schema.json",
+  "title": "Loop Run Result",
+  "description": "Schema for loops/<name>/runs/<id>/result.json — written by each sub-agent or the runner.",
+  "type": "object",
+  "required": ["run_id", "status", "tier", "ts_start", "ts_end"],
+  "additionalProperties": true,
+  "properties": {
+    "run_id": {
+      "type": "string",
+      "description": "Unique run identifier (matches the directory name)."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["completed", "failed", "escalated", "budget_exhausted", "verifier_failed"],
+      "description": "Terminal status of this run."
+    },
+    "tier": {
+      "type": "string",
+      "enum": ["L1", "L2", "L3"],
+      "description": "Tier at which this run executed."
+    },
+    "ts_start": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 run start time."
+    },
+    "ts_end": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 run end time."
+    },
+    "prompt_tokens": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Approximate prompt tokens consumed."
+    },
+    "completion_tokens": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Approximate completion tokens produced."
+    },
+    "exit_condition": {
+      "type": "string",
+      "description": "Which exit condition triggered end of run."
+    },
+    "artifacts": {
+      "type": "array",
+      "description": "Artifact paths produced relative to the run directory.",
+      "items": { "type": "string" }
+    },
+    "escalation_reason": {
+      "type": "string",
+      "description": "Human-readable reason when status is escalated."
+    },
+    "worker_id": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Index of the parallel worker (0 for single-worker runs)."
+    },
+    "agents_md_hash": {
+      "type": "string",
+      "description": "Hash of AGENTS.md at run start (A-E6.3)."
+    }
+  }
+}
