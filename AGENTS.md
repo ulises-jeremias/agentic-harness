@@ -1,3 +1,4 @@
+<!-- spec-hash:ca723537e215 -->
 # AGENTS.md — AI Workspace Orchestrator
 
 **Purpose**: Stateless session that orchestrates multi-repository work across any project or team.
