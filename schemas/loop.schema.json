@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/ulises-jeremias/ai-workspace/main/schemas/loop.schema.json",
+  "title": "AI Workspace Loop Declaration (LOOP.md frontmatter)",
+  "description": "YAML frontmatter schema for loops/<name>/LOOP.md",
+  "type": "object",
+  "required": ["name", "tier", "cadence", "goal", "exit_conditions", "budget"],
+  "additionalProperties": true,
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "description": "Kebab-case loop name (matches directory name)."
+    },
+    "tier": {
+      "type": "string",
+      "enum": ["L1", "L2", "L3"],
+      "description": "Rollout tier: L1 report-only, L2 PR-gated, L3 unattended on allowlist."
+    },
+    "cadence": {
+      "type": "string",
+      "pattern": "^[0-9]+(m|h|d|w)$",
+      "description": "Run frequency: 15m, 1h, 6h, 1d, 1w."
+    },
+    "goal": {
+      "type": "string",
+      "minLength": 1,
+      "description": "One or two sentences describing what this loop accomplishes."
+    },
+    "allowlist": {
+      "type": "array",
+      "description": "Actions the loop may take without a human gate.",
+      "items": { "type": "string" }
+    },
+    "deny": {
+      "type": "array",
+      "description": "Actions explicitly forbidden.",
+      "items": { "type": "string" }
+    },
+    "exit_conditions": {
+      "oneOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["goal_met", "budget_exhausted", "human_escalation",
+                     "safe_to_commit", "requires_pr", "max_iterations"]
+          }
+        },
+        {
+          "type": "object",
+          "required": ["conditions"],
+          "properties": {
+            "logic": { "type": "string", "enum": ["any", "all"], "default": "any" },
+            "conditions": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["goal_met", "budget_exhausted", "human_escalation",
+                         "safe_to_commit", "requires_pr", "max_iterations"]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "budget": {
+      "type": "object",
+      "description": "Cost and rate limits.",
+      "required": ["max_runs_per_day"],
+      "properties": {
+        "max_tokens": { "type": "integer", "minimum": 0 },
+        "max_runs_per_day": { "type": "integer", "minimum": 1 },
+        "max_wall_seconds": { "type": "integer", "minimum": 0 },
+        "max_iterations": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "verifier": {
+      "oneOf": [
+        { "type": "string" },
+        { "type": "null" }
+      ],
+      "description": "Agent or skill name that signs off before write actions."
+    },
+    "parallelism": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 10,
+      "default": 1,
+      "description": "Number of parallel sub-agent workers per run (A-E8.1)."
+    },
+    "aggregation": {
+      "type": "string",
+      "enum": ["all", "first-success", "vote"],
+      "default": "all",
+      "description": "How to combine results from parallel sub-agents (A-E8.2)."
+    },
+    "request": {
+      "type": "string",
+      "description": "Default task prompt (may be overridden via bin/loop run --request)."
+    }
+  }
+}
