@@ -15,7 +15,7 @@
 [![CI](https://img.shields.io/github/actions/workflow/status/ulises-jeremias/agentic-harness/ci.yml?style=flat-square&logo=githubactions&logoColor=white&label=CI&labelColor=1f2937&color=%233b82f6)](https://github.com/ulises-jeremias/agentic-harness/actions/workflows/ci.yml)
 [![Smoke](https://img.shields.io/github/actions/workflow/status/ulises-jeremias/agentic-harness/smoke.yml?style=flat-square&logo=githubactions&logoColor=white&label=Smoke%20Test&labelColor=1f2937&color=%238b5cf6)](https://github.com/ulises-jeremias/agentic-harness/actions/workflows/smoke.yml)
 
-[Quick Start :zap:](#quick-start--loop-engineering-mode) · [Key Concepts](#-key-concepts) · [Docs](#-docs) · [Contributing](CONTRIBUTING.md)
+[Quick Start](#quick-start) · [Key Concepts](#-key-concepts) · [Docs](#-docs) · [Contributing](CONTRIBUTING.md)
 
 Works with **Claude Code**, **opencode**, **Cursor**, **Gemini CLI**, and **GitHub Copilot**.
 
@@ -27,16 +27,16 @@ Works with **Claude Code**, **opencode**, **Cursor**, **Gemini CLI**, and **GitH
 
 Think of it as the **operating system for your AI coding agents**.
 
-```
+```text
      Your AI Tool  ←→  agentic-harness  ←→  Your Repos
-                       (memory, context,
-                        loops, personas,
-                        job queues)
+                        (memory, context,
+                         loops, personas,
+                         job queues)
 ```
 
 ---
 
-## ⚡ Quick Start — Loop Engineering Mode
+## Quick Start — Loop Engineering Mode
 
 > "You shouldn't be prompting coding agents anymore. You should be designing loops that prompt your agents." — *Peter Steinberger*
 
@@ -135,7 +135,7 @@ See [docs/LOOPS.md](docs/LOOPS.md) for the full loop reference and anti-patterns
 
 ## 📁 Structure
 
-```
+```text
 agentic-harness/
 ├── AGENTS.md              # AI orchestration instructions (main config)
 ├── CLAUDE.md              # Symlink → AGENTS.md (opencode/Cursor)
