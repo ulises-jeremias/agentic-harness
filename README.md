@@ -9,13 +9,19 @@
 <br>
 <br>
 
-[![MIT License](https://img.shields.io/badge/License-MIT-%233b82f6?style=for-the-badge&labelColor=1f2937)](LICENSE)
-[![Stars](https://img.shields.io/github/stars/ulises-jeremias/agentic-harness?style=for-the-badge&logo=github&color=%238b5cf6&labelColor=1f2937)](https://github.com/ulises-jeremias/agentic-harness)
+[![Layer](https://img.shields.io/badge/L2-Agentic%20Runtime-8b5cf6?style=for-the-badge&labelColor=030712)](#personal-dx-stack)
+[![Memory](https://img.shields.io/badge/Persistent-Memory-06b6d4?style=for-the-badge&labelColor=030712)](#key-concepts)
+[![Loops](https://img.shields.io/badge/Loop-Engineering-f472b6?style=for-the-badge&labelColor=030712)](#quick-start)
+[![CI](https://img.shields.io/github/actions/workflow/status/ulises-jeremias/agentic-harness/ci.yml?style=for-the-badge&label=CI&labelColor=030712&color=06b6d4)](https://github.com/ulises-jeremias/agentic-harness/actions/workflows/ci.yml)
 
-[![CI](https://img.shields.io/github/actions/workflow/status/ulises-jeremias/agentic-harness/ci.yml?style=flat-square&logo=githubactions&logoColor=white&label=CI&labelColor=1f2937&color=%233b82f6)](https://github.com/ulises-jeremias/agentic-harness/actions/workflows/ci.yml)
-[![Smoke](https://img.shields.io/github/actions/workflow/status/ulises-jeremias/agentic-harness/smoke.yml?style=flat-square&logo=githubactions&logoColor=white&label=Smoke%20Test&labelColor=1f2937&color=%238b5cf6)](https://github.com/ulises-jeremias/agentic-harness/actions/workflows/smoke.yml)
+<h3>Persistent context and autonomous loops for AI-assisted delivery.</h3>
 
-[Quick Start](#quick-start) · [Key Concepts](#-key-concepts) · [Docs](#-docs) · [Contributing](CONTRIBUTING.md)
+<p>
+  <strong>agentic-harness</strong> is the runtime layer of my personal Developer Experience stack:<br>
+  memory, personas, indexed repos, packs, queues, and feedback loops that keep AI work moving.
+</p>
+
+[Quick Start](#quick-start) · [Key Concepts](#key-concepts) · [Docs](#docs) · [Personal DX Stack](#personal-dx-stack) · [Contributing](CONTRIBUTING.md)
 
 Works with **Claude Code**, **opencode**, **Cursor**, **Gemini CLI**, and **GitHub Copilot**.
 
@@ -36,7 +42,7 @@ Think of it as the **operating system for your AI coding agents**.
 
 ---
 
-## Quick Start — Loop Engineering Mode
+## Quick Start
 
 > "You shouldn't be prompting coding agents anymore. You should be designing loops that prompt your agents." — *Peter Steinberger*
 
@@ -83,7 +89,7 @@ See [docs/LOOPS.md](docs/LOOPS.md) for the full loop reference and anti-patterns
 
 ---
 
-## 🧠 Key Concepts
+## Key Concepts
 
 <table>
   <tr>
@@ -156,7 +162,7 @@ agentic-harness/
 
 ---
 
-## 📚 Docs
+## Docs
 
 | Guide | Description |
 |-------|-------------|
@@ -173,21 +179,32 @@ agentic-harness/
 
 ---
 
-## 🔗 Related Project
+## Personal DX Stack
 
 <table>
   <tr>
-    <td width="60%" valign="top">
-      <strong>⚡ agentic-workstation</strong><br>
-      <sub>The workstation baseline layer — chezmoi-managed skills, agents, MCP templates, CLI helpers, and loop primitives.</sub>
+    <td width="33%" valign="top">
+      <strong>dotfiles</strong><br>
+      <sub>The personal operating layer: shell, editor, terminal, packages, and day-to-day ergonomics.</sub>
       <br><br>
-      <a href="https://github.com/ulises-jeremias/agentic-workstation"><code>github.com/ulises-jeremias/agentic-workstation</code></a>
+      <a href="https://github.com/ulises-jeremias/dotfiles"><code>ulises-jeremias/dotfiles</code></a>
     </td>
-    <td width="40%" align="center">
-      <pre>L1: agentic-workstation<br>L2: agentic-harness (this repo)<br>L3: client repos</pre>
+    <td width="34%" valign="top">
+      <strong>agentic-workstation</strong><br>
+      <sub>The AI-native workstation baseline: skills, agents, MCP templates, CLI helpers, and setup automation.</sub>
+      <br><br>
+      <a href="https://github.com/ulises-jeremias/agentic-workstation"><code>ulises-jeremias/agentic-workstation</code></a>
+    </td>
+    <td width="33%" valign="top">
+      <strong>agentic-harness</strong><br>
+      <sub>The running instance layer: persistent memory, indexed repos, personas, packs, and background loops.</sub>
+      <br><br>
+      <a href="https://github.com/ulises-jeremias/agentic-harness"><code>ulises-jeremias/agentic-harness</code></a>
     </td>
   </tr>
 </table>
+
+Together, these three projects form my personal workspace: a polished Developer Experience / UX system that optimizes setup, context switching, AI-assisted delivery, and daily workflow automation.
 
 ---
 
