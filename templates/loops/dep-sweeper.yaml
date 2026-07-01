@@ -31,7 +31,7 @@ budget:
   max_runs_per_day: 1
   max_wall_seconds: 600
 
-verifier: dots-ai-code-reviewer
+verifier: agentic-workstation-code-reviewer
 
 request: |
   You are the dependency sweeper for this repository.

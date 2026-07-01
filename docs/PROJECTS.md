@@ -21,7 +21,7 @@ cd projects/my-project
 ## Directory Structure
 
 ```text
-ai-workspace/
+agentic-harness/
 ├── repos/                            # Cloned repos (gitignored)
 │   └── github.com/
 │       └── owner/

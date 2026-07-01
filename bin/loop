@@ -57,8 +57,8 @@ WORKSPACE_ROOT = Path(__file__).resolve().parent.parent
 LOOPS_DIR = WORKSPACE_ROOT / "loops"
 TEMPLATES_DIR = WORKSPACE_ROOT / "templates" / "loops"
 WORKTREES_HOME = Path(
-    os.environ.get("AI_WORKSPACE_WORKTREES_DIR", "")
-    or Path.home() / ".local" / "share" / "ai-workspace" / "worktrees"
+    os.environ.get("HARNESS_WORKTREES_DIR", "")
+    or Path.home() / ".local" / "share" / "agentic-harness" / "worktrees"
 )
 
 # ── colors ────────────────────────────────────────────────────────────────────
@@ -408,10 +408,10 @@ def cmd_run(args: list[str]) -> int:
         finalize_run(loop_dir, run_dir, rid, worktree_path, trace_file, "cancelled")
         return 1
 
-    # Dispatch to runner (dots-ai or skeleton)
+    # Dispatch to runner (agentic-workstation or skeleton)
     runner_dir = Path(
-        os.environ.get("AI_WORKSPACE_RUNNER_DIR", "")
-        or Path.home() / ".local" / "share" / "ai-workspace" / "runner"
+        os.environ.get("HARNESS_RUNNER_DIR", "")
+        or Path.home() / ".local" / "share" / "agentic-harness" / "runner"
     )
 
     plan_md = run_dir / "plan.md"
@@ -444,8 +444,8 @@ def cmd_run(args: list[str]) -> int:
             "## Request\n\n"
             f"{request}\n\n"
             "## Status\n\n"
-            "⚠ No runner available. Install dots-ai to enable full loop execution.\n"
-            "See: https://github.com/ulises-jeremias/dots-ai\n",
+            "⚠ No runner available. Install agentic-workstation to enable full loop execution.\n"
+            "See: https://github.com/ulises-jeremias/agentic-workstation\n",
             encoding="utf-8",
         )
 

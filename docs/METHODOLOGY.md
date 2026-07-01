@@ -110,7 +110,7 @@ A **loop** is a recurring goal: you define a purpose and the AI iterates — wit
 |------|------|
 | **Automation / Scheduling** | When does the loop fire? (cron, timer, trigger) |
 | **Worktree isolation** | Each run gets its own git worktree |
-| **Skills** | Reusable task prompts (from `dots-ai`) |
+| **Skills** | Reusable task prompts (from `agentic-workstation`) |
 | **Plugins / Connectors** | MCP and CLI reach (GitHub, ClickUp, CI) |
 | **Sub-agents** | Maker (implementer) + Checker (verifier) |
 | **Memory / State spine** | `LOOP.md` (intent) + `STATE.md` (current state) |

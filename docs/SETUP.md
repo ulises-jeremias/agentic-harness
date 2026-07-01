@@ -16,8 +16,8 @@
 
 ```bash
 # 1. Clone as your workspace
-git clone <repo-url> ~/.ai-workspace
-cd ~/.ai-workspace
+git clone <repo-url> ~/.agentic-harness
+cd ~/.agentic-harness
 
 # 2. (Optional) Make it your own — remove upstream history
 rm -rf .git && git init && git add . && git commit -m "chore: init workspace"
@@ -42,8 +42,8 @@ opencode        # or: claude / cursor / gemini
 ### 1. Clone the repository
 
 ```bash
-git clone <repo-url> ~/.ai-workspace
-cd ~/.ai-workspace
+git clone <repo-url> ~/.agentic-harness
+cd ~/.agentic-harness
 ```
 
 ### 2. Make scripts executable
@@ -123,7 +123,7 @@ Pre-configured to ignore:
 After setup:
 
 ```text
-ai-workspace/
+agentic-harness/
 ├── .gitignore
 ├── AGENTS.md                  ← Main AI instructions
 ├── CLAUDE.md                  ← Symlink → AGENTS.md
@@ -209,7 +209,7 @@ Cursor reads `CLAUDE.md` (symlinked to `AGENTS.md`).
 ## Updating
 
 ```bash
-cd ~/.ai-workspace
+cd ~/.agentic-harness
 git pull origin main
 ```
 

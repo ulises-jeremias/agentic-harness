@@ -1,6 +1,6 @@
 # Glossary
 
-Shared terminology for the AI Workspace + dots-ai ecosystem.
+Shared terminology for the AI Workspace + agentic-workstation ecosystem.
 
 ## A
 
@@ -10,8 +10,8 @@ Shared terminology for the AI Workspace + dots-ai ecosystem.
 **AGENTS.md**
 : Root-level file that instructs the AI tool (Claude Code, opencode, Cursor) on how to behave in this workspace. The primary agent contract. Also called CLAUDE.md, GEMINI.md depending on the tool — symlinked to AGENTS.md for portability.
 
-**ai-workspace**
-: The running instance — a git repository at `~/.ai-workspace` containing knowledge, packs, personas, loops, and workspace CLIs. Layer 2 in the three-layer harness model.
+**agentic-harness**
+: The running instance — a git repository at `~/.agentic-harness` containing knowledge, packs, personas, loops, and workspace CLIs. Layer 2 in the three-layer harness model.
 
 ## C
 
@@ -20,23 +20,23 @@ Shared terminology for the AI Workspace + dots-ai ecosystem.
 
 ## D
 
-**dots-ai**
-: The portable workstation baseline — a chezmoi-managed repository at `~/.local/share/dots-ai` providing AI skills, agents, CLI helpers, and MCP templates. Layer 1 in the three-layer model.
+**agentic-workstation**
+: The portable workstation baseline — a chezmoi-managed repository at `~/.local/share/agentic-workstation` providing AI skills, agents, CLI helpers, and MCP templates. Layer 1 in the three-layer model.
 
 ## G
 
 **glossary**
-: This file. A shared vocabulary that both ai-workspace and dots-ai reference to ensure consistent terminology across docs, code, and agent instructions.
+: This file. A shared vocabulary that both agentic-harness and agentic-workstation reference to ensure consistent terminology across docs, code, and agent instructions.
 
 ## H
 
 **harness**
-: The three-layer architecture (infrastructure → running instance → application repos) that makes AI-assisted delivery repeatable and auditable. Layers: L1 (dots-ai workstation), L2 (ai-workspace running instance), L3 (client repos).
+: The three-layer architecture (infrastructure → running instance → application repos) that makes AI-assisted delivery repeatable and auditable. Layers: L1 (agentic-workstation workstation), L2 (agentic-harness running instance), L3 (client repos).
 
 ## K
 
 **knowledge base**
-: The `knowledge/` directory in ai-workspace. Structured markdown files organized by type (skills, processes, learnings, todos) that persist across sessions. The loop's "memory."
+: The `knowledge/` directory in agentic-harness. Structured markdown files organized by type (skills, processes, learnings, todos) that persist across sessions. The loop's "memory."
 
 ## L
 
@@ -52,7 +52,7 @@ Shared terminology for the AI Workspace + dots-ai ecosystem.
 ## M
 
 **MCP**
-: Model Context Protocol — a standard for AI tools to interact with external systems (filesystem, GitHub, databases). dots-ai ships MCP templates.
+: Model Context Protocol — a standard for AI tools to interact with external systems (filesystem, GitHub, databases). agentic-workstation ships MCP templates.
 
 ## P
 
@@ -68,15 +68,15 @@ Shared terminology for the AI Workspace + dots-ai ecosystem.
 ## R
 
 **runner**
-: The dots-ai dev companion runner — a background process that executes loop jobs. Invoked by `bin/loop run` when available. Falls back to skeleton mode without dots-ai.
+: The agentic-workstation dev companion runner — a background process that executes loop jobs. Invoked by `bin/loop run` when available. Falls back to skeleton mode without agentic-workstation.
 
 ## S
 
 **skill**
-: A self-contained AI instruction bundle with `SKILL.md` (human-readable) and `skill.json` (manifest). Skills are the unit of distribution in dots-ai. They declare capabilities, boundaries, triggers, dependencies, and compatibility.
+: A self-contained AI instruction bundle with `SKILL.md` (human-readable) and `skill.json` (manifest). Skills are the unit of distribution in agentic-workstation. They declare capabilities, boundaries, triggers, dependencies, and compatibility.
 
 **skill catalog**
-: `skill-catalog.yaml` — the dots-ai orchestration metadata file that maps skills to domains, responsibilities, roles, and dependency graph.
+: `skill-catalog.yaml` — the agentic-workstation orchestration metadata file that maps skills to domains, responsibilities, roles, and dependency graph.
 
 **snapshot**
 : The output of `workspace-context` — a machine-readable summary of the current session state including active persona, loaded pack, spec hash, and persona constraints.

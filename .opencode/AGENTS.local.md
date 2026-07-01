@@ -8,8 +8,8 @@
 
 ### Skills integration
 
-OpenCode reads skills from `~/.config/opencode/skills/`. After installing `dots-ai`,
-skills like `dots-ai-assistant`, `github-cli-workflow`, etc. are available.
+OpenCode reads skills from `~/.config/opencode/skills/`. After installing `agentic-workstation`,
+skills like `agentic-workstation-assistant`, `github-cli-workflow`, etc. are available.
 
 ### Using the workspace context tool
 

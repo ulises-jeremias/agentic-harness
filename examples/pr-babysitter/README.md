@@ -13,7 +13,7 @@ Every 15 minutes, this loop:
 ## Setup
 
 ```bash
-cd ~/.ai-workspace
+cd ~/.agentic-harness
 
 # 1. Index both repos
 ./bin/project-indexer clone owner/my-api

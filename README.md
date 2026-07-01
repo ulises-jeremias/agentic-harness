@@ -31,8 +31,8 @@ Your AI Tool  ←→  AI Workspace  ←→  Your Repos
 
 ```bash
 # 1. Clone as your personal workspace
-git clone <this-repo> ~/.ai-workspace
-cd ~/.ai-workspace
+git clone <this-repo> ~/.agentic-harness
+cd ~/.agentic-harness
 ./scripts/workspace-init.sh
 
 # 2. Index a repo
@@ -79,7 +79,7 @@ If the branch already exists (locally or on the remote), the script switches to 
 ## Structure
 
 ```text
-ai-workspace/
+agentic-harness/
 ├── AGENTS.md              # AI orchestration instructions (main config)
 ├── CLAUDE.md              # Symlink → AGENTS.md (opencode / Cursor)
 ├── GEMINI.md              # Symlink → AGENTS.md (Gemini CLI)

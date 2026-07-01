@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/ulises-jeremias/ai-workspace/main/schemas/loop-result.schema.json",
+  "$id": "https://raw.githubusercontent.com/ulises-jeremias/agentic-harness/main/schemas/loop-result.schema.json",
   "title": "Loop Run Result",
   "description": "Schema for loops/<name>/runs/<id>/result.json — written by each sub-agent or the runner.",
   "type": "object",

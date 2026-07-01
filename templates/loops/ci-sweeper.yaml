@@ -37,7 +37,7 @@ budget:
   max_wall_seconds: 900
   max_iterations: 3
 
-verifier: dots-ai-code-reviewer
+verifier: agentic-workstation-code-reviewer
 
 request: |
   You are the CI sweeper for this repository.

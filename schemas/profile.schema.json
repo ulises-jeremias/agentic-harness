@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/ulises-jeremias/ai-workspace/main/schemas/profile.schema.json",
+  "$id": "https://raw.githubusercontent.com/ulises-jeremias/agentic-harness/main/schemas/profile.schema.json",
   "title": "AI Workspace Session Profile",
   "description": "A composable session profile that bundles a pack, persona, and optional skills/loops into a single loadable unit.",
   "type": "object",

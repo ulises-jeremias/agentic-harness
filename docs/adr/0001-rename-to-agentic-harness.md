@@ -1,10 +1,10 @@
-# ADR 0001: Rename repository from ai-workspace to agentic-harness
+# ADR 0001: Rename repository from agentic-harness to agentic-harness
 
 **Status**: Accepted
 
 ## Context
 
-The repository was originally named `ai-workspace`, a generic descriptor that
+The repository was originally named `agentic-harness`, a generic descriptor that
 does not differentiate the project from countless other "AI workspace" tools
 and configurations. The project's core philosophy — documented in
 `docs/METHODOLOGY.md` — is that of an **agentic harness**: a lightweight,
@@ -15,7 +15,7 @@ workspace.
 
 ## Decision
 
-1. Rename the GitHub repository from `ai-workspace` to `agentic-harness`.
+1. Rename the GitHub repository from `agentic-harness` to `agentic-harness`.
 2. Set the GitHub description to:
    > "Portable agentic harness — context, memory, and loops for AI coding
    > agents."

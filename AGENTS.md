@@ -31,7 +31,7 @@
 | Deferred / background work | `./bin/devcompanion queue` |
 
 > **Customize this table** to match your installed skills and team tools.
-> **dots-ai installs**: add `dots-ai-assistant` as the entry point for dots-ai repo work and `dots-ai-dev-companion` for generic client delivery.
+> **agentic-workstation installs**: add `agentic-workstation-assistant` as the entry point for agentic-workstation repo work and `agentic-workstation-dev-companion` for generic client delivery.
 
 ---
 
@@ -78,7 +78,7 @@
 | `ui-ux-pro-max` | UI/UX design, components, layouts |
 | `github-cli-workflow` | Push branch, create draft PR (GitHub) |
 | `gitlab-cli-workflow` | Push branch, create draft MR (GitLab) |
-| `dots-ai-workstation-triage` | Workstation health diagnostics |
+| `agentic-workstation-workstation-triage` | Workstation health diagnostics |
 
 ### Subagents
 
@@ -91,7 +91,7 @@
 | `explore` | Fast codebase search |
 | `docs-lookup` | Documentation and API references |
 
-> **dots-ai installs**: agents are deployed with the `dots-ai-` prefix by `dots-ai` (e.g. `dots-ai-code-reviewer`, `dots-ai-security-reviewer`). Update this table accordingly. **Add your team's custom skills here** as you configure them.
+> **agentic-workstation installs**: agents are deployed with the `agentic-workstation-` prefix by `agentic-workstation` (e.g. `agentic-workstation-code-reviewer`, `agentic-workstation-security-reviewer`). Update this table accordingly. **Add your team's custom skills here** as you configure them.
 
 ---
 
@@ -193,15 +193,15 @@ or tell the user to let the worker pick it up.
 ### Client engagements: lock the LLM before queuing
 
 Before queuing background jobs for a client repo, **verify the active LLM
-policy** so the runner cannot fall back to OpenCode / Ollama / dots-ai
+policy** so the runner cannot fall back to OpenCode / Ollama / agentic-workstation
 credentials. The policy is read by both `dots-devcompanion` (workstation) and
 this workspace's `bin/devcompanion` when wired to the workstation runner.
 
 ```bash
 # 1. Wire the workspace CLI to the workstation runner (one-time per machine).
-export AI_WORKSPACE_RUNNER_DIR="$HOME/.local/share/dots-ai/dev-companion/runner"
+export HARNESS_RUNNER_DIR="$HOME/.local/share/agentic-workstation/dev-companion/runner"
 
-# 2. Pick the policy from the engagement's env file (~/.config/dots-ai/env.d/<client>.env).
+# 2. Pick the policy from the engagement's env file (~/.config/agentic-workstation/env.d/<client>.env).
 export ANTHROPIC_API_KEY="<client key>"
 export DOTS_AI_DEVCOMPANION_LLM_ALLOWLIST="anthropic"
 export DOTS_AI_DEVCOMPANION_LLM_STRICT="1"
@@ -215,7 +215,7 @@ policy**; do not queue jobs. Cursor/Copilot-only engagements: use
 `./bin/devcompanion run-once --no-llm` (skeleton plan) and drive the LLM
 inside the IDE with the client's account.
 
-→ [`docs/PROJECTS.md`](docs/PROJECTS.md) · [`docs/DEVCOMPANION.md`](docs/DEVCOMPANION.md) · [`dots-ai: DEV_COMPANION_LLM.md`](https://github.com/ulises-jeremias/dots-ai/blob/main/docs/DEV_COMPANION_LLM.md)
+→ [`docs/PROJECTS.md`](docs/PROJECTS.md) · [`docs/DEVCOMPANION.md`](docs/DEVCOMPANION.md) · [`agentic-workstation: DEV_COMPANION_LLM.md`](https://github.com/ulises-jeremias/agentic-workstation/blob/main/docs/DEV_COMPANION_LLM.md)
 
 ---
 

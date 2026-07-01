@@ -13,9 +13,9 @@ Every day at 8am, this loop:
 ## Setup
 
 ```bash
-# 1. Clone ai-workspace
-git clone https://github.com/ulises-jeremias/ai-workspace ~/.ai-workspace
-cd ~/.ai-workspace
+# 1. Clone agentic-harness
+git clone https://github.com/ulises-jeremias/agentic-harness ~/.agentic-harness
+cd ~/.agentic-harness
 ./scripts/workspace-init.sh
 
 # 2. Index your repo
@@ -40,12 +40,12 @@ See `loop.yaml` in this directory — copy to `loops/daily-triage/LOOP.md` to cu
 ```bash
 # Install timer
 mkdir -p ~/.config/systemd/user
-cp schedule/ai-workspace-daily-triage.timer ~/.config/systemd/user/
-cp schedule/ai-workspace-daily-triage.service ~/.config/systemd/user/
-systemctl --user enable --now ai-workspace-daily-triage.timer
+cp schedule/agentic-harness-daily-triage.timer ~/.config/systemd/user/
+cp schedule/agentic-harness-daily-triage.service ~/.config/systemd/user/
+systemctl --user enable --now agentic-harness-daily-triage.timer
 
 # Check logs
-journalctl --user -u ai-workspace-daily-triage
+journalctl --user -u agentic-harness-daily-triage
 ```
 
 ## Upgrade path

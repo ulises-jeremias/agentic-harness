@@ -69,7 +69,7 @@ devcompanion:
     strict: true                      # fail closed
     runbook: |
       1. Source the engagement env file:
-           source ~/.config/dots-ai/env.d/<client>.env
+           source ~/.config/agentic-workstation/env.d/<client>.env
          which must export ANTHROPIC_API_KEY (or the right key for this client)
          and the DOTS_AI_DEVCOMPANION_LLM_* variables matching this block.
       2. Verify before queuing jobs (no model call):
