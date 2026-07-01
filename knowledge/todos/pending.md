@@ -21,6 +21,6 @@ _No active jobs in queue._
 ## Rules
 
 - This file is auto-generated — edit via `bin/devcompanion`, not directly
-- Active jobs are in `~/.local/share/ai-workspace/dev-companion/queue/pending/`
+- Active jobs are in `~/.local/share/agentic-harness/dev-companion/queue/pending/`
 - Run `./bin/devcompanion status` for a live view
 - Run `./bin/devcompanion sync-todos` to regenerate this file

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/ulises-jeremias/ai-workspace/main/schemas/loop.schema.json",
+  "$id": "https://raw.githubusercontent.com/ulises-jeremias/agentic-harness/main/schemas/loop.schema.json",
   "title": "AI Workspace Loop Declaration (LOOP.md frontmatter)",
   "description": "YAML frontmatter schema for loops/<name>/LOOP.md",
   "type": "object",

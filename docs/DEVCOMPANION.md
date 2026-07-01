@@ -13,7 +13,7 @@ bin/devcompanion  (standalone Python CLI)
        │
        ├─ reads    projects/              → resolves project name → repo path
        ├─ reads    templates/jobs/        → job templates
-       ├─ writes   ~/.local/share/ai-workspace/dev-companion/queue/
+       ├─ writes   ~/.local/share/agentic-harness/dev-companion/queue/
        │           ├── pending/           ← jobs waiting to run
        │           ├── processing/        ← job currently running
        │           ├── done/              ← completed jobs
@@ -22,24 +22,24 @@ bin/devcompanion  (standalone Python CLI)
        └─ writes   knowledge/todos/pending.md   ← auto-generated
 ```
 
-**Queue home** defaults to `~/.local/share/ai-workspace/dev-companion/`.
-Override with `AI_WORKSPACE_DC_HOME` env var.
+**Queue home** defaults to `~/.local/share/agentic-harness/dev-companion/`.
+Override with `HARNESS_DC_HOME` env var.
 
 **Runner** — `run-once` uses a built-in skeleton runner by default.
-If `AI_WORKSPACE_RUNNER_DIR` is set and points to a directory containing a
+If `HARNESS_RUNNER_DIR` is set and points to a directory containing a
 `runner` module with a `main()` entry point, it will be used for full
 LLM-powered execution.
 
 > [!IMPORTANT]
 > When the workstation baseline is installed, set
-> `AI_WORKSPACE_RUNNER_DIR=$HOME/.local/share/dots-ai/dev-companion/runner`
+> `HARNESS_RUNNER_DIR=$HOME/.local/share/agentic-workstation/dev-companion/runner`
 > so this CLI delegates to the same runner that `dots-devcompanion run-once`
 > uses. Otherwise the workspace falls back to the built-in skeleton even when
 > the workstation provides full LLM support.
 
 ```bash
 # One-time setup: align the workspace with the workstation runner.
-export AI_WORKSPACE_RUNNER_DIR="$HOME/.local/share/dots-ai/dev-companion/runner"
+export HARNESS_RUNNER_DIR="$HOME/.local/share/agentic-workstation/dev-companion/runner"
 ```
 
 ---
@@ -86,7 +86,7 @@ export AI_WORKSPACE_RUNNER_DIR="$HOME/.local/share/dots-ai/dev-companion/runner"
 ```
 
 Artifacts are written to:
-`~/.local/share/ai-workspace/dev-companion/queue/artifacts/<job-id>/`
+`~/.local/share/agentic-harness/dev-companion/queue/artifacts/<job-id>/`
 
 ### 3. Check status
 
@@ -188,7 +188,7 @@ Do not edit these manually — they are regenerated on every `queue`, `done`, an
 
 When `dots_ai_devcompanion_runner` is available, it picks a provider through an
 **explicit policy layer** (see
-[`dots-ai/docs/DEV_COMPANION_LLM.md`](https://github.com/ulises-jeremias/dots-ai/blob/main/docs/DEV_COMPANION_LLM.md)).
+[`agentic-workstation/docs/DEV_COMPANION_LLM.md`](https://github.com/ulises-jeremias/agentic-workstation/blob/main/docs/DEV_COMPANION_LLM.md)).
 By default the order is:
 
 1. **opencode** (local, free)
@@ -228,7 +228,7 @@ job can never widen the global allowlist):
 
 For Cursor/Copilot-only engagements there is no headless adapter today; use
 `run-once --no-llm` (skeleton plan + IDE-driven execution). See
-[`dots-ai/docs/DEV_COMPANION_LLM.md`](https://github.com/ulises-jeremias/dots-ai/blob/main/docs/DEV_COMPANION_LLM.md)
+[`agentic-workstation/docs/DEV_COMPANION_LLM.md`](https://github.com/ulises-jeremias/agentic-workstation/blob/main/docs/DEV_COMPANION_LLM.md)
 for the full reference.
 
 ---
@@ -237,8 +237,8 @@ for the full reference.
 
 | Variable | Purpose |
 |----------|---------|
-| `AI_WORKSPACE_DC_HOME` | Override queue home directory |
-| `AI_WORKSPACE_RUNNER_DIR` | Path to the workstation runner (set to `~/.local/share/dots-ai/dev-companion/runner` when both are installed) |
+| `HARNESS_DC_HOME` | Override queue home directory |
+| `HARNESS_RUNNER_DIR` | Path to the workstation runner (set to `~/.local/share/agentic-workstation/dev-companion/runner` when both are installed) |
 | `ANTHROPIC_API_KEY` | Enable Anthropic LLM provider |
 | `OPENAI_API_KEY` | Enable OpenAI LLM provider |
 | `DOTS_AI_DEVCOMPANION_LLM_ALLOWLIST` | Comma-separated providers allowed (ordered) |
@@ -246,7 +246,7 @@ for the full reference.
 | `DOTS_AI_DEVCOMPANION_LLM_PINNED_PROVIDER` | Force a single provider |
 | `DOTS_AI_DEVCOMPANION_LLM_PINNED_MODEL` | Override the pinned provider's default model |
 | `DOTS_AI_DEVCOMPANION_LLM_STRICT` | `1`/`true` → fail closed when no allowed provider is available |
-| `DOTS_AI_DEVCOMPANION_LLM_CONFIG` | Override the policy file path (`~/.config/dots-ai/devcompanion-llm.json` by default) |
+| `DOTS_AI_DEVCOMPANION_LLM_CONFIG` | Override the policy file path (`~/.config/agentic-workstation/devcompanion-llm.json` by default) |
 
 ---
 

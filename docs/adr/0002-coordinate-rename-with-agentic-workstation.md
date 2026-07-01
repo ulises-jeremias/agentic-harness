@@ -4,7 +4,7 @@
 
 ## Context
 
-ADR 0001 decided to rename this repository from `ai-workspace` to `agentic-harness`. That ADR was accepted but never executed, pending coordination with the companion workstation repository (`dots-ai`, now renamed to `agentic-workstation` via its ADR-010).
+ADR 0001 decided to rename this repository from `agentic-harness` to `agentic-harness`. That ADR was accepted but never executed, pending coordination with the companion workstation repository (`agentic-workstation`, now renamed to `agentic-workstation` via its ADR-010).
 
 The three-layer architecture (ADR-007 in agentic-workstation) defines:
 
@@ -14,15 +14,15 @@ The three-layer architecture (ADR-007 in agentic-workstation) defines:
 | L2 — Running Instance | Session state, knowledge, packs, loops | `agentic-harness` (this repo) |
 | L3 — Application | Client project repos | Per-client |
 
-Both renames must happen in tandem to avoid a staggered migration period where cross-references (documentation, the `dots-ai-workspace-knowledge-sync` skill, CI workflows) point to outdated URLs.
+Both renames must happen in tandem to avoid a staggered migration period where cross-references (documentation, the `dots-agentic-harness-knowledge-sync` skill, CI workflows) point to outdated URLs.
 
 ## Decision
 
-1. **Reaffirm ADR 0001**: Rename this repo from `ai-workspace` to `agentic-harness`, with GitHub description "Portable agentic harness — context, memory, and loops for AI coding agents."
-2. **Coordinate execution**: This rename executes immediately after `dots-ai` → `agentic-workstation` is complete.
-3. **Cross-repo skill**: Rename `dots-ai-workspace-knowledge-sync` to `dots-harness-knowledge-sync` to reflect both new repo names.
-4. **Environment variables**: Rename `AI_WORKSPACE_*` env vars (e.g., `AI_WORKSPACE_RUNNER_DIR`) to `HARNESS_*` equivalents.
-5. **Local paths**: The personal instance at `~/.ai-workspace/` is a separate fork (`my-ai-workspace`) with `ai-workspace` as upstream. Only the remote URL needs updating — the local directory name stays `~/.ai-workspace/`.
+1. **Reaffirm ADR 0001**: Rename this repo from `agentic-harness` to `agentic-harness`, with GitHub description "Portable agentic harness — context, memory, and loops for AI coding agents."
+2. **Coordinate execution**: This rename executes immediately after `agentic-workstation` → `agentic-workstation` is complete.
+3. **Cross-repo skill**: Rename `dots-agentic-harness-knowledge-sync` to `dots-harness-knowledge-sync` to reflect both new repo names.
+4. **Environment variables**: Rename `HARNESS_*` env vars (e.g., `HARNESS_RUNNER_DIR`) to `HARNESS_*` equivalents.
+5. **Local paths**: The personal instance at `~/.agentic-harness/` is a separate fork (`my-agentic-harness`) with `agentic-harness` as upstream. Only the remote URL needs updating — the local directory name stays `~/.agentic-harness/`.
 
 ## Consequences
 
@@ -35,5 +35,5 @@ Both renames must happen in tandem to avoid a staggered migration period where c
 ### Negative
 
 - Migration cost: updating ~48 references in this repo plus cross-references
-- Personal `~/.ai-workspace` clone needs remote update
-- Env var renames (`AI_WORKSPACE_*` → `HARNESS_*`) may require shell config updates
+- Personal `~/.agentic-harness` clone needs remote update
+- Env var renames (`HARNESS_*` → `HARNESS_*`) may require shell config updates

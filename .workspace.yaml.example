@@ -44,8 +44,8 @@ ai:
 
 # ── devcompanion ──────────────────────────────────────────────────────────────
 devcompanion:
-  # Override queue home (default: ~/.local/share/ai-workspace/dev-companion)
-  # queue_home: ~/.local/share/ai-workspace/dev-companion
+  # Override queue home (default: ~/.local/share/agentic-harness/dev-companion)
+  # queue_home: ~/.local/share/agentic-harness/dev-companion
 
   # Default template for quick queuing
   # default_template: code-review

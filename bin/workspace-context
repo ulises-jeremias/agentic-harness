@@ -156,10 +156,10 @@ PYEOF
     echo ""
   fi
 
-  # dots-ai integration (skill catalog discovery)
-  dots_ai_catalog="${HOME}/.local/share/dots-ai/skills/skill-catalog.yaml"
+  # agentic-workstation integration (skill catalog discovery)
+  dots_ai_catalog="${HOME}/.local/share/agentic-workstation/skills/skill-catalog.yaml"
   if [[ -f "${dots_ai_catalog}" ]]; then
-    blue "── dots-ai Skills ─────────────────────────────────────────"
+    blue "── agentic-workstation Skills ─────────────────────────────────────────"
     total_skills=$(python3 -c "
 import yaml, sys
 data = yaml.safe_load(open('${dots_ai_catalog}'))

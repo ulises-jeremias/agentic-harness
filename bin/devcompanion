@@ -6,7 +6,7 @@
 """
 bin/devcompanion — standalone background job queue for AI Workspace.
 
-Manages a job queue in ~/.local/share/ai-workspace/dev-companion/
+Manages a job queue in ~/.local/share/agentic-harness/dev-companion/
 (no dependency on any external workstation runner).
 
 If a workstation runner (dots_ai_devcompanion_runner) is available, it will be
@@ -40,10 +40,10 @@ TEMPLATES_DIR  = WORKSPACE_ROOT / "templates" / "jobs"
 KNOWLEDGE_TODOS = WORKSPACE_ROOT / "knowledge" / "todos" / "pending.md"
 
 # Queue home — standalone, no external dependency
-# Override with AI_WORKSPACE_DC_HOME env var for custom locations
+# Override with HARNESS_DC_HOME env var for custom locations
 _DC_HOME = Path(
-    os.environ.get("AI_WORKSPACE_DC_HOME")
-    or Path.home() / ".local" / "share" / "ai-workspace" / "dev-companion"
+    os.environ.get("HARNESS_DC_HOME")
+    or Path.home() / ".local" / "share" / "agentic-harness" / "dev-companion"
 )
 QUEUE_PENDING    = _DC_HOME / "queue" / "pending"
 QUEUE_PROCESSING = _DC_HOME / "queue" / "processing"
@@ -51,11 +51,11 @@ QUEUE_DONE       = _DC_HOME / "queue" / "done"
 QUEUE_FAILED     = _DC_HOME / "queue" / "failed"
 
 # Optional external runner (used if available, falls back to skeleton)
-# Set AI_WORKSPACE_RUNNER_DIR to point at a directory containing a
+# Set HARNESS_RUNNER_DIR to point at a directory containing a
 # runner module with a main() entry point for full LLM-powered execution.
 _RUNNER_DIR = Path(
-    os.environ.get("AI_WORKSPACE_RUNNER_DIR", "")
-    or Path.home() / ".local" / "share" / "ai-workspace" / "runner"
+    os.environ.get("HARNESS_RUNNER_DIR", "")
+    or Path.home() / ".local" / "share" / "agentic-harness" / "runner"
 ) / "runner"
 
 
@@ -595,7 +595,7 @@ def cmd_help(_args=None):
 
 {_cyan('Queue path:')}
   {_DC_HOME / "queue"}
-  (override with AI_WORKSPACE_DC_HOME env var)
+  (override with HARNESS_DC_HOME env var)
 
 {_cyan('Examples:')}
   devcompanion queue my-api --template code-review

@@ -16,8 +16,8 @@
 set -euo pipefail
 
 WORKSPACE_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-DC_HOME="${AI_WORKSPACE_DC_HOME:-${HOME}/.local/share/ai-workspace/dev-companion}"
-WORKTREES_HOME="${AI_WORKSPACE_WORKTREES_DIR:-${HOME}/.local/share/ai-workspace/worktrees}"
+DC_HOME="${HARNESS_DC_HOME:-${HOME}/.local/share/agentic-harness/dev-companion}"
+WORKTREES_HOME="${HARNESS_WORKTREES_DIR:-${HOME}/.local/share/agentic-harness/worktrees}"
 
 DRY_RUN=false
 KEEP_KNOWLEDGE=false
@@ -117,8 +117,8 @@ remove "${WORKSPACE_ROOT}/projects.yaml"
 # ── Scheduler entries (hints only) ───────────────────────────────────────────
 echo ""
 echo "Scheduler cleanup (manual steps required):"
-echo "  systemd:  systemctl --user disable --now ai-workspace-*.timer 2>/dev/null"
-echo "  launchd:  launchctl unload ~/Library/LaunchAgents/ai-workspace.*.plist 2>/dev/null"
+echo "  systemd:  systemctl --user disable --now agentic-harness-*.timer 2>/dev/null"
+echo "  launchd:  launchctl unload ~/Library/LaunchAgents/agentic-harness.*.plist 2>/dev/null"
 echo ""
 
 if [[ "${DRY_RUN}" == "true" ]]; then

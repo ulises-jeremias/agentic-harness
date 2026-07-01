@@ -69,7 +69,7 @@ budget:
   max_tokens: 50000
   max_runs_per_day: 1
   max_wall_seconds: 600
-verifier: dots-ai-code-reviewer
+verifier: agentic-workstation-code-reviewer
 ---
 
 # Daily Issue Triage Loop
@@ -154,8 +154,8 @@ Every loop run dispatches two sub-agents:
 2. **Verifier** (checker) — audits artifacts before any write action
 
 ```yaml
-verifier: dots-ai-code-reviewer   # default for code-touching loops
-# verifier: dots-ai-architect     # for design/ADR loops
+verifier: agentic-workstation-code-reviewer   # default for code-touching loops
+# verifier: agentic-workstation-architect     # for design/ADR loops
 ```
 
 The verifier must sign off before any action not in `allowlist`. If the
@@ -186,7 +186,7 @@ Get a starter: `./bin/loop init <pattern>`
 **systemd timer (Linux)**:
 
 ```ini
-# ~/.config/systemd/user/ai-workspace-daily-triage.timer
+# ~/.config/systemd/user/agentic-harness-daily-triage.timer
 [Timer]
 OnCalendar=daily
 [Install]
@@ -196,7 +196,7 @@ WantedBy=timers.target
 **launchd (macOS)**:
 
 ```xml
-<!-- ~/Library/LaunchAgents/ai-workspace.daily-triage.plist -->
+<!-- ~/Library/LaunchAgents/agentic-harness.daily-triage.plist -->
 <key>StartCalendarInterval</key>
 <dict><key>Hour</key><integer>8</integer></dict>
 ```
@@ -206,7 +206,7 @@ WantedBy=timers.target
 ```text
 mcp__claude_ai_Claude_Code_Remote__create_trigger
   cron_expression: "0 8 * * *"
-  prompt: "Run bin/loop run daily-triage in the ai-workspace"
+  prompt: "Run bin/loop run daily-triage in the agentic-harness"
 ```
 
 ---

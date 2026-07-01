@@ -33,7 +33,7 @@ budget:
   max_runs_per_day: 96
   max_wall_seconds: 600
 
-verifier: dots-ai-code-reviewer
+verifier: agentic-workstation-code-reviewer
 
 request: |
   You are the PR babysitter for this repository.

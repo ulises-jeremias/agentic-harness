@@ -58,8 +58,8 @@ queue options:
   --no-llm             Skip LLM, generate skeleton plan only
 
 Queue path:
-  /home/ulisesjcf/.local/share/ai-workspace/dev-companion/queue
-  (override with AI_WORKSPACE_DC_HOME env var)
+  /home/ulisesjcf/.local/share/agentic-harness/dev-companion/queue
+  (override with HARNESS_DC_HOME env var)
 
 Examples:
   devcompanion queue my-api --template code-review

@@ -13,7 +13,7 @@ Using the `oss-contrib` profile:
 ## Setup
 
 ```bash
-cd ~/.ai-workspace
+cd ~/.agentic-harness
 
 # 1. Index the OSS repo you want to contribute to
 ./bin/project-indexer clone owner/some-oss-project

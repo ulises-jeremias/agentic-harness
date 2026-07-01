@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # scripts/rename-migrate.sh
 # Migration helper for existing clones after the rename from
-# ai-workspace → agentic-harness.
+# agentic-harness → agentic-harness.
 #
 # Usage:
 #   ./scripts/rename-migrate.sh
@@ -10,7 +10,7 @@
 
 set -euo pipefail
 
-MIGRATE_FROM="ulises-jeremias/ai-workspace"
+MIGRATE_FROM="ulises-jeremias/agentic-harness"
 MIGRATE_TO="ulises-jeremias/agentic-harness"
 
 SSH_PATTERN="git@github.com:${MIGRATE_FROM}"
