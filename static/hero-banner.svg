@@ -1,0 +1,70 @@
+<svg width="1200" height="280" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0e14;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#141a23;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0a0e14;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#8b5cf6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="glowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:0.12" />
+      <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:0.04" />
+    </linearGradient>
+    <linearGradient id="iconGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:1" />
+    </linearGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <rect width="40" height="40" fill="none"/>
+      <rect x="0" y="0" width="1" height="1" fill="#ffffff" opacity="0.02"/>
+    </pattern>
+  </defs>
+
+  <rect width="1200" height="280" rx="16" ry="16" fill="url(#bgGrad)"/>
+  <rect width="1200" height="280" rx="16" ry="16" fill="url(#grid)"/>
+  <ellipse cx="400" cy="140" rx="500" ry="120" fill="url(#glowGrad)"/>
+
+  <rect x="0" y="0" width="1200" height="4" rx="2" fill="url(#accentGrad)"/>
+
+  <g transform="translate(100, 80)">
+    <rect x="0" y="0" width="64" height="64" rx="16" fill="#1a2332" stroke="#3b82f6" stroke-width="1.5"/>
+    <text x="32" y="44" text-anchor="middle" font-size="32" fill="url(#iconGrad)">🔄</text>
+  </g>
+
+  <text x="184" y="112" fill="white" font-family="'Segoe UI', -apple-system, Arial, sans-serif" font-size="40" font-weight="800" letter-spacing="1">
+    agentic-harness
+  </text>
+
+  <text x="184" y="146" fill="#8b949e" font-family="'Segoe UI', -apple-system, Arial, sans-serif" font-size="18" font-weight="400">
+    Persistent memory, context, and loop orchestration for AI coding agents
+  </text>
+
+  <g transform="translate(120, 200)">
+    <rect x="0" y="0" width="85" height="28" rx="14" fill="#1f2937" stroke="#3b82f6" stroke-width="1"/>
+    <text x="42" y="18" text-anchor="middle" fill="#3b82f6" font-family="'Segoe UI', sans-serif" font-size="12" font-weight="600">memory</text>
+
+    <rect x="99" y="0" width="80" height="28" rx="14" fill="#1f2937" stroke="#8b5cf6" stroke-width="1"/>
+    <text x="139" y="18" text-anchor="middle" fill="#8b5cf6" font-family="'Segoe UI', sans-serif" font-size="12" font-weight="600">loops</text>
+
+    <rect x="193" y="0" width="80" height="28" rx="14" fill="#1f2937" stroke="#58a6ff" stroke-width="1"/>
+    <text x="233" y="18" text-anchor="middle" fill="#58a6ff" font-family="'Segoe UI', sans-serif" font-size="12" font-weight="600">context</text>
+
+    <rect x="287" y="0" width="75" height="28" rx="14" fill="#1f2937" stroke="#7ee787" stroke-width="1"/>
+    <text x="324" y="18" text-anchor="middle" fill="#7ee787" font-family="'Segoe UI', sans-serif" font-size="12" font-weight="600">packs</text>
+
+    <rect x="376" y="0" width="90" height="28" rx="14" fill="#1f2937" stroke="#f778ba" stroke-width="1"/>
+    <text x="421" y="18" text-anchor="middle" fill="#f778ba" font-family="'Segoe UI', sans-serif" font-size="12" font-weight="600">personas</text>
+
+    <rect x="480" y="0" width="110" height="28" rx="14" fill="#1f2937" stroke="#bc8cff" stroke-width="1"/>
+    <text x="535" y="18" text-anchor="middle" fill="#bc8cff" font-family="'Segoe UI', sans-serif" font-size="12" font-weight="600">orchestration</text>
+
+    <rect x="604" y="0" width="80" height="28" rx="14" fill="#1f2937" stroke="#3b82f6" stroke-width="1"/>
+    <text x="644" y="18" text-anchor="middle" fill="#3b82f6" font-family="'Segoe UI', sans-serif" font-size="12" font-weight="600">queue</text>
+  </g>
+
+  <rect x="0" y="276" width="1200" height="4" rx="2" fill="url(#accentGrad)"/>
+</svg>
