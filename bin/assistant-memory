@@ -18,6 +18,11 @@ import tempfile
 from datetime import date, timedelta
 from pathlib import Path
 
+import json
+import sqlite3
+import struct
+import urllib.request
+
 WORKSPACE_ROOT = Path(__file__).resolve().parent.parent
 KNOWLEDGE = WORKSPACE_ROOT / "knowledge"
 
@@ -189,6 +194,7 @@ def cmd_search(args: list[str]):
     project_filter: str | None = None
     since_filter: str | None = None
     min_conf: str | None = None
+    semantic = False
 
     i = 0
     while i < len(args):
@@ -201,13 +207,74 @@ def cmd_search(args: list[str]):
                 since_filter = args[i + 1]; i += 2
             case "--min-confidence":
                 min_conf = args[i + 1]; i += 2
+            case "--semantic":
+                semantic = True; i += 1
             case _:
                 query_parts.append(args[i]); i += 1
 
     query = " ".join(query_parts)
     if not query and not tag_filter and not project_filter:
-        print("Usage: assistant-memory search [--tag T] [--project P] [--since YYYY-MM-DD] [--min-confidence low|med|high] <query>")
+        print("Usage: assistant-memory search [--tag T] [--project P] [--since YYYY-MM-DD] [--min-confidence low|med|high] [--semantic] <query>")
         sys.exit(1)
+
+    if semantic:
+        try:
+            import sqlite_vec
+        except ImportError:
+            print("Semantic index requires sqlite-vec. Install with: pip install sqlite-vec")
+            sys.exit(0)
+
+        db_path = KNOWLEDGE / ".knowledge-index.db"
+        if not db_path.exists():
+            print(_yellow("Semantic index not found - falling back to text search"))
+        else:
+            conn = sqlite3.connect(str(db_path))
+            conn.enable_load_extension(True)
+            sqlite_vec.load(conn)
+            conn.enable_load_extension(False)
+
+            payload = json.dumps({"model": "nomic-embed-text", "input": query}).encode()
+            req = urllib.request.Request(
+                "http://localhost:11434/api/embeddings",
+                data=payload,
+                headers={"Content-Type": "application/json"},
+            )
+            try:
+                resp = urllib.request.urlopen(req, timeout=30)
+                result = json.loads(resp.read())
+                query_embedding = result["embedding"]
+            except Exception as e:
+                print(f"Failed to get embedding: {e}")
+                sys.exit(1)
+
+            embedding_bytes = struct.pack(f"{len(query_embedding)}f", *query_embedding)
+            rows = conn.execute(
+                "SELECT id, distance FROM vec_entries WHERE embedding MATCH ? ORDER BY distance LIMIT 10",
+                (embedding_bytes,),
+            ).fetchall()
+
+            print(f"\n{_blue(f'=== Semantic Search: {query} ===')}\n")
+            found_any = False
+            for entry_id, distance in rows:
+                row = conn.execute("SELECT path FROM entries WHERE id = ?", (entry_id,)).fetchone()
+                if not row:
+                    continue
+                found_any = True
+                rel = row[0]
+                rel_path = KNOWLEDGE / rel
+                content = _read(rel_path)
+                lines = content.splitlines()
+                preview = " ".join(l.strip() for l in lines if l.strip())[:200]
+                print(f"\U0001f4c4 {_cyan(rel)}:")
+                print(f"   {_dim(f'similarity: {1 - distance:.4f}')}")
+                print(f"   {_dim(preview)}")
+                print()
+
+            conn.close()
+            if not found_any:
+                print(_dim("  (no results found)"))
+            print()
+            return
 
     label = query if query else "(filtered)"
     print(f"\n{_blue(f'=== Searching: {label} ===')}\n")
@@ -537,6 +604,72 @@ def cmd_inject(_args: list[str]):
     print("<!-- end assistant-memory inject -->")
 
 
+def cmd_index(args: list[str]):
+    try:
+        import sqlite_vec
+    except ImportError:
+        print("Semantic index requires sqlite-vec. Install with: pip install sqlite-vec")
+        sys.exit(0)
+
+    db_path = KNOWLEDGE / ".knowledge-index.db"
+    conn = sqlite3.connect(str(db_path))
+    conn.enable_load_extension(True)
+    sqlite_vec.load(conn)
+    conn.enable_load_extension(False)
+
+    conn.execute("""
+        CREATE VIRTUAL TABLE IF NOT EXISTS vec_entries USING vec0(
+            id INTEGER PRIMARY KEY,
+            embedding float[768]
+        )
+    """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS entries (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            path TEXT UNIQUE,
+            text TEXT
+        )
+    """)
+
+    md_files = sorted(KNOWLEDGE.rglob("*.md"))
+    print(f"Indexing {len(md_files)} files...")
+
+    for md_file in md_files:
+        content = _read(md_file)
+        rel = str(md_file.relative_to(KNOWLEDGE))
+
+        payload = json.dumps({"model": "nomic-embed-text", "input": content}).encode()
+        req = urllib.request.Request(
+            "http://localhost:11434/api/embeddings",
+            data=payload,
+            headers={"Content-Type": "application/json"},
+        )
+
+        try:
+            resp = urllib.request.urlopen(req, timeout=30)
+            result = json.loads(resp.read())
+            embedding = result["embedding"]
+        except Exception as e:
+            print(f"  {_yellow('!')} Skipping {rel}: {e}")
+            continue
+
+        embedding_bytes = struct.pack(f"{len(embedding)}f", *embedding)
+        conn.execute("INSERT OR REPLACE INTO entries (path, text) VALUES (?, ?)", (rel, content))
+        cursor = conn.execute("SELECT id FROM entries WHERE path = ?", (rel,))
+        entry_id = cursor.fetchone()[0]
+
+        conn.execute(
+            "INSERT OR REPLACE INTO vec_entries (id, embedding) VALUES (?, ?)",
+            (entry_id, embedding_bytes),
+        )
+
+        print(f"  {_green('\u2713')} {rel}")
+
+    conn.commit()
+    conn.close()
+    print(f"\n{_green('Index built successfully')}")
+
+
 def usage():
     print(f"""
 {_blue('assistant-memory')} — Manage assistant knowledge base
@@ -544,9 +677,10 @@ def usage():
 {_cyan('Usage:')}
   assistant-memory add --type <type> [--from-skill <name>] [--tags a,b,c] <content>
                                                   Add new entry (with optional origin tracking)
-  assistant-memory search [--tag T] [--project P] [--since YYYY-MM-DD]
-                   [--min-confidence low|med|high] <query>
-                                                  Search knowledge base (with filters)
+   assistant-memory search [--tag T] [--project P] [--since YYYY-MM-DD]
+                    [--min-confidence low|med|high] [--semantic] <query>
+                                                    Search knowledge base (with filters)
+  assistant-memory index build                              Build semantic index
   assistant-memory list [type]                   List entries by type
   assistant-memory todo                          Show pending todos
   assistant-memory review                        Review key items (session start)
@@ -585,6 +719,7 @@ def main():
 
     dispatch = {
         "add":     cmd_add,
+        "index":   cmd_index,
         "search":  cmd_search,
         "list":    cmd_list,
         "todo":    cmd_todo,
