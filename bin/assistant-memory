@@ -702,7 +702,7 @@ def usage():
 
 {Cyan('Examples:')}
   assistant-memory add --type learning "Always run tests before committing"
-  assistant-memory add --type skill --from-skill dots-agentic-harness-knowledge-sync --tags jira,workflow "New workflow pattern"
+  assistant-memory add --type skill --from-skill dots-harness-knowledge-sync --tags jira,workflow "New workflow pattern"
   assistant-memory add --type todo "Investigate slow query in reports endpoint"
   assistant-memory search "deploy"
   assistant-memory list
