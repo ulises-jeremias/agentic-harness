@@ -4,6 +4,8 @@
 
 ---
 
+<!-- markdownlint-disable MD024 -->
+
 ## Overview
 
 ```text
@@ -462,3 +464,5 @@ bin/loop run pr-babysitter --verbose --dry-run
 # 4. Schedule with new tier
 bin/loop schedule pr-babysitter --cron "0 */2 * * *"
 ```
+
+<!-- markdownlint-enable MD024 -->

@@ -20,7 +20,7 @@
 
 ```bash
 ./bin/loop init pr-babysitter --template pr-babysitter --tier 2
-```
+```text
 
 ---
 
@@ -37,7 +37,7 @@ deny:
   - close          # Cannot close
   - push           # Cannot push
   - label          # Cannot label
-```
+```text
 
 **Key difference from L1**: The allowlist now has `comment`. This loop CAN write — but only comments. It CANNOT merge, approve, close, push, or label.
 
@@ -45,13 +45,13 @@ deny:
 
 L2 loops never auto-merge. They produce output that a human must approve:
 
-```
+```text
 Loop writes draft comment
          ↓
 Human reviews comment
          ↓
 Human publishes or discards
-```
+```text
 
 The loop acts as a **reviewer assistant**, not a reviewer replacement.
 
@@ -61,7 +61,7 @@ The loop acts as a **reviewer assistant**, not a reviewer replacement.
 
 ```yaml
 verifier: agentic-workstation-code-reviewer
-```
+```text
 
 The `verifier` is a separate agent that double-checks the loop's output before it's published. In L2, the verifier runs but the human still has final say.
 
@@ -71,7 +71,7 @@ The `verifier` is a separate agent that double-checks the loop's output before i
 
 ```bash
 ./bin/loop run pr-babysitter --dry-run --verbose
-```
+```text
 
 ```text
 [DRY-RUN] Would run: pr-babysitter (Tier 2)
@@ -81,7 +81,7 @@ The `verifier` is a separate agent that double-checks the loop's output before i
   Budget: 80,000 tokens max
   Would review: 3 open PRs detected
   Would post: draft comments (not published until human approves)
-```
+```text
 
 ---
 
@@ -89,13 +89,13 @@ The `verifier` is a separate agent that double-checks the loop's output before i
 
 ```bash
 ./bin/loop run pr-babysitter
-```
+```text
 
 Check the output:
 
 ```bash
 cat loops/pr-babysitter/plan.md
-```
+```text
 
 ```markdown
 # PR Babysitter Run — 2026-07-03 14:00
@@ -116,7 +116,7 @@ cat loops/pr-babysitter/plan.md
 ## Verifier Notes
 - PR #145: `agentic-workstation-code-reviewer` confirmed no security issues
 - No escalations needed
-```
+```text
 
 ---
 
@@ -126,12 +126,12 @@ L2 loops run more often because review timeliness matters:
 
 ```bash
 ./bin/loop schedule pr-babysitter --cron "0 */4 * * *"
-```
+```text
 
 ```text
 Next run: 2026-07-03 16:00 UTC
 Runs every 4 hours — matches typical PR review cycle
-```
+```text
 
 ---
 
@@ -139,14 +139,14 @@ Runs every 4 hours — matches typical PR review cycle
 
 ```bash
 ./bin/loop cost pr-babysitter --monthly
-```
+```text
 
 ```text
 LOOP: pr-babysitter
 Per run:  ~15,000 tokens  ~$0.15
 Per day:  ~90,000 tokens  ~$0.90  (6 runs/day)
 Per month: ~2,700,000 tokens ~$27.00 (180 runs/month)
-```
+```text
 
 **Optimization**: If costs are high:
 
@@ -182,7 +182,7 @@ Per month: ~2,700,000 tokens ~$27.00 (180 runs/month)
 ./bin/loop status --tier 2
 ./bin/loop audit pr-babysitter --last 1
 ./bin/loop cost pr-babysitter --monthly
-```
+```text
 
 ---
 

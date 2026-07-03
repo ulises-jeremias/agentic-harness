@@ -17,10 +17,12 @@ API keys and tokens are stored in `~/.config/agentic-workstation/env.d/<client>.
 Example env file (`~/.config/agentic-workstation/env.d/acme.env`):
 
 ```bash
+
 export ANTHROPIC_API_KEY="sk-ant-..."
 export JIRA_API_TOKEN="..."
 export JIRA_EMAIL="dev@acme.com"
 export JIRA_URL="https://acme.atlassian.net"
+
 ```
 
 ### `.gitignore` protections
@@ -39,6 +41,7 @@ The harness `.gitignore` prevents accidental credential commits:
 ### Credential boundaries
 
 Never reference credentials in:
+
 - `knowledge/` entries — the AI may repeat them
 - `packs/*.yaml` — packs may be shared between environments
 - `personas/*.md` — personas are loaded into AI context
@@ -77,16 +80,20 @@ Before committing knowledge entries, verify:
 Personas constrain what the AI can do. Each persona declares:
 
 ```yaml
+
 allow:
+
   - read_files
   - search_code
 deny:
+
   - execute_commands
   - write_files
   - network_access
 handoff:
   trigger: "when task requires implementation"
   target: "implementer"
+
 ```
 
 ### How guardrails prevent data exposure
@@ -109,15 +116,20 @@ The `researcher` and `reviewer` personas have **no execution capability** — th
 Each pack can declare an LLM policy:
 
 ```yaml
+
 llm:
   allowlist:
+
     - anthropic
   deny list:
+
     - openai
   strict: true
+
 ```
 
 When a pack with strict LLM policy is active:
+
 1. The harness enforces the policy for all AI operations
 2. `devcompanion` jobs respect the policy
 3. Cross-client contamination is prevented — Acme's data never goes to Startup X's provider
@@ -127,6 +139,7 @@ When a pack with strict LLM policy is active:
 All `devcompanion` jobs log LLM policy decisions to `~/.local/share/agentic-workstation/dev-companion/logs/llm-audit.log`:
 
 ```json
+
 {
   "job_id": "abc123",
   "pack": "acme-corp",
@@ -135,6 +148,7 @@ All `devcompanion` jobs log LLM policy decisions to `~/.local/share/agentic-work
   "model": "claude-sonnet-4-20250514",
   "timestamp": "2026-07-03T14:00:00Z"
 }
+
 ```
 
 ---
@@ -154,13 +168,18 @@ All `devcompanion` jobs log LLM policy decisions to `~/.local/share/agentic-work
 Every loop declares exit conditions that stop execution:
 
 ```yaml
+
 exit:
+
   - condition: "cost_exceeds 5.00"
     action: "pause"
+
   - condition: "error_rate > 0.1"
     action: "stop"
+
   - condition: "consecutive_failures > 3"
     action: "stop_and_alert"
+
 ```
 
 ### Loop credential isolation
@@ -168,10 +187,12 @@ exit:
 Loops never have direct access to the harness's environment variables. They inherit the shell environment at run time, so schedule loops with explicit environment:
 
 ```bash
+
 # systemd service file
 [Service]
 EnvironmentFile=%h/.config/agentic-workstation/env.d/acme.env
 ExecStart=%h/.ai-workspace/bin/loop run daily-triage
+
 ```
 
 ---
@@ -204,3 +225,4 @@ If you discover a security vulnerability in agentic-harness:
 1. Do not open a public issue
 2. Report via [GitHub private vulnerability reporting](https://github.com/ulises-jeremias/agentic-harness/security/advisories/new)
 3. Include: affected component, reproduction steps, impact assessment
+

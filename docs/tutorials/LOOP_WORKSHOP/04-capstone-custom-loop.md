@@ -63,7 +63,7 @@ deny:
   - comment
   - push
   - create_pr
-```
+```text
 
 ### L2 Template
 
@@ -77,7 +77,7 @@ deny:
   - force-push
   - delete-branch
   - label            # Deny anything you don't need
-```
+```text
 
 ### L3 Template
 
@@ -91,7 +91,7 @@ deny:
   - approve          # NEVER allow self-approval
   - force-push       # NEVER force-push
   - delete-branch
-```
+```text
 
 ---
 
@@ -105,9 +105,9 @@ deny:
 
 ### Budget formula
 
-```
+```text
 monthly_cost = max_tokens/run × max_runs/day × 30 × token_price
-```
+```text
 
 For Claude Sonnet (~$10/M tokens):
 
@@ -132,7 +132,7 @@ exit_conditions:
   - goal_met           # Task complete → stop
   - budget_exhausted   # Hit token limit → stop
   - human_escalation   # Something needs a human → escalate
-```
+```text
 
 ### Optional exit conditions (L2+)
 
@@ -141,7 +141,7 @@ exit_conditions:
   - consecutive_failures: 3 # Stop if failing repeatedly
   - cost_exceeds: 5.00      # Stop if daily cost exceeds threshold
   - error_rate > 0.1        # Stop if >10% of runs fail
-```
+```text
 
 ---
 
@@ -161,7 +161,7 @@ request: |
   - If [escalation condition]: escalate immediately
   Output:
   - Write [report.md / plan.md / state update]
-```
+```text
 
 ### Example: Dependency Updater Loop
 
@@ -181,7 +181,7 @@ request: |
   6. Do NOT update major versions — those need human review
   7. If you find a CVE (security vulnerability): escalate immediately
   Output: report.md with updated packages, PRs opened, failures
-```
+```text
 
 ---
 
@@ -225,7 +225,7 @@ Week 3: L2 — Draft only, review every output
 Week 4: L2 — If output quality is good
 Week 5: L2 — One more week of confidence
 Week 6: L3 — Autonomous with alerts
-```
+```text
 
 Never rush from L1 to L3. A week at each tier is the minimum.
 
@@ -302,7 +302,7 @@ request: |
   1. [Step 1]
   2. [Step 2]
   Output: report.md
-```
+```text
 
 Create it:
 
@@ -317,7 +317,7 @@ mkdir -p loops/my-custom-loop
 
 # Check results
 cat loops/my-custom-loop/report.md
-```
+```text
 
 ---
 

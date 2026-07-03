@@ -25,48 +25,62 @@ You can use L1 alone (skills without memory). You can use L2 alone (memory witho
 Skills-only (fastest):
 
 ```bash
+
 curl -fsSL https://github.com/ulises-jeremias/agentic-workstation/releases/latest/download/install-skills.sh | bash
+
 ```
 
 Or full workstation with dotfiles:
 
 ```bash
+
 chezmoi init --apply ulises-jeremias/agentic-workstation
+
 ```
 
 Verify:
 
 ```bash
+
 dots-doctor
+
 ```
 
 ```text
+
 Skills: 52 bundled
 Agents: 13 configured
 MCP templates: 6
 CLI tools: dots-doctor, dots-skills, dots-devcompanion, dots-mcp, dots-loop
+
 ```
 
 ### Clone the harness (L2)
 
 ```bash
+
 git clone https://github.com/ulises-jeremias/agentic-harness ~/.ai-workspace
 cd ~/.ai-workspace
 bash scripts/workspace-init.sh
+
 ```
 
 Verify:
 
 ```bash
+
 ./bin/workspace-context
+
 ```
 
 ```text
+
 === Workspace Context Snapshot ===
 Harness dir: /home/you/.ai-workspace
 Workstation skills: detected (52 skills)
 Knowledge entries: 0
 Active packs: none
+
 ```
 
 Both layers are connected — the harness discovers the workstation's skills automatically.
@@ -78,6 +92,7 @@ Both layers are connected — the harness discovers the workstation's skills aut
 ### Create the project
 
 ```bash
+
 mkdir ~/projects/hello-stack
 cd ~/projects/hello-stack
 git init
@@ -95,6 +110,7 @@ if __name__ == "__main__":
     main()
 EOF
 git add . && git commit -m "feat: initial hello-stack project"
+
 ```
 
 ### Add AGENTS.md (L3)
@@ -102,6 +118,7 @@ git add . && git commit -m "feat: initial hello-stack project"
 Create `AGENTS.md` in the project root:
 
 ```markdown
+
 # AGENTS.md — hello-stack
 
 ## Routing
@@ -120,13 +137,16 @@ Create `AGENTS.md` in the project root:
 - Conventional Commits: feat:, fix:, docs:, chore:
 - pytest for testing
 - argparse for CLI
+
 ```
 
 ### Link the project to the harness
 
 ```bash
+
 cd ~/.ai-workspace
 ./bin/project-indexer link ~/projects/hello-stack hello-stack
+
 ```
 
 ### Create a pack
@@ -134,8 +154,10 @@ cd ~/.ai-workspace
 `~/.ai-workspace/packs/hello-stack.yaml`:
 
 ```yaml
+
 name: hello-stack
 repos:
+
   - path: projects/hello-stack
     primary: true
 conventions:
@@ -143,6 +165,7 @@ conventions:
   language: python
   framework: argparse
   testing: pytest
+
 ```
 
 ---
@@ -152,34 +175,44 @@ conventions:
 ### Start your AI session
 
 ```bash
+
 cd ~/.ai-workspace
 ./bin/workspace-context load --pack packs/hello-stack.yaml
 claude  # or opencode / cursor
+
 ```
 
 ```text
+
 [AI reads AGENTS.md]
 Workspace context loaded: hello-stack
 Skills available: 52 (jira-assistant, github-cli-workflow, planner, implementer, code-reviewer, ...)
 Knowledge: 0 entries (new workspace)
+
 ```
 
 ### Find work to do
 
 ```text
+
 Check if there are any GitHub issues on the hello-stack project.
+
 ```
 
 The AI uses the **project-indexer** to find the repo, then `gh issue list`:
 
 ```text
+
 No open issues. Let's create one: "Add --greeting flag to customize the greeting".
+
 ```
 
 ### Plan the feature
 
 ```text
+
 Delegate to the planner subagent for this feature.
+
 ```
 
 The **planner** (from workstation) produces a plan using the project's conventions (from the harness pack).
@@ -187,10 +220,13 @@ The **planner** (from workstation) produces a plan using the project's conventio
 ### Implement
 
 ```text
+
 Implement the plan. Delegate to implementer.
+
 ```
 
 The **implementer** subagent:
+
 1. Reads project conventions from the pack
 2. Creates branch: `feat/add-greeting-flag`
 3. Writes code following Python patterns
@@ -199,10 +235,13 @@ The **implementer** subagent:
 ### Review
 
 ```text
+
 Review the changes. Delegate to code-reviewer.
+
 ```
 
 The **code-reviewer** subagent checks:
+
 - Code quality and conventions
 - Test coverage
 - Security (via security-reviewer if needed)
@@ -210,10 +249,13 @@ The **code-reviewer** subagent checks:
 ### Create PR
 
 ```text
+
 Push and create a PR. Use github-cli-workflow.
+
 ```
 
 The **github-cli-workflow** skill creates a well-formatted PR with:
+
 - Conventional Commits title
 - What/Why/Changes/Testing sections
 - Link to the issue
@@ -227,37 +269,49 @@ Now that manual workflow works, automate recurring tasks.
 ### Create a daily triage loop
 
 ```bash
+
 cd ~/.ai-workspace
 ./bin/loop init daily-triage --template daily-triage --tier 1
+
 ```
 
 Edit `loops/daily-triage/LOOP.md` to point at hello-stack:
 
 ```yaml
+
 request: |
   Scan hello-stack for open issues. Write a report.
+
 ```
 
 Run it:
 
 ```bash
+
 ./bin/loop run daily-triage
+
 ```
 
 ```text
+
 [L1 - OBSERVE ONLY]
 Issues found: 1 (ACME-456 — in progress)
 Report saved: loops/daily-triage/report.md
+
 ```
 
 ### Schedule it
 
 ```bash
+
 ./bin/loop schedule daily-triage
+
 ```
 
 ```text
+
 Next run: tomorrow 09:00
+
 ```
 
 ---
@@ -267,26 +321,33 @@ Next run: tomorrow 09:00
 ### Session 1: Save learnings
 
 ```bash
+
 ./bin/assistant-memory add --type learning "hello-stack uses argparse with ArgumentDefaultsHelpFormatter"
 ./bin/assistant-memory add --type process "hello-stack workflow: planner → implementer → code-reviewer → github-cli-workflow"
 ./bin/assistant-memory add --type todo "Add CI workflow for hello-stack tests"
+
 ```
 
 ### Session 2: AI remembers
 
 ```bash
+
 cd ~/.ai-workspace
 ./bin/assistant-memory inject
 claude
+
 ```
 
 ```text
+
 Previous session learnings:
+
 - hello-stack uses argparse with ArgumentDefaultsHelpFormatter
 - hello-stack workflow: planner → implementer → code-reviewer → github-cli-workflow
 - Pending: Add CI workflow for hello-stack tests
 
 What would you like to work on?
+
 ```
 
 The AI remembers everything from yesterday. No repetition needed.
@@ -296,6 +357,7 @@ The AI remembers everything from yesterday. No repetition needed.
 ## What You Built
 
 ```text
+
 agentic-workstation (L1)          agentic-harness (L2)          hello-stack (L3)
 ┌─────────────────────┐          ┌─────────────────────┐       ┌──────────────────┐
 │ 52 skills            │          │ knowledge/           │       │ AGENTS.md        │
@@ -306,6 +368,7 @@ agentic-workstation (L1)          agentic-harness (L2)          hello-stack (L3)
                                   │ bin/workspace-context │
                                   │ bin/devcompanion      │
                                   └─────────────────────┘
+
 ```
 
 ### Layer interaction
@@ -327,3 +390,4 @@ agentic-workstation (L1)          agentic-harness (L2)          hello-stack (L3)
 - [Your First PR](https://github.com/ulises-jeremias/agentic-harness/blob/main/docs/tutorials/FIRST_PR.md) — harness-specific first PR
 - [Loop Creation Workshop](https://github.com/ulises-jeremias/agentic-harness/blob/main/docs/tutorials/LOOP_WORKSHOP/README.md) — build autonomous loops
 - [Multi-Client Setup](https://github.com/ulises-jeremias/agentic-harness/blob/main/docs/tutorials/MULTI_CLIENT_SETUP.md) — manage multiple clients
+
