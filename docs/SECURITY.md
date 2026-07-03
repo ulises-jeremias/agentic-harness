@@ -225,4 +225,3 @@ If you discover a security vulnerability in agentic-harness:
 1. Do not open a public issue
 2. Report via [GitHub private vulnerability reporting](https://github.com/ulises-jeremias/agentic-harness/security/advisories/new)
 3. Include: affected component, reproduction steps, impact assessment
-

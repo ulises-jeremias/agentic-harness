@@ -390,4 +390,3 @@ agentic-workstation (L1)          agentic-harness (L2)          hello-stack (L3)
 - [Your First PR](https://github.com/ulises-jeremias/agentic-harness/blob/main/docs/tutorials/FIRST_PR.md) — harness-specific first PR
 - [Loop Creation Workshop](https://github.com/ulises-jeremias/agentic-harness/blob/main/docs/tutorials/LOOP_WORKSHOP/README.md) — build autonomous loops
 - [Multi-Client Setup](https://github.com/ulises-jeremias/agentic-harness/blob/main/docs/tutorials/MULTI_CLIENT_SETUP.md) — manage multiple clients
-
