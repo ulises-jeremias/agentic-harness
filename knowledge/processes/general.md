@@ -1,85 +1,45 @@
----
-type: process
-updated: 2026-06-30
-confidence: high
----
+# General Processes
 
-# General Process Patterns
+> SAMPLE — Replace with your own process documentation.
 
-> Cross-tool workflow patterns discovered during sessions.
-> Add entries with: `./bin/assistant-memory add --type process "..."`
+## Feature Development Workflow
 
----
+**Last updated**: 2026-07-03
 
-## Task Type Routing
+### Standard flow
 
-| Type | Pattern |
-|------|---------|
-| Bug fix | discover → fix → review → PR |
-| Feature | discover → plan → implement → review → PR |
-| Research | explore → summarize → propose |
-| Maintenance | identify → fix → test → commit |
-| Data pipeline | inspect → validate → test → PR |
+1. **Plan**: Use planner subagent to create implementation plan
+2. **Branch**: `git checkout -b feat/JIRA-123-description`
+3. **Implement**: Follow the plan, write code + tests
+4. **Self-review**: Use code-reviewer subagent for initial review
+5. **PR**: Push branch, create PR via github-cli-workflow skill
+6. **Address feedback**: Iterate on review comments
+7. **Merge**: Squash merge to main after approval
+8. **Save**: Record learnings in knowledge base
 
----
+### PR size guidelines
 
-## Delivery Workflow
+- Max 200 lines changed per PR
+- If larger, split into stacked PRs
+- Exceptions: generated code, large refactors with review agreement
 
-```text
-1. Discovery  — inspect repo (README → docs/ → AGENTS.md → CONTRIBUTING)
-2. Planning   — break into tasks, identify risks
-3. Implement  — work with appropriate persona constraints
-4. Review     — quality, security, correctness gate
-5. PR         — push branch, open draft PR
-```
+## Release Process
 
-## Communication Defaults
+**Last updated**: 2026-07-02
 
-> Override in AGENTS.md with your preferred language settings.
+### Steps
 
-- **User communication**: configure in AGENTS.md
-- **Technical output** (tickets, PRs, commits): English (recommended)
-- **Documentation**: English (recommended)
+1. Update CHANGELOG.md with new version section
+2. Bump version in relevant config files
+3. Create git tag: `git tag -a v1.2.0 -m "Release v1.2.0"`
+4. Push tag: `git push origin v1.2.0`
+5. CI builds and publishes artifacts
+6. Create GitHub Release with changelog content
+7. Announce in team channel
 
----
+### Version scheme
 
-## Common Patterns
-
-### When starting any session
-
-```text
-1. Check knowledge/ for context: ./bin/assistant-memory search "topic"
-2. Check pending items: ./bin/assistant-memory todo
-3. If working on a repo: inspect before acting
-```
-
-### When something unexpected happens
-
-```text
-1. Document the behavior
-2. Search knowledge/ for similar cases: ./bin/assistant-memory search "symptom"
-3. If new pattern: save it → ./bin/assistant-memory add --type learning "..."
-4. If needs follow-up: ./bin/assistant-memory add --type todo "..."
-```
-
-### Knowledge saving trigger
-
-```text
-After any session where you learn something:
-→ ./bin/assistant-memory add --type learning "Pattern: ..."
-→ ./bin/assistant-memory add --type process "Tool: CLI usage pattern"
-```
-
----
-
-## Notes
-
-<!-- Add cross-tool patterns as you discover them -->
-
----
-
-## History
-
-| Date | Pattern | Context |
-|------|---------|---------|
-| _YYYY-MM-DD_ | _Pattern discovered_ | _Session context_ |
+Semantic versioning: MAJOR.MINOR.PATCH
+- MAJOR: breaking changes
+- MINOR: new features, backward compatible
+- PATCH: bug fixes, backward compatible
