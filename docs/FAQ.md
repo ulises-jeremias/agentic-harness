@@ -163,4 +163,3 @@ Your LLM policy is too restrictive. Check:
 1. `DOTS_AI_DEVCOMPANION_LLM_ALLOWLIST` — is your provider listed?
 2. `DOTS_AI_DEVCOMPANION_LLM_STRICT` — is strict mode blocking fallback?
 3. Run `dots-devcompanion llm-status` to see the active policy.
-

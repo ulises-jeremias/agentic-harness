@@ -208,7 +208,6 @@ bin/loop schedule ci-sweeper
 
 ---
 
-<!-- markdownlint-enable MD024 -->
 
 ## Migration Paths by Starting Point
 
@@ -291,3 +290,4 @@ The harness was renamed from `ai-workspace` to `agentic-harness`. If your script
 - **Keep context only**: Delete bin/loop, keep everything else
 - **Keep everything but loops**: Don't schedule loops, use harness interactively
 
+<!-- markdownlint-enable MD024 -->
