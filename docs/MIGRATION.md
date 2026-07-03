@@ -208,7 +208,6 @@ bin/loop schedule ci-sweeper
 
 ---
 
-
 ## Migration Paths by Starting Point
 
 ### From vanilla chezmoi
