@@ -6,7 +6,9 @@
 
 ## Repo Scale
 
-### Recommended limits
+<!-- markdownlint-disable MD024 -->
+
+## Recommended limits
 
 | Profile | Max repos | Reasoning |
 |---------|-----------|-----------|
@@ -17,11 +19,13 @@
 ### When to use project-indexer vs manual cloning
 
 Use `project-indexer` when:
+
 - You clone repos frequently
 - You want automatic symlink management in `projects/`
 - You're setting up a new harness instance
 
 Clone manually when:
+
 - You need custom clone options (shallow, single-branch)
 - The repo requires SSH key selection per host
 - You want to control the exact local path
@@ -79,11 +83,13 @@ Git handles this well — knowledge is text, so delta compression is efficient.
 
 ### Cost formula
 
-```
+```text
+
 cost_per_run = (input_tokens × input_price) + (output_tokens × output_price)
 
 monthly_cost = cost_per_run × runs_per_day × 30
-```
+
+```text
 
 ### Example costs (Claude Sonnet 4, May 2026 pricing)
 
@@ -106,6 +112,7 @@ monthly_cost = cost_per_run × runs_per_day × 30
 ### Cost monitoring
 
 ```bash
+
 # Per-loop cost estimate
 bin/loop cost daily-triage --monthly
 
@@ -114,13 +121,14 @@ bin/loop audit --summary
 
 # Set cost alert
 bin/loop cost daily-triage --alert 5.00  # Alert if monthly exceeds $5
-```
+
+```text
 
 ---
 
 ## Pack & Profile Scale
 
-### Recommended limits
+## Recommended limits
 
 | Surface | Max recommended | Why |
 |---------|----------------|-----|
@@ -157,20 +165,26 @@ Typical snapshot: **5-15KB** for a solo dev setup. Agency setups with 10 repos a
 ## Scaling Checklist
 
 ### For solo developers
+
 - [ ] Keep knowledge/ under 50 entries
 - [ ] Archive stale entries monthly
 - [ ] Use 3-5 personas max
 - [ ] Run loops on schedule, not continuously
 
 ### For small teams (3-5)
+
 - [ ] Each member forks their own harness
 - [ ] Share packs via the project repo (not knowledge/)
 - [ ] Document team-wide conventions in AGENTS.md
 - [ ] One member runs L2+ loops (not everyone)
 
 ### For agencies (10+ clients)
+
 - [ ] One pack per client
 - [ ] Per-client LLM policies (strict mode)
 - [ ] Per-client env.d/ files
 - [ ] Audit knowledge/ weekly for cross-client contamination
 - [ ] Rotate loop contexts with workspace-context load
+
+<!-- markdownlint-enable MD024 -->
+

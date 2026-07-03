@@ -9,6 +9,7 @@
 ### Do I need agentic-workstation to use agentic-harness?
 
 No. The harness works standalone with any AI coding tool. However, without agentic-workstation you lose:
+
 - Pre-built skill packs (Jira, GitHub, ClickUp, etc.)
 - Dev companion LLM-powered runner
 - MCP server templates
@@ -52,10 +53,12 @@ Think of personas as your role and subagents as your team.
 Create a pack per client and load it at session start:
 
 ```bash
+
 workspace-context load --pack packs/acme-corp.yaml
 # ... work on Acme tasks ...
 workspace-context load --pack packs/startup-x.yaml
 # ... switch to Startup X ...
+
 ```
 
 Each pack isolates repos, tools, and LLM policies. No cross-contamination between clients.
@@ -79,6 +82,7 @@ Knowledge is what the AI learned through interaction. Documentation is what you 
 ### What tier should my loop start at?
 
 Always start at **Tier 1** (report-only). Tier 1 loops:
+
 - Read data only (no writes, PRs, comments)
 - Print a report to terminal/STATE.md
 - Cannot cause damage
@@ -110,6 +114,7 @@ Use `bin/loop cost <name> --monthly` for accurate projections based on actual to
 The practical limit depends on your AI tool's context window. `assistant-memory inject` outputs all knowledge entries. If your context window is 200K tokens (Claude), you can comfortably store 50-100 knowledge entries before injection dominates the context.
 
 For larger knowledge bases:
+
 - Archive stale entries periodically
 - Use the search command instead of inject for targeted lookups
 - Split very large entries into multiple smaller ones
@@ -142,6 +147,7 @@ Yes. Use `--no-llm` for a skeleton plan. This is useful for Cursor/Copilot-only 
 ### The AI doesn't seem to see my pack/persona/skills
 
 Run `workspace-context` and check the output. It prints every loaded context surface. Missing entries usually mean:
+
 - Pack file has invalid YAML (check with schema validation)
 - Persona frontmatter is malformed
 - Skills aren't installed or `HARNESS_RUNNER_DIR` isn't set
@@ -153,6 +159,8 @@ Loops store repo paths in STATE.md. If you rename or move a repo, update the pat
 ### I get "policy_no_provider_available" from dev companion
 
 Your LLM policy is too restrictive. Check:
+
 1. `DOTS_AI_DEVCOMPANION_LLM_ALLOWLIST` — is your provider listed?
 2. `DOTS_AI_DEVCOMPANION_LLM_STRICT` — is strict mode blocking fallback?
 3. Run `dots-devcompanion llm-status` to see the active policy.
+

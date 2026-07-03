@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+<!-- markdownlint-disable MD024 -->
 ## [1.0.0] — Stable
 
 ### Added
@@ -90,6 +91,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Pack format standardized: YAML with validated fields
 - Persona format: Markdown with YAML frontmatter
 - Knowledge entries: Frontmatter with type, date, and context fields
+
+<!-- markdownlint-enable MD024 -->
 
 ---
 

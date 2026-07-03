@@ -17,6 +17,7 @@ Don't throw away your existing setup. Adopt one layer at a time:
 
 ---
 
+<!-- markdownlint-disable MD024 -->
 ## Phase 1: Knowledge Only
 
 ### What you keep
@@ -26,17 +27,21 @@ Your existing shell setup, Cursor rules, Copilot instructions, Claude Code proje
 ### What you add
 
 ```bash
+
 # Clone the harness
 git clone https://github.com/ulises-jeremias/agentic-harness ~/.ai-workspace
 
 # Initialize
 cd ~/.ai-workspace && bash scripts/workspace-init.sh
+
 ```
 
 Now the AI has persistent memory via `assistant-memory`. Start your AI session with:
 
 ```text
+
 Run assistant-memory inject and use the output as context.
+
 ```
 
 The AI will now remember patterns, preferences, and todos across sessions.
@@ -44,11 +49,13 @@ The AI will now remember patterns, preferences, and todos across sessions.
 ### Verification
 
 ```bash
+
 # Save your first learning
 ./bin/assistant-memory add --type learning "We use Conventional Commits: feat:, fix:, docs:, chore:"
 
 # Start a new session — the AI should recall this
 ./bin/assistant-memory inject
+
 ```
 
 ---
@@ -60,15 +67,21 @@ The AI will now remember patterns, preferences, and todos across sessions.
 Create packs for your active projects instead of manually telling the AI about each repo:
 
 **Before** (manual context):
+
 ```text
+
 I'm working on the acme-corp/backend repo. It's a Python FastAPI project.
 The Jira project key is ACME. We deploy to AWS via GitHub Actions.
+
 ```
 
 **After** (pack-based context):
+
 ```bash
+
 workspace-context load --pack packs/acme-corp.yaml
 # AI automatically knows repos, conventions, Jira key, deploy details
+
 ```
 
 ### Creating your first pack
@@ -76,14 +89,19 @@ workspace-context load --pack packs/acme-corp.yaml
 Copy the template and fill in your project details:
 
 ```bash
+
 cp packs/example-client.yaml packs/acme-corp.yaml
+
 ```
 
 ```yaml
+
 name: acme-corp
 repos:
+
   - name: backend
     url: https://github.com/acme-corp/backend
+
   - name: frontend
     url: https://github.com/acme-corp/frontend
 conventions:
@@ -95,7 +113,9 @@ tools:
   jira_project: ACME
 llm:
   allowlist:
+
     - anthropic
+
 ```
 
 ---
@@ -107,14 +127,17 @@ llm:
 If you currently use instructions like:
 
 ```text
+
 Just review the code, don't make changes.
 Let me approve before you implement anything.
 Research only today — no file writes.
+
 ```
 
 Replace them with personas:
 
 ```bash
+
 # Instead of "just review, don't change"
 workspace-context load --persona reviewer
 
@@ -123,6 +146,7 @@ workspace-context load --persona researcher
 
 # Instead of "let me approve first"
 workspace-context load --persona architect
+
 ```
 
 ### From Cursor rules
@@ -130,9 +154,11 @@ workspace-context load --persona architect
 If you have `.cursor/rules/` files like:
 
 ```text
+
 Always use TypeScript strict mode
 Never use any
 Prefer composition over inheritance
+
 ```
 
 Move these to a pack under `conventions:` instead of scattered rules files.
@@ -150,6 +176,7 @@ If you have `.github/copilot-instructions.md`, the harness already provides a sy
 If you manually run these commands regularly:
 
 ```bash
+
 # Manually every morning:
 gh issue list --state open --assignee @me
 
@@ -158,11 +185,13 @@ gh pr list --state open --search "review:required"
 
 # Manually after CI fails:
 gh run list --status failure --branch main
+
 ```
 
 Replace with loops:
 
 ```bash
+
 # Auto-scan issues every morning
 bin/loop init daily-triage --template daily-triage --tier 1
 bin/loop schedule daily-triage
@@ -174,9 +203,12 @@ bin/loop schedule pr-babysitter
 # Auto-detect CI failures every hour
 bin/loop init ci-sweeper --template ci-sweeper --tier 3
 bin/loop schedule ci-sweeper
+
 ```
 
 ---
+
+<!-- markdownlint-enable MD024 -->
 
 ## Migration Paths by Starting Point
 
@@ -234,6 +266,7 @@ If upgrading from v0.1: pack format changed. See `schemas/pack.schema.json` for 
 ### CLI renames
 
 Old harness (< v0.3) used different CLI names:
+
 - `bin/memory` -> `bin/assistant-memory`
 - `bin/context` -> `bin/workspace-context`
 - `bin/queue` -> `bin/devcompanion`
@@ -257,3 +290,4 @@ The harness was renamed from `ai-workspace` to `agentic-harness`. If your script
 - **Keep knowledge only**: Delete loop dirs, keep knowledge/ and packs/
 - **Keep context only**: Delete bin/loop, keep everything else
 - **Keep everything but loops**: Don't schedule loops, use harness interactively
+
