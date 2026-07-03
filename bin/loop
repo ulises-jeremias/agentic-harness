@@ -16,6 +16,7 @@ Usage:
     loop status [loop]            Show loop status (all, or one)
     loop audit [loop]             Summarize past runs (success rate, cost)
     loop cost <loop>              Estimate cost for one run
+    loop schedule <loop>          Install systemd/launchd timer
     loop sync                     Regenerate knowledge todos from completed runs
     loop help                     Show this help
 """
@@ -24,6 +25,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import platform
 import re
 import shutil
 import signal
@@ -669,6 +671,360 @@ def cmd_cost(args: list[str]) -> int:
     return 0
 
 
+def cmd_schedule(args: list[str]) -> int:
+    """Install or manage OS-level timer for a loop."""
+    list_mode = "--list" in args
+    remove_mode = "--remove" in args
+    status_mode = "--status" in args
+    dry_run = "--dry-run" in args
+    cron_override = None
+
+    # Extract --cron value
+    for i, a in enumerate(args):
+        if a == "--cron" and i + 1 < len(args):
+            cron_override = args[i + 1]
+            break
+        if a.startswith("--cron="):
+            cron_override = a.split("=", 1)[1]
+            break
+
+    # --list: show all scheduled loops
+    if list_mode:
+        return _schedule_list()
+    if status_mode:
+        return _schedule_status()
+
+    # --remove: remove schedule for a loop
+    if remove_mode:
+        loop_name = next((a for a in args if not a.startswith("-") and a != "schedule"), None)
+        if not loop_name:
+            err("Usage: bin/loop schedule <name> --remove")
+            return 1
+        return _schedule_remove(loop_name, dry_run)
+
+    # schedule <name>: install timer
+    loop_name = next((a for a in args if not a.startswith("-") and a != "schedule"), None)
+    if not loop_name:
+        err("Usage: bin/loop schedule <name> [--cron EXPR] [--dry-run]")
+        return 1
+
+    loop_dir = LOOPS_DIR / loop_name
+    if not loop_dir.is_dir():
+        err(f"Loop not found: {loop_name} (run 'bin/loop init {loop_name}' first)")
+        return 1
+
+    loopyaml = loop_dir / "LOOP.md"
+    if not loopyaml.exists():
+        err(f"LOOP.md not found in {loop_dir}")
+        return 1
+
+    loop_cfg = parse_loop_md(loopyaml)
+    cron = cron_override or loop_cfg.get("schedule", "daily")
+
+    if dry_run:
+        log(f"[DRY-RUN] Would schedule: {loop_name}")
+        log(f"  Cron: {cron}")
+        return _schedule_dry_run(loop_name, cron)
+
+    return _schedule_install(loop_name, cron)
+
+
+def _schedule_dry_run(loop_name: str, cron: str) -> int:
+    """Print timer files without installing."""
+    system = platform.system()
+    harness_dir = WORKSPACE_ROOT
+    loop_cmd = f"{harness_dir}/bin/loop run {loop_name}"
+
+    print(f"\n{blue('[loop]')} Would schedule: {loop_name}")
+    print(f"  Cron: {cron}")
+    print(f"  Command: {loop_cmd}")
+    print()
+
+    if system == "Linux":
+        svc = _systemd_service(loop_name, loop_cmd)
+        timer = _systemd_timer(loop_name, cron)
+        print(dim("--- systemd service (would create) ---"))
+        print(svc)
+        print(dim("--- systemd timer (would create) ---"))
+        print(timer)
+        print(dim(f"Would enable: systemctl --user enable agentic-harness-{loop_name}.timer"))
+        print(dim(f"Would start:  systemctl --user start agentic-harness-{loop_name}.timer"))
+    elif system == "Darwin":
+        plist = _launchd_plist(loop_name, cron)
+        print(dim("--- launchd plist (would create) ---"))
+        print(plist)
+        print(dim(f"Would load: launchctl load ~/Library/LaunchAgents/com.agentic-harness.{loop_name}.plist"))
+    else:
+        print(yellow(f"Manual scheduling required on {system}:"))
+        print(f"  {loop_cmd}")
+        print(f"  Schedule: {cron}")
+        print()
+
+    return 0
+
+
+def _schedule_install(loop_name: str, cron: str) -> int:
+    """Install systemd timer (Linux) or launchd plist (macOS)."""
+    system = platform.system()
+    harness_dir = WORKSPACE_ROOT
+    loop_cmd = f"{harness_dir}/bin/loop run {loop_name}"
+
+    if system == "Linux":
+        systemd_user = Path.home() / ".config" / "systemd" / "user"
+        systemd_user.mkdir(parents=True, exist_ok=True)
+
+        svc_path = systemd_user / f"agentic-harness-{loop_name}.service"
+        timer_path = systemd_user / f"agentic-harness-{loop_name}.timer"
+
+        svc_path.write_text(_systemd_service(loop_name, loop_cmd), encoding="utf-8")
+        timer_path.write_text(_systemd_timer(loop_name, cron), encoding="utf-8")
+
+        ok(f"Created: {svc_path}")
+        ok(f"Created: {timer_path}")
+
+        # Enable and start
+        try:
+            subprocess.run(
+                ["systemctl", "--user", "enable", f"agentic-harness-{loop_name}.timer"],
+                capture_output=True, text=True, check=False,
+            )
+            subprocess.run(
+                ["systemctl", "--user", "start", f"agentic-harness-{loop_name}.timer"],
+                capture_output=True, text=True, check=False,
+            )
+            ok(f"Enabled and started: agentic-harness-{loop_name}.timer")
+        except Exception as e:
+            warn(f"Could not enable timer: {e}")
+            ok("Timer files created manually — enable with: systemctl --user enable agentic-harness-{loop_name}.timer")
+
+        return 0
+
+    elif system == "Darwin":
+        launchd_dir = Path.home() / "Library" / "LaunchAgents"
+        launchd_dir.mkdir(parents=True, exist_ok=True)
+
+        plist_path = launchd_dir / f"com.agentic-harness.{loop_name}.plist"
+        plist_path.write_text(_launchd_plist(loop_name, cron), encoding="utf-8")
+
+        ok(f"Created: {plist_path}")
+
+        try:
+            subprocess.run(
+                ["launchctl", "load", str(plist_path)],
+                capture_output=True, text=True, check=False,
+            )
+            ok(f"Loaded: com.agentic-harness.{loop_name}")
+        except Exception as e:
+            warn(f"Could not load plist: {e}")
+            ok(f"Plist created — load with: launchctl load ~/Library/LaunchAgents/com.agentic-harness.{loop_name}.plist")
+
+        return 0
+
+    else:
+        print(f"\n{yellow('Manual scheduling required on ' + system + ':')}")
+        print(f"  Command: {loop_cmd}")
+        print(f"  Schedule: {cron}")
+        print()
+        return 0
+
+
+def _schedule_list() -> int:
+    """List all scheduled loops."""
+    system = platform.system()
+    loops = []
+    if system == "Linux":
+        systemd_user = Path.home() / ".config" / "systemd" / "user"
+        for p in sorted(systemd_user.glob("agentic-harness-*.timer")):
+            name = p.stem.replace("agentic-harness-", "").replace(".timer", "")
+            loops.append(name)
+    elif system == "Darwin":
+        launchd_dir = Path.home() / "Library" / "LaunchAgents"
+        for p in sorted(launchd_dir.glob("com.agentic-harness.*.plist")):
+            name = p.stem.replace("com.agentic-harness.", "")
+            loops.append(name)
+
+    if not loops:
+        print(dim("No scheduled loops found."))
+        return 0
+
+    print(f"\n{blue('[loop]')} Scheduled loops:")
+    for name in loops:
+        enabled = _schedule_enabled(name)
+        enabled_str = green("enabled") if enabled else yellow("disabled")
+        print(f"  {name:30s} {enabled_str}")
+    print()
+    return 0
+
+
+def _schedule_status() -> int:
+    """Check schedule health."""
+    system = platform.system()
+    issues = []
+    if system == "Linux":
+        systemd_user = Path.home() / ".config" / "systemd" / "user"
+        for p in sorted(systemd_user.glob("agentic-harness-*.timer")):
+            name = p.stem.replace("agentic-harness-", "").replace(".timer", "")
+            # Check if timer is active
+            result = subprocess.run(
+                ["systemctl", "--user", "is-active", f"agentic-harness-{name}.timer"],
+                capture_output=True, text=True, check=False,
+            )
+            status = result.stdout.strip()
+            if status != "active":
+                issues.append(f"{name}: {status}")
+    elif system == "Darwin":
+        launchd_dir = Path.home() / "Library" / "LaunchAgents"
+        for p in sorted(launchd_dir.glob("com.agentic-harness.*.plist")):
+            name = p.stem.replace("com.agentic-harness.", "")
+            result = subprocess.run(
+                ["launchctl", "list", f"com.agentic-harness.{name}"],
+                capture_output=True, text=True, check=False,
+            )
+            if result.returncode != 0:
+                issues.append(f"{name}: not loaded")
+
+    if issues:
+        print(f"\n{yellow('[loop]')} Schedule issues:")
+        for issue in issues:
+            print(f"  {yellow('!')} {issue}")
+        print()
+    else:
+        ok("All schedules healthy.")
+    return 0
+
+
+def _schedule_remove(loop_name: str, dry_run: bool) -> int:
+    """Remove schedule for a loop."""
+    system = platform.system()
+    if system == "Linux":
+        systemd_user = Path.home() / ".config" / "systemd" / "user"
+        svc = systemd_user / f"agentic-harness-{loop_name}.service"
+        timer = systemd_user / f"agentic-harness-{loop_name}.timer"
+
+        if dry_run:
+            log(f"[DRY-RUN] Would remove: {svc}")
+            log(f"[DRY-RUN] Would remove: {timer}")
+            return 0
+
+        # Stop and disable first
+        subprocess.run(
+            ["systemctl", "--user", "stop", f"agentic-harness-{loop_name}.timer"],
+            capture_output=True, text=True, check=False,
+        )
+        subprocess.run(
+            ["systemctl", "--user", "disable", f"agentic-harness-{loop_name}.timer"],
+            capture_output=True, text=True, check=False,
+        )
+        svc.unlink(missing_ok=True)
+        timer.unlink(missing_ok=True)
+        ok(f"Removed schedule: {loop_name}")
+
+    elif system == "Darwin":
+        plist = Path.home() / "Library" / "LaunchAgents" / f"com.agentic-harness.{loop_name}.plist"
+        if dry_run:
+            log(f"[DRY-RUN] Would remove: {plist}")
+            return 0
+
+        subprocess.run(
+            ["launchctl", "unload", str(plist)],
+            capture_output=True, text=True, check=False,
+        )
+        plist.unlink(missing_ok=True)
+        ok(f"Removed schedule: {loop_name}")
+
+    else:
+        warn(f"Manual removal required on {system}.")
+
+    return 0
+
+
+def _schedule_enabled(loop_name: str) -> bool:
+    """Check if a loop timer is enabled."""
+    system = platform.system()
+    if system == "Linux":
+        result = subprocess.run(
+            ["systemctl", "--user", "is-enabled", f"agentic-harness-{loop_name}.timer"],
+            capture_output=True, text=True, check=False,
+        )
+        return result.stdout.strip() == "enabled"
+    elif system == "Darwin":
+        plist = Path.home() / "Library" / "LaunchAgents" / f"com.agentic-harness.{loop_name}.plist"
+        if not plist.exists():
+            return False
+        result = subprocess.run(
+            ["launchctl", "list", f"com.agentic-harness.{loop_name}"],
+            capture_output=True, text=True, check=False,
+        )
+        return result.returncode == 0
+    return False
+
+
+def _systemd_service(loop_name: str, exec_cmd: str) -> str:
+    """Generate systemd service file content."""
+    return f"""[Unit]
+Description=agentic-harness loop: {loop_name}
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart={exec_cmd}
+StandardOutput=journal
+StandardError=journal
+"""
+
+
+def _systemd_timer(loop_name: str, cron: str) -> str:
+    """Generate systemd timer file content."""
+    on_calendar = cron
+    # Convert common patterns to systemd OnCalendar format
+    if cron == "hourly":
+        on_calendar = "*-*-* *:00:00"
+    elif cron == "daily":
+        on_calendar = "*-*-* 09:00:00"
+    elif cron == "weekly":
+        on_calendar = "Mon *-*-* 09:00:00"
+
+    return f"""[Unit]
+Description=agentic-harness loop timer: {loop_name}
+
+[Timer]
+OnCalendar={on_calendar}
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+"""
+
+
+def _launchd_plist(loop_name: str, cron: str) -> str:
+    """Generate launchd plist content."""
+    interval = 86400  # daily default
+    if cron == "hourly":
+        interval = 3600
+    elif cron == "weekly":
+        interval = 604800
+
+    return f"""<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.agentic-harness.{loop_name}</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>{WORKSPACE_ROOT}/bin/loop</string>
+        <string>run</string>
+        <string>{loop_name}</string>
+    </array>
+    <key>StartInterval</key>
+    <integer>{interval}</integer>
+    <key>RunAtLoad</key>
+    <false/>
+</dict>
+</plist>
+"""
+
+
 def cmd_sync() -> int:
     """Regenerate knowledge todos from completed loop runs."""
     knowledge_todos = WORKSPACE_ROOT / "knowledge" / "todos" / "pending.md"
@@ -725,6 +1081,8 @@ def main() -> None:
             sys.exit(cmd_audit(rest))
         case "cost":
             sys.exit(cmd_cost(rest))
+        case "schedule":
+            sys.exit(cmd_schedule(rest))
         case "sync":
             sys.exit(cmd_sync())
         case "templates":
