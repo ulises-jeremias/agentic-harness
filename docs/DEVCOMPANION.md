@@ -25,20 +25,19 @@ bin/devcompanion  (standalone Python CLI)
 **Queue home** defaults to `~/.local/share/agentic-harness/dev-companion/`.
 Override with `HARNESS_DC_HOME` env var.
 
-**Runner** — `run-once` uses a built-in skeleton runner by default.
-If `HARNESS_RUNNER_DIR` is set and points to a directory containing a
-`runner` module with a `main()` entry point, it will be used for full
-LLM-powered execution.
+**Runner hierarchy** — `run-once` tries runners in this order:
 
-> [!IMPORTANT]
-> When the workstation baseline is installed, set
-> `HARNESS_RUNNER_DIR=$HOME/.local/share/agentic-workstation/dev-companion/runner`
-> so this CLI delegates to the same runner that `dots-devcompanion run-once`
-> uses. Otherwise the workspace falls back to the built-in skeleton even when
-> the workstation provides full LLM support.
+| Priority | Runner | When available |
+|----------|--------|----------------|
+| 1 | **agentic-workstation runner** | `HARNESS_RUNNER_DIR` set; multi-provider LLM with policy enforcement |
+| 2 | **`claude --print`** (Claude Code CLI) | `claude` in `PATH`; works out of the box for Claude Code users |
+| 3 | **Skeleton plan** | Always; writes a `plan.md` stub, no AI execution |
+
+**Claude Code users**: no extra setup needed — `run-once` finds `claude` automatically.
+
+**For multi-provider support** (agentic-workstation):
 
 ```bash
-# One-time setup: align the workspace with the workstation runner.
 export HARNESS_RUNNER_DIR="$HOME/.local/share/agentic-workstation/dev-companion/runner"
 ```
 

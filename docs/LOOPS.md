@@ -29,6 +29,26 @@
 
 ---
 
+## Runner Hierarchy
+
+`bin/loop run` tries AI runners in this order. The first one found is used:
+
+| Priority | Runner | When available |
+|----------|--------|----------------|
+| 1 | **agentic-workstation runner** | `HARNESS_RUNNER_DIR` points to runner dir; provides multi-provider LLM selection (Anthropic, OpenAI, Ollama, OpenCode) with policy enforcement |
+| 2 | **`claude --print`** (Claude Code CLI) | `claude` is in `PATH`; works out of the box for Claude Code users, no extra setup |
+| 3 | **Skeleton plan** | Always available; writes a `plan.md` stub with no AI execution |
+
+**Claude Code users** (most common case): loops work natively as long as `claude` is in your PATH.
+
+**For multi-provider support**: install [agentic-workstation](https://github.com/ulises-jeremias/agentic-workstation) and set:
+
+```bash
+export HARNESS_RUNNER_DIR="$HOME/.local/share/agentic-workstation/dev-companion/runner"
+```
+
+---
+
 ## Loop Directory Contract
 
 Every loop lives in `loops/<loop-name>/`:
