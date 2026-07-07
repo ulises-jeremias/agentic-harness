@@ -94,6 +94,52 @@ def _import_runner():
         return None, str(e)
 
 
+def _try_claude_runner(request: str, out_dir: Path, repo_path: str = "") -> bool:
+    """Invoke `claude --print` as a built-in runner for Claude Code users.
+
+    Returns True if claude was found and invoked (check out_dir for output).
+    Falls back gracefully when `claude` is not in PATH.
+    """
+    claude_bin = shutil.which("claude")
+    if not claude_bin:
+        return False
+
+    context = f"Repository: {repo_path}\n" if repo_path else ""
+    prompt = (
+        f"You are an AI assistant executing a background job.\n"
+        f"Workspace root: {WORKSPACE_ROOT}\n"
+        f"{context}"
+        f"Output directory: {out_dir}\n\n"
+        f"{request}\n\n"
+        f"Write your plan to {out_dir}/plan.md. "
+        f"Work from the workspace root shown above."
+    )
+    try:
+        result = subprocess.run(
+            [claude_bin, "--print",
+             "--allowedTools", "Bash,Read,Write,Edit,Glob,Grep",
+             prompt],
+            capture_output=True,
+            text=True,
+            cwd=str(WORKSPACE_ROOT),
+            timeout=1800,
+        )
+    except subprocess.TimeoutExpired:
+        warn("claude runner timed out (1800s)")
+        return False
+
+    out_dir.mkdir(parents=True, exist_ok=True)
+    if result.returncode == 0:
+        plan_md = out_dir / "plan.md"
+        if not plan_md.exists() and result.stdout.strip():
+            plan_md.write_text(result.stdout, encoding="utf-8")
+        ok("claude runner completed")
+        return True
+
+    warn(f"claude runner exited {result.returncode}: {result.stderr[:200]}")
+    return False
+
+
 # ── helpers ───────────────────────────────────────────────────────────────────
 
 def utc_now() -> str:
@@ -377,19 +423,29 @@ def cmd_run_once(args):
 
     no_llm = getattr(args, "no_llm", False)
 
-    # ── Try workstation runner first ──────────────────────────────────────
+    # ── Dispatch: agentic-workstation runner → claude CLI → skeleton ──────
     runner, reason = _import_runner()
     if runner and not no_llm:
         argv = ["--job", str(job_file), "--out", str(out_dir)]
         rc = runner.main(argv)
         if rc is None:
             rc = 0  # treat no explicit return as success
+    elif no_llm:
+        log("--no-llm flag set. Using skeleton runner.")
+        rc = _skeleton_run(job_file, out_dir, no_llm=True)
     else:
         if runner is None:
-            warn(f"Workstation runner not available ({reason}). Using skeleton runner.")
-        elif no_llm:
-            log("--no-llm flag set. Using skeleton runner.")
-        rc = _skeleton_run(job_file, out_dir, no_llm=True)
+            warn(f"Workstation runner not available ({reason}). Trying claude runner.")
+        job = read_job(job_file)
+        if _try_claude_runner(
+            job.get("request", ""),
+            out_dir,
+            repo_path=job.get("repo_path", ""),
+        ):
+            rc = 0
+        else:
+            warn("No runner found. Using skeleton runner.")
+            rc = _skeleton_run(job_file, out_dir, no_llm=True)
 
     # ── Move to done/failed ───────────────────────────────────────────────
     if not job_file.exists():
