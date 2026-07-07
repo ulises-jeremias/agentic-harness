@@ -36,6 +36,7 @@ Override with `HARNESS_DC_HOME` env var.
 **Claude Code users**: no extra setup needed — `run-once` finds `claude` automatically.
 
 **For multi-provider support** (agentic-workstation):
+
 ```bash
 export HARNESS_RUNNER_DIR="$HOME/.local/share/agentic-workstation/dev-companion/runner"
 ```

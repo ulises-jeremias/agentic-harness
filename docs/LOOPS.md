@@ -42,6 +42,7 @@
 **Claude Code users** (most common case): loops work natively as long as `claude` is in your PATH.
 
 **For multi-provider support**: install [agentic-workstation](https://github.com/ulises-jeremias/agentic-workstation) and set:
+
 ```bash
 export HARNESS_RUNNER_DIR="$HOME/.local/share/agentic-workstation/dev-companion/runner"
 ```
