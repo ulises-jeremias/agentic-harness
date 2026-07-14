@@ -23,7 +23,7 @@ import sqlite3
 import struct
 import urllib.request
 
-WORKSPACE_ROOT = Path(__file__).resolve().parent.parent
+WORKSPACE_ROOT = Path(os.environ.get("HARNESS_DIR", Path(__file__).resolve().parent.parent))
 KNOWLEDGE = WORKSPACE_ROOT / "knowledge"
 
 
