@@ -12,11 +12,18 @@
 assistant-memory — Manage assistant knowledge base
 
 Usage:
-  assistant-memory add --type <type> <content>   Add new entry
-  assistant-memory search <query>                Search knowledge base
+  assistant-memory add --type <type> [--from-skill <name>] [--tags a,b,c] <content>
+                                                  Add new entry (with optional origin tracking)
+   assistant-memory search [--tag T] [--project P] [--since YYYY-MM-DD]
+                    [--min-confidence low|med|high] [--semantic] <query>
+                                                    Search knowledge base (with filters)
+  assistant-memory index build                              Build semantic index
   assistant-memory list [type]                   List entries by type
   assistant-memory todo                          Show pending todos
   assistant-memory review                        Review key items (session start)
+  assistant-memory review --stale                Review stale entries (interactive batch)
+  assistant-memory review --stale --auto-renew   Auto-extend all stale entries by 1 year
+  assistant-memory review --stale --delete       Delete stale entries (use FORCE=1 to execute)
   assistant-memory inject                        Output context block for injection
   assistant-memory help                          Show this help
 
@@ -26,12 +33,17 @@ Types for add:
   learning   General session learning
   todo       Pending item to follow up
 
+Add flags:
+  --from-skill <name>   Origin skill name (for cross-repo traceability)
+  --tags a,b,c          Comma-separated tags (applied to frontmatter for skill type)
+
 Examples:
   assistant-memory add --type learning "Always run tests before committing"
+  assistant-memory add --type skill --from-skill dots-harness-knowledge-sync --tags jira,workflow "New workflow pattern"
   assistant-memory add --type todo "Investigate slow query in reports endpoint"
   assistant-memory search "deploy"
   assistant-memory list
-  assistant-memory inject   # paste output at start of session
+  assistant-memory inject   # paste output at end of session
 
 ```
 
