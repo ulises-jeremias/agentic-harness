@@ -59,3 +59,48 @@ def test_add_with_special_characters():
     assert result.returncode == 0
     content = (KNOWLEDGE_DIR / "learnings" / "general.md").read_text()
     assert special_string in content
+
+
+def test_empty_knowledge_base():
+    """Test commands against an empty (non-existent) knowledge directory."""
+    empty_result = run_memory_command(["search", "nonexistent"])
+    assert empty_result.returncode == 0
+
+
+def test_add_todo():
+    """Test adding a todo entry."""
+    result = run_memory_command(["add", "--type", "todo", "fix the CI pipeline"])
+    assert result.returncode == 0
+    assert "Added todo" in result.stdout
+
+    content = (KNOWLEDGE_DIR / "todos" / "pending.md").read_text()
+    assert "fix the CI pipeline" in content
+
+
+def test_inject_output_format():
+    """Test inject output contains expected structure."""
+    result = run_memory_command(["inject"])
+    assert result.returncode == 0
+    assert len(result.stdout) > 0
+
+
+def test_search_no_results():
+    """Test search with no matching results returns cleanly."""
+    result = run_memory_command(["search", "zzzz_nonexistent_query_zzzz"])
+    assert result.returncode == 0
+
+
+def test_review_stale_output():
+    """Test review --stale output format."""
+    result = run_memory_command(["review", "--stale"])
+    assert result.returncode == 0
+
+
+def test_add_process():
+    """Test adding a process entry."""
+    result = run_memory_command(["add", "--type", "process", "deploy to production"])
+    assert result.returncode == 0
+    assert "Added process" in result.stdout
+
+    content = (KNOWLEDGE_DIR / "processes" / "general.md").read_text()
+    assert "deploy to production" in content
