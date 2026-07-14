@@ -1,1 +1,61 @@
-CnRlc3RfbWVtb3J5LmltcG9ydCBzdWJwcm9jZXNzCmZyb20gcGF0aGxpYiBpbXBvcnQgUGF0aAoKS05PV0xFREdFX0RJUiA9IFBhdGgoX19maWxlX18pLnBhcmVudC5wYXJlbnQgLyAia25vd2xlZGdlIgoKZGVmIHJ1bl9tZW1vcnlfY29tbWFuZChhcmdzOiBsaXN0W3N0cl0pIC0+IHN1YnByb2Nlc3MuQ29tcGxldGVkUHJvY2VzczoKICAgICJcIlwiUnVuIHRoZSBhc3Npc3RhbnQtbWVtb3J5IENMSSB0b29sIHdpdGggdGhlIGdpdmVuIGFyZ3VtZW50cy5cIlwiIgogICAgcmV0dXJuIHN1YnByb2Nlc3MucnVuKAogICAgICAgIFsiYmluL2Fzc2lzdGFudC1tZW1vcnkiXSArIGFyZ3MsCiAgICAgICAgY2FwdHVyZV9vdXRwdXQ9VHJ1ZSwKICAgICAgICB0ZXh0PVRydWUsCiAgICAgICAgY3dkPVBhdGgoX19maWxlX18pLnBhcmVudC5wYXJlbnQsCiAgICAgICAgY2hlY2s9RmFsc2UKICAgICkKCmRlZiB0ZXN0X2FkZF9sZWFybmluZygpOgogICAgIlwiXCJUZXN0IGFkZGluZyBhIGxlYXJuaW5nIGVudHJ5LlwiXCIiCiAgICAjIEVuc3VyZSB0aGUgbGVhcm5pbmdzIGRpcmVjdG9yeSBhbmQgZmlsZSBleGlzdAogICAgbGVhcm5pbmdzX2RpciA9IEtOT1dMRURHRV9ESVIgLyAibGVhcm5pbmdzIgogICAgbGVhcm5pbmdzX2Rpci5ta2RpcihleGlzdF9vaz1UcnVlKQogICAgKGxlYXJuaW5nc19kaXIgLyAiZ2VuZXJhbC5tZCIpLnRvdWNoKCkKCiAgICAjIEFkZCBhIGxlYXJuaW5nCiAgICByZXN1bHQgPSBydW5fbWVtb3J5X2NvbW1hbmQoWyJhZGQiLCAiLS10eXBlIiwgImxlYXJuaW5nIiwgInRlc3QgbGVhcm5pbmciXSkKICAgIGFzc2VydCByZXN1bHQucmV0dXJuY29kZSA9PSAwCiAgICBhc3NlcnQgIkFkZGVkIGxlYXJuaW5nIiBpbiByZXN1bHQuc3Rkb3V0CgogICAgIyBWZXJpZnkgdGhlIGxlYXJuaW5nIHdhcyBhZGRlZAogICAgY29udGVudCA9IChsZWFybmluZ3NfZGlyIC8gImdlbmVyYWwubWQiKS5yZWFkX3RleHQoKQogICAgYXNzZXJ0ICJ0ZXN0IGxlYXJuaW5nIiBpbiBjb250ZW50CgpkZWYgdGVzdF9zZWFyY2goKToKICAgICJcIlwiVGVzdCBzZWFyY2hpbmcgZm9yIGFuIGVudHJ5LlwiXCIiCiAgICByZXN1bHQgPSBydW5fbWVtb3J5X2NvbW1hbmQoWyJzZWFyY2giLCAidGVzdCJdKQogICAgYXNzZXJ0IHJlc3VsdC5yZXR1cm5jb2RlID09IDAKICAgIGFzc2VydCAidGVzdCBsZWFybmluZyIgaW4gcmVzdWx0LnN0ZG91dAoKZGVmIHRlc3RfcmV2aWV3X3N0YWxlKCk6CiAgICAiXCJcIlRlc3QgcmV2aWV3aW5nIHN0YWxlIGVudHJpZXMuXCJcIiIKICAgIHJlc3VsdCA9IHJ1bl9tZW1vcnlfY29tbWFuZChbInJldmlldyIsICItLXN0YWxlIl0pCiAgICBhc3NlcnQgcmVzdWx0LnJldHVybmNvZGUgPT0gMAoKZGVmIHRlc3RfaW5qZWN0KCk6CiAgICAiXCJcIlRlc3QgaW5qZWN0aW5nIHRoZSBrbm93bGVkZ2UgYmFzZS5cIlwiIgogICAgcmVzdWx0ID0gcnVuX21lbW9yeV9jb21tYW5kKFsiinjectIl0pCiAgICBhc3NlcnQgcmVzdWx0LnJldHVybmNvZGUgPT0gMAoKZGVmIHRlc3RfYWRkX2R1cGxpY2F0ZSgpOgogICAgIlwiXCJUZXN0IGFkZGluZyBhIGR1cGxpY2F0ZSBlbnRyeS5cIlwiIgogICAgcnVuX21lbW9yeV9jb21tYW5kKFsiYWRkIiwgIi0tdHlwZSIsICJsZWFybmluZyIsICJkdXBsaWNhdGUgZW50cnkiXSkKICAgIHJlc3VsdCA9IHJ1bl9tZW1vcnlfY29tbWFuZChbImFkZCIsICItLXR5cGUiLCAibGVhcm5pbmciLCAiZHVwbGljYXRlIGVudHJ5Il0pCiAgICBhc3NlcnQgcmVzdWx0LnJldHVybmNvZGUgPT0gMAogICAgY29udGVudCA9IChLTk9XTEVER0VfRElSIC8gImxlYXJuaW5ncyIgLyAiZ2VuZXJhbC5tZCIpLnJlYWRfdGV4dCgpCiAgICBhc3NlcnQgY29udGVudC5jb3VudCgiZHVwbGljYXRlIGVudHJ5IikgPT0gMgoKZGVmIHRlc3RfYWRkX3dpdGhfc3BlY2lhbF9jaGFyYWN0ZXJzKCk6CiAgICAiXCJcIlRlc3QgYWRkaW5nIGFuIGVudHJ5IHdpdGggc3BlY2lhbCBjaGFyYWN0ZXJzLlwiXCIiCiAgICBzcGVjaWFsX3N0cmluZyA9ICchQCMkJV4mKigpXyArLT1bXXsfdDtcJicsLi88Pj9gfidcIgogICAgcmVzdWx0ID0gcnVuX21lbW9yeV9jb21tYW5kKFsiYWRkIiwgIi0tdHlwZSIsICJsZWFybmluZyIsIHNwZWNpYWxfc3RyaW5nXSkgICAgYXNzZXJ0IHJlc3VsdC5yZXR1cm5jb2RlID09IDAKICAgIGNvbnRlbnQgPSAoS05PV0xFREdFX0RJUiAvICJsZWFybmluZ3MiIC8gImdlbmVyYWwubWQiKS5yZWFkX3RleHQoKQogICAgYXNzZXJ0IHNwZWNpYWxfc3RyaW5nIGluIGNvbnRlbnQ=
+import subprocess
+from pathlib import Path
+
+KNOWLEDGE_DIR = Path(__file__).parent.parent / "knowledge"
+
+def run_memory_command(args: list[str]) -> subprocess.CompletedProcess:
+    """Run the assistant-memory CLI tool with the given arguments."""
+    return subprocess.run(
+        ["bin/assistant-memory"] + args,
+        capture_output=True,
+        text=True,
+        cwd=Path(__file__).parent.parent,
+    )
+
+def test_add_learning():
+    """Test adding a learning entry."""
+    # Ensure the learnings directory and file exist
+    learnings_dir = KNOWLEDGE_DIR / "learnings"
+    learnings_dir.mkdir(exist_ok=True)
+    (learnings_dir / "general.md").touch()
+
+    # Add a learning
+    result = run_memory_command(["add", "--type", "learning", "test learning"])
+    assert result.returncode == 0
+    assert "Added learning" in result.stdout
+
+    # Verify the learning was added
+    content = (learnings_dir / "general.md").read_text()
+    assert "test learning" in content
+
+def test_search():
+    """Test searching for an entry."""
+    result = run_memory_command(["search", "test"])
+    assert result.returncode == 0
+    assert "test learning" in result.stdout
+
+def test_review_stale():
+    """Test reviewing stale entries."""
+    result = run_memory_command(["review", "--stale"])
+    assert result.returncode == 0
+
+def test_inject():
+    """Test injecting the knowledge base."""
+    result = run_memory_command(["inject"])
+    assert result.returncode == 0
+
+def test_add_duplicate():
+    """Test adding a duplicate entry."""
+    run_memory_command(["add", "--type", "learning", "duplicate entry"])
+    result = run_memory_command(["add", "--type", "learning", "duplicate entry"])
+    assert result.returncode == 0
+    content = (KNOWLEDGE_DIR / "learnings" / "general.md").read_text()
+    assert content.count("duplicate entry") == 2
+
+def test_add_with_special_characters():
+    """Test adding an entry with special characters."""
+    special_string = "!@#$%^&*()_+-=[]{};':\",./<>?`~"
+    result = run_memory_command(["add", "--type", "learning", special_string])
+    assert result.returncode == 0
+    content = (KNOWLEDGE_DIR / "learnings" / "general.md").read_text()
+    assert special_string in content
