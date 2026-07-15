@@ -64,6 +64,15 @@ WORKTREES_HOME = Path(
     or Path.home() / ".local" / "share" / "agentic-harness" / "worktrees"
 )
 
+# Devcompanion queue paths (shared with bin/devcompanion)
+_DC_HOME = Path(
+    os.environ.get("HARNESS_DC_HOME")
+    or Path.home() / ".local" / "share" / "agentic-harness" / "dev-companion"
+)
+_QUEUE_PENDING    = _DC_HOME / "queue" / "pending"
+_QUEUE_DONE       = _DC_HOME / "queue" / "done"
+_QUEUE_FAILED     = _DC_HOME / "queue" / "failed"
+
 # ── colors ────────────────────────────────────────────────────────────────────
 
 _USE_COLOR = sys.stdout.isatty() and not os.environ.get("NO_COLOR")
@@ -328,6 +337,46 @@ def _try_opencode_runner(request: str, run_dir: Path) -> bool:
     return False
 
 
+def _queue_via_devcompanion(request: str, run_dir: Path, loop_name: str, rid: str) -> bool:
+    """Queue the loop run as a devcompanion job for async processing.
+
+    The job will be picked up by the systemd worker (nanlabs-dev-companion-worker)
+    or via `devcompanion run-once`. Returns True if queued successfully.
+
+    This avoids the subprocess-in-subprocess problem when running `loop run`
+    from within an interactive LLM session (opencode, claude, etc.).
+    """
+    job_id = f"loop-{loop_name}-{rid}"
+    job = {
+        "id": job_id,
+        "created_at": utc_now(),
+        "request": request,
+        "repo_path": str(WORKSPACE_ROOT),
+        "loop_run_dir": str(run_dir),
+        "llm": True,
+        "limits": {
+            "timeout_sec": 1800,
+            "max_steps": 25,
+        },
+        "actions_allowed": ["plan_only"],
+    }
+
+    job_file = _QUEUE_PENDING / f"{job_id}.job"
+    try:
+        job_file.parent.mkdir(parents=True, exist_ok=True)
+        job_file.write_text(json.dumps(job, indent=2) + "\n", encoding="utf-8")
+        log(f"Queued as devcompanion job: {job_id}")
+        log(f"  Job file  : {job_file}")
+        log(f"  Run dir   : {run_dir}")
+        log(f"  Next step : the worker (systemd timer every 5m) will pick it up")
+        log(f"  Or run    : devcompanion run-once  to process immediately")
+        log(f"  Check     : devcompanion status")
+        return True
+    except OSError as e:
+        warn(f"Could not queue devcompanion job: {e}")
+        return False
+
+
 # ── commands ──────────────────────────────────────────────────────────────────
 
 def cmd_init(args: list[str]) -> int:
@@ -517,7 +566,8 @@ def cmd_run(args: list[str]) -> int:
         except ImportError:
             pass
 
-    # Dispatch: agentic-workstation runner → claude CLI → skeleton
+    # Dispatch: agentic-workstation runner → devcompanion queue → claude CLI → skeleton
+    queued = False
     if runner_mod is not None:
         try:
             job_file = run_dir / "job.json"
@@ -532,6 +582,9 @@ def cmd_run(args: list[str]) -> int:
             runner_mod.main(["--job", str(job_file), "--out", str(run_dir)])
         except Exception as e:
             err(f"Runner error: {e}")
+    elif _queue_via_devcompanion(request, run_dir, loop_name, rid):
+        queued = True  # queued for async devcompanion processing
+        log("Loop dispatched to devcompanion queue — worker will process asynchronously.")
     elif _try_claude_runner(request, run_dir):
         pass  # claude runner handled it
     elif _try_opencode_runner(request, run_dir):
@@ -557,17 +610,39 @@ def cmd_run(args: list[str]) -> int:
         )
 
     # Update state
+    run_status = "queued" if queued else "completed"
     new_state = {
         "last_run": utc_now(),
-        "last_run_status": "completed",
+        "last_run_status": run_status,
         "last_run_id": rid,
         "runs_today": runs_today + 1,
         "pending": [],
         "escalations": [],
     }
+    if queued:
+        new_state["pending"] = [f"devcompanion:loop-{loop_name}-{rid}"]
     write_state_md(loop_dir, new_state)
 
-    # Cleanup worktree on success
+    # For queued runs, add trace entry and clean up worktree
+    if queued:
+        trace_file.write_text(
+            trace_file.read_text(encoding="utf-8")
+            + json.dumps({"ts": utc_now(), "kind": "queued",
+                          "job_id": f"loop-{loop_name}-{rid}"}) + "\n",
+            encoding="utf-8",
+        )
+        # Clean up worktree — the devcompanion worker runs independently
+        if worktree_path and worktree_path.is_dir():
+            subprocess.run(
+                ["git", "-C", str(WORKSPACE_ROOT), "worktree", "remove",
+                 str(worktree_path), "--force"],
+                capture_output=True,
+            )
+        ok(f"Run {rid} queued for async processing. State: {run_status}")
+        ok(f"  Check later with: devcompanion status")
+        return 0
+
+    # Cleanup worktree on inline completion
     if worktree_path and worktree_path.is_dir():
         subprocess.run(
             ["git", "-C", str(WORKSPACE_ROOT), "worktree", "remove",
