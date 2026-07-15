@@ -26,7 +26,8 @@ def _run_memory(
 def test_no_args_shows_help(temp_workspace: Path) -> None:
     """Running without arguments should show usage."""
     result = _run_memory(cwd=temp_workspace)
-    assert result.returncode in (0, 1)
+    assert result.returncode == 0
+    assert "Types for add:" in result.stdout
 
 
 def test_inject_outputs_context(temp_workspace: Path) -> None:

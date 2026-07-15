@@ -663,7 +663,7 @@ def cmd_index(args: list[str]):
             (entry_id, embedding_bytes),
         )
 
-        print(f"  {_green('\u2713')} {rel}")
+        print(f"  {_green('✓')} {rel}")
 
     conn.commit()
     conn.close()
@@ -690,17 +690,17 @@ def usage():
   assistant-memory inject                        Output context block for injection
   assistant-memory help                          Show this help
 
-{Cyan('Types for add:')}
+{_cyan('Types for add:')}
   skill      New skill or tool discovery
   process    Process pattern (workflow, tool usage)
   learning   General session learning
   todo       Pending item to follow up
 
-{Cyan('Add flags:')}
+{_cyan('Add flags:')}
   --from-skill <name>   Origin skill name (for cross-repo traceability)
   --tags a,b,c          Comma-separated tags (applied to frontmatter for skill type)
 
-{Cyan('Examples:')}
+{_cyan('Examples:')}
   assistant-memory add --type learning "Always run tests before committing"
   assistant-memory add --type skill --from-skill dots-harness-knowledge-sync --tags jira,workflow "New workflow pattern"
   assistant-memory add --type todo "Investigate slow query in reports endpoint"
