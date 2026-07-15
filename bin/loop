@@ -286,6 +286,48 @@ def _try_claude_runner(request: str, run_dir: Path) -> bool:
     return False
 
 
+def _try_opencode_runner(request: str, run_dir: Path) -> bool:
+    """Invoke `opencode run` as a headless runner.
+
+    Returns True if opencode was found and invoked (check run_dir for output).
+    Falls back gracefully when `opencode` is not in PATH.
+    """
+    opencode_bin = shutil.which("opencode")
+    if not opencode_bin:
+        return False
+
+    prompt = (
+        f"You are executing an autonomous loop run in an agentic-harness workspace.\n"
+        f"Workspace root: {WORKSPACE_ROOT}\n"
+        f"Output directory: {run_dir}\n\n"
+        f"{request}\n\n"
+        f"Write your final report to {run_dir}/report.md and your plan to "
+        f"{run_dir}/plan.md. Work from the workspace root shown above."
+    )
+    try:
+        result = subprocess.run(
+            [opencode_bin, "run", "--print-logs"],
+            input=prompt,
+            capture_output=True,
+            text=True,
+            cwd=str(WORKSPACE_ROOT),
+            timeout=900,
+        )
+    except subprocess.TimeoutExpired:
+        warn("opencode runner timed out (900s)")
+        return False
+
+    if result.returncode == 0:
+        report_md = run_dir / "report.md"
+        if not report_md.exists() and result.stdout.strip():
+            report_md.write_text(result.stdout, encoding="utf-8")
+        ok("opencode runner completed")
+        return True
+
+    warn(f"opencode runner exited {result.returncode}: {result.stderr[:200]}")
+    return False
+
+
 # ── commands ──────────────────────────────────────────────────────────────────
 
 def cmd_init(args: list[str]) -> int:
@@ -492,6 +534,8 @@ def cmd_run(args: list[str]) -> int:
             err(f"Runner error: {e}")
     elif _try_claude_runner(request, run_dir):
         pass  # claude runner handled it
+    elif _try_opencode_runner(request, run_dir):
+        pass  # opencode runner handled it
     else:
         warn("No runner found — writing skeleton plan.md")
         plan_md.write_text(
@@ -506,7 +550,8 @@ def cmd_run(args: list[str]) -> int:
             "## Status\n\n"
             "⚠ No runner found. Options:\n"
             "  1. Install Claude Code CLI (`claude` in PATH) for native execution.\n"
-            "  2. Install agentic-workstation and set HARNESS_RUNNER_DIR.\n"
+            "  2. Install opencode CLI (`opencode` in PATH) for headless execution.\n"
+            "  3. Install agentic-workstation and set HARNESS_RUNNER_DIR.\n"
             "See: https://github.com/ulises-jeremias/agentic-workstation\n",
             encoding="utf-8",
         )
