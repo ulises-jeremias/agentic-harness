@@ -247,7 +247,7 @@ Together, these three projects form my personal workspace: a polished Developer 
 ## 👥 Contributors
 
 <a href="https://github.com/ulises-jeremias/agentic-harness/contributors">
-  <img src="https://contrib.rocks/image?repo=ulises-jeremias/agentic-harness"/>
+  <img alt="Contributors" src="https://contrib.rocks/image?repo=ulises-jeremias/agentic-harness"/>
 </a>
 
 Made with [contributors-img](https://contrib.rocks).
