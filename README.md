@@ -243,3 +243,11 @@ Together, these three projects form my personal workspace: a polished Developer 
 <sub>Built with ❤️ for AI-assisted software delivery</sub>
 
 </div>
+
+## 👥 Contributors
+
+<a href="https://github.com/ulises-jeremias/agentic-harness/contributors">
+  <img src="https://contrib.rocks/image?repo=ulises-jeremias/agentic-harness"/>
+</a>
+
+Made with [contributors-img](https://contrib.rocks).
