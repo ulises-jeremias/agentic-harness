@@ -119,8 +119,8 @@ def _try_claude_runner(request: str, out_dir: Path, repo_path: str = "") -> bool
     try:
         result = subprocess.run(
             [claude_bin, "--print",
-             "--allowedTools", "Bash,Read,Write,Edit,Glob,Grep",
-             prompt],
+             "--allowedTools", "Bash,Read,Write,Edit,Glob,Grep"],
+            input=prompt,
             capture_output=True,
             text=True,
             cwd=str(WORKSPACE_ROOT),
@@ -139,6 +139,43 @@ def _try_claude_runner(request: str, out_dir: Path, repo_path: str = "") -> bool
         return True
 
     warn(f"claude runner exited {result.returncode}: {result.stderr[:200]}")
+    return False
+
+
+def _try_opencode_runner(request: str, out_dir: Path) -> bool:
+    opencode_bin = shutil.which("opencode")
+    if not opencode_bin:
+        return False
+
+    prompt = (
+        f"You are executing an autonomous loop run in an agentic-harness workspace.\n"
+        f"Workspace root: {WORKSPACE_ROOT}\n"
+        f"Output directory: {out_dir}\n\n"
+        f"{request}\n\n"
+        f"Write your final report to {out_dir}/report.md and your plan to "
+        f"{out_dir}/plan.md. Work from the workspace root shown above."
+    )
+    try:
+        result = subprocess.run(
+            [opencode_bin, "run", "--print-logs"],
+            input=prompt,
+            capture_output=True,
+            text=True,
+            cwd=str(WORKSPACE_ROOT),
+            timeout=900,
+        )
+    except subprocess.TimeoutExpired:
+        warn("opencode runner timed out (900s)")
+        return False
+
+    if result.returncode == 0:
+        report_md = out_dir / "report.md"
+        if not report_md.exists() and result.stdout.strip():
+            report_md.write_text(result.stdout, encoding="utf-8")
+        ok("opencode runner completed")
+        return True
+
+    warn(f"opencode runner exited {result.returncode}: {result.stderr[:200]}")
     return False
 
 
@@ -439,11 +476,10 @@ def cmd_run_once(args):
         if runner is None:
             warn(f"Workstation runner not available ({reason}). Trying claude runner.")
         job = read_job(job_file)
-        if _try_claude_runner(
-            job.get("request", ""),
-            out_dir,
-            repo_path=job.get("repo_path", ""),
-        ):
+        request = job.get("request", "")
+        if _try_claude_runner(request, out_dir, repo_path=job.get("repo_path", "")):
+            rc = 0
+        elif _try_opencode_runner(request, out_dir):
             rc = 0
         else:
             warn("No runner found. Using skeleton runner.")

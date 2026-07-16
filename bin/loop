@@ -566,7 +566,7 @@ def cmd_run(args: list[str]) -> int:
         except ImportError:
             pass
 
-    # Dispatch: agentic-workstation runner → devcompanion queue → claude CLI → skeleton
+    # Dispatch: agentic-workstation → claude CLI → opencode → devcompanion queue → skeleton
     queued = False
     if runner_mod is not None:
         try:
@@ -582,13 +582,13 @@ def cmd_run(args: list[str]) -> int:
             runner_mod.main(["--job", str(job_file), "--out", str(run_dir)])
         except Exception as e:
             err(f"Runner error: {e}")
-    elif _queue_via_devcompanion(request, run_dir, loop_name, rid):
-        queued = True  # queued for async devcompanion processing
-        log("Loop dispatched to devcompanion queue — worker will process asynchronously.")
     elif _try_claude_runner(request, run_dir):
         pass  # claude runner handled it
     elif _try_opencode_runner(request, run_dir):
         pass  # opencode runner handled it
+    elif _queue_via_devcompanion(request, run_dir, loop_name, rid):
+        queued = True  # queued for async devcompanion processing
+        log("Loop dispatched to devcompanion queue — worker will process asynchronously.")
     else:
         warn("No runner found — writing skeleton plan.md")
         plan_md.write_text(
