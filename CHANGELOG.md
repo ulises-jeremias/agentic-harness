@@ -10,6 +10,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ---
 
 <!-- markdownlint-disable MD024 -->
+## [Unreleased]
+
+### Added
+
+- Hard autonomy gate (`bin/loop-gh-gate`): PATH-first `gh` shim during `loop run` that enforces tier/allowlist/deny and requires verifier receipts for merge/close (exit code 78 on denial)
+- `loop run --force` bypasses `max_runs_per_day` budget
+- Runner prompt now loads `request.md`, injects a HARD autonomy contract, and persists `prompt.md` per run
+- STATE.md pending/escalations are preserved across runs; list items with `#` are quoted
+
+### Fixed
+
+- `bin/loop` no longer wiped `pending`/`escalations` after every run
+- ISO timestamps in STATE.md parsed as datetime by PyYAML no longer crash the budget gate
+- Duplicate `_try_opencode_runner` definition removed
+
 ## [1.0.0] — Stable
 
 ### Added

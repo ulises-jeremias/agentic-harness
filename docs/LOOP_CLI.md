@@ -80,7 +80,7 @@ bin/loop run <name> [flags]
 | Flag | Type | Default | Description |
 |------|------|---------|-------------|
 | `--dry-run` | flag | false | Preview what would happen without executing |
-| `--force` | flag | false | Run even if exit conditions are met |
+| `--force` | flag | false | Bypass `max_runs_per_day` budget gate (and run even if exit conditions are met) |
 | `--verbose` | flag | false | Print detailed execution logs |
 
 ### Examples
@@ -92,7 +92,7 @@ bin/loop run daily-triage
 # Dry-run to see what would happen
 bin/loop run daily-triage --dry-run
 
-# Force run even if exit conditions say stop
+# Force run even if today's budget is exhausted
 bin/loop run pr-babysitter --force
 
 # Verbose output for debugging
@@ -109,6 +109,7 @@ bin/loop run ci-sweeper --verbose
 | 3 | Loop skipped — exit condition prevented execution |
 | 4 | Invalid loop — LOOP.md missing or malformed |
 | 5 | Tier violation — attempted Tier 3 operation on Tier 1 loop |
+| 78 | Hard gate denial — `gh` mutation blocked by `bin/loop-gh-gate` (allowlist/deny/receipt) |
 
 ---
 

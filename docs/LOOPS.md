@@ -181,6 +181,15 @@ verifier: agentic-workstation-code-reviewer   # default for code-touching loops
 The verifier must sign off before any action not in `allowlist`. If the
 verifier fails, the run is marked `verifier_failed` and escalated.
 
+> **Hard gate (2026-07-17):** During `loop run`, `bin/loop` installs a PATH-first
+> `gh` shim (`bin/loop-gh-gate`) that intercepts mutating commands. Actions must
+> be on `allowlist`, not on `deny`, and compatible with the loop tier. **merge**
+> and **close** additionally require a JSON verifier receipt under
+> `runs/<id>/verifier-receipts/` (see prompt contract). Denied calls exit with
+> code `78` and append to `gate-denials.jsonl`. Read-only `gh` commands pass
+> through. A separate verifier *agent process* is still optional — the receipt
+> is the enforceable check-off.
+
 ---
 
 ## Reference Patterns
