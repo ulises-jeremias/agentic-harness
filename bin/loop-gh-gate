@@ -1,0 +1,483 @@
+#!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.10"
+# dependencies = []
+# ///
+"""
+bin/loop-gh-gate — Hard autonomy gate for `gh` during loop runs.
+
+Installed on PATH as a `gh` shim while a loop runner is active. Intercepts
+mutating GitHub CLI commands and enforces LOOP.md allowlist / deny / tier
+rules. Merge and close additionally require a verifier receipt under the
+active run directory.
+
+Environment (set by bin/loop):
+  LOOP_GATE_REAL_GH       Absolute path to the real `gh` binary
+  LOOP_GATE_RUN_DIR       Active run artifacts directory
+  LOOP_GATE_TIER          L1 | L2 | L3
+  LOOP_GATE_ALLOWLIST     Comma-separated allowlisted actions
+  LOOP_GATE_DENY          Comma-separated denied actions
+  LOOP_GATE_VERIFIER      Verifier skill/agent name (optional)
+  LOOP_GATE_DISABLED      If "1", pass through without checks (tests only)
+
+Usage (normally via shim):
+  loop-gh-gate -- pr merge 123 --repo owner/repo --squash
+  loop-gh-gate --classify pr merge 123 --repo owner/repo
+  loop-gh-gate --check-receipt merge --repo owner/repo --number 123
+"""
+from __future__ import annotations
+
+import json
+import os
+import re
+import subprocess
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any
+
+
+# Actions that mutate GitHub state and must be gated.
+MUTATING_ACTIONS = frozenset({
+    "merge",
+    "close",
+    "comment",
+    "label",
+    "assign",
+    "approve",
+    "push",
+    "commit",
+    "force-push",
+    "delete",
+})
+
+# Merge/close always need a verifier receipt at L2+ (and are denied at L1).
+RECEIPT_REQUIRED = frozenset({"merge", "close"})
+
+# Max age for a verifier receipt (seconds).
+RECEIPT_MAX_AGE_SEC = 3600
+
+
+def _split_csv(value: str | None) -> list[str]:
+    if not value:
+        return []
+    return [p.strip() for p in value.split(",") if p.strip()]
+
+
+def gate_config_from_env() -> dict[str, Any]:
+    return {
+        "real_gh": os.environ.get("LOOP_GATE_REAL_GH", ""),
+        "run_dir": Path(os.environ["LOOP_GATE_RUN_DIR"]) if os.environ.get("LOOP_GATE_RUN_DIR") else None,
+        "tier": (os.environ.get("LOOP_GATE_TIER") or "L1").upper(),
+        "allowlist": _split_csv(os.environ.get("LOOP_GATE_ALLOWLIST")),
+        "deny": _split_csv(os.environ.get("LOOP_GATE_DENY")),
+        "verifier": os.environ.get("LOOP_GATE_VERIFIER") or "",
+        "disabled": os.environ.get("LOOP_GATE_DISABLED") == "1",
+    }
+
+
+def classify_gh_argv(argv: list[str]) -> tuple[str | None, dict[str, Any]]:
+    """Classify a `gh` argv into an action + metadata.
+
+    Returns (action_or_None_if_readonly, meta).
+    """
+    args = [a for a in argv if a != "--"]
+    meta: dict[str, Any] = {"repo": None, "number": None, "raw": list(args)}
+
+    if not args:
+        return None, meta
+
+    # Strip global flags we don't care about for classification.
+    i = 0
+    while i < len(args):
+        a = args[i]
+        if a in ("-R", "--repo") and i + 1 < len(args):
+            meta["repo"] = args[i + 1]
+            i += 2
+            continue
+        if a.startswith("--repo="):
+            meta["repo"] = a.split("=", 1)[1]
+            i += 1
+            continue
+        break
+
+    rest = args[i:]
+    if not rest:
+        return None, meta
+
+    # gh pr merge|close|comment|edit|review ...
+    if rest[0] == "pr" and len(rest) >= 2:
+        sub = rest[1]
+        # number often follows: gh pr merge 123
+        if len(rest) >= 3 and rest[2].isdigit():
+            meta["number"] = int(rest[2])
+        if sub == "merge":
+            return "merge", meta
+        if sub == "close":
+            return "close", meta
+        if sub == "comment":
+            return "comment", meta
+        if sub == "review":
+            joined = " ".join(rest)
+            if "--approve" in rest or " --approve" in f" {joined}":
+                return "approve", meta
+            return "comment", meta  # request-changes / comment reviews
+        if sub == "edit":
+            joined = " ".join(rest)
+            if "--add-label" in rest or "--remove-label" in rest:
+                return "label", meta
+            if "--add-assignee" in rest or "--remove-assignee" in rest:
+                return "assign", meta
+            return None, meta
+
+    # gh issue comment|edit ...
+    if rest[0] == "issue" and len(rest) >= 2:
+        sub = rest[1]
+        if len(rest) >= 3 and rest[2].isdigit():
+            meta["number"] = int(rest[2])
+        if sub == "comment":
+            return "comment", meta
+        if sub == "edit":
+            if "--add-assignee" in rest or "--remove-assignee" in rest:
+                return "assign", meta
+            if "--add-label" in rest or "--remove-label" in rest:
+                return "label", meta
+            return None, meta
+        if sub == "create" and ("--label" in rest or "-l" in rest):
+            return "label", meta
+
+    # gh api mutating methods
+    if rest[0] == "api":
+        method = "GET"
+        path = ""
+        skip_next = False
+        for a in rest[1:]:
+            if skip_next:
+                skip_next = False
+                continue
+            if a in ("-X", "--method"):
+                skip_next = True
+                continue
+            if a.startswith("--method="):
+                method = a.split("=", 1)[1].upper()
+                continue
+            if a.startswith("-"):
+                # flag possibly with inline value; skip value-taking flags lightly
+                if a in ("-F", "-f", "-H", "--header", "--input", "-i"):
+                    skip_next = True
+                continue
+            if not path:
+                path = a
+        # Re-scan for method if -X was used
+        for i, a in enumerate(rest[1:], 1):
+            if a in ("-X", "--method") and i + 1 < len(rest):
+                method = rest[i + 1].upper()
+            elif a.startswith("--method="):
+                method = a.split("=", 1)[1].upper()
+        if method in ("POST", "PUT", "PATCH", "DELETE"):
+            if "/merge" in path:
+                return "merge", meta
+            if "/comments" in path:
+                return "comment", meta
+            if "/assignees" in path or "assignees" in path:
+                return "assign", meta
+            if "/labels" in path:
+                return "label", meta
+            if re.search(r"/pulls/\d+$", path) and method == "PATCH":
+                return "close", meta
+            if re.search(r"/issues/\d+$", path) and method == "PATCH":
+                return "assign", meta
+            if method == "DELETE":
+                return "delete", meta
+            return "push", meta  # unknown mutating API → typically denied
+
+    return None, meta
+
+
+def tier_forbids(tier: str, action: str) -> str | None:
+    """Return a reason if the tier itself forbids the action."""
+    t = tier.upper()
+    if t.startswith("L1") or t == "1":
+        return f"L1 report-only forbids '{action}'"
+    if (t.startswith("L2") or t == "2") and action in ("merge", "close", "approve", "push", "commit", "force-push", "delete"):
+        return f"L2 assisted forbids '{action}' (allow comment/label/assign only)"
+    return None
+
+
+def evaluate_action(
+    action: str,
+    *,
+    tier: str,
+    allowlist: list[str],
+    deny: list[str],
+) -> tuple[bool, str]:
+    """Return (allowed, reason)."""
+    if action not in MUTATING_ACTIONS:
+        return True, "non-mutating"
+
+    reason = tier_forbids(tier, action)
+    if reason:
+        return False, reason
+
+    if action in deny:
+        return False, f"action '{action}' is on deny list"
+
+    if action not in allowlist:
+        return False, f"action '{action}' is not on allowlist"
+
+    return True, "allowlisted"
+
+
+def receipts_dir(run_dir: Path) -> Path:
+    d = run_dir / "verifier-receipts"
+    d.mkdir(parents=True, exist_ok=True)
+    return d
+
+
+def write_denial(run_dir: Path | None, record: dict[str, Any]) -> None:
+    if run_dir is None:
+        return
+    path = run_dir / "gate-denials.jsonl"
+    record = {**record, "ts": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")}
+    with path.open("a", encoding="utf-8") as fh:
+        fh.write(json.dumps(record) + "\n")
+
+
+def find_verifier_receipt(
+    run_dir: Path,
+    action: str,
+    *,
+    repo: str | None = None,
+    number: int | None = None,
+    max_age_sec: int = RECEIPT_MAX_AGE_SEC,
+) -> dict[str, Any] | None:
+    """Find a matching approved receipt for this action/target."""
+    d = receipts_dir(run_dir)
+    now = datetime.now(timezone.utc)
+    candidates: list[tuple[datetime, Path, dict[str, Any]]] = []
+
+    for path in sorted(d.glob("*.json")):
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        if data.get("action") != action:
+            continue
+        if not data.get("approved"):
+            continue
+        if number is not None and data.get("number") not in (None, number):
+            continue
+        if repo is not None and data.get("repo") not in (None, repo):
+            continue
+        ts_raw = data.get("ts") or ""
+        try:
+            ts = datetime.fromisoformat(str(ts_raw).replace("Z", "+00:00"))
+        except ValueError:
+            continue
+        if (now - ts).total_seconds() > max_age_sec:
+            continue
+        candidates.append((ts, path, data))
+
+    if not candidates:
+        return None
+    # Prefer the most specific (has number+repo), then newest.
+    def score(item: tuple[datetime, Path, dict[str, Any]]) -> tuple[int, float]:
+        ts, _, data = item
+        specificity = int(data.get("number") is not None) + int(bool(data.get("repo")))
+        return (specificity, ts.timestamp())
+
+    candidates.sort(key=score, reverse=True)
+    return candidates[0][2]
+
+
+def require_receipt(
+    run_dir: Path,
+    action: str,
+    *,
+    repo: str | None,
+    number: int | None,
+    verifier: str,
+) -> tuple[bool, str]:
+    if action not in RECEIPT_REQUIRED:
+        return True, "receipt not required"
+    receipt = find_verifier_receipt(run_dir, action, repo=repo, number=number)
+    if receipt is None:
+        return (
+            False,
+            f"missing verifier receipt for {action}"
+            + (f" {repo}" if repo else "")
+            + (f"#{number}" if number is not None else "")
+            + f" — write {run_dir / 'verifier-receipts'}/<id>.json "
+            f'{{"action":"{action}","repo":"{repo or "owner/repo"}",'
+            f'"number":{number if number is not None else "123"},'
+            f'"approved":true,"verifier":"{verifier or "configured-verifier"}",'
+            f'"rationale":"...","ts":"<ISO8601>Z"}}',
+        )
+    if verifier and receipt.get("verifier") and receipt["verifier"] != verifier:
+        return False, f"receipt verifier mismatch: got {receipt.get('verifier')!r}, expected {verifier!r}"
+    return True, "receipt ok"
+
+
+def check_command(
+    argv: list[str],
+    cfg: dict[str, Any] | None = None,
+) -> tuple[bool, str, str | None, dict[str, Any]]:
+    """Full check. Returns (ok, reason, action, meta)."""
+    cfg = cfg or gate_config_from_env()
+    if cfg.get("disabled"):
+        return True, "gate disabled", None, {}
+
+    action, meta = classify_gh_argv(argv)
+    if action is None:
+        return True, "readonly / ungated", None, meta
+
+    ok, reason = evaluate_action(
+        action,
+        tier=str(cfg.get("tier") or "L1"),
+        allowlist=list(cfg.get("allowlist") or []),
+        deny=list(cfg.get("deny") or []),
+    )
+    if not ok:
+        return False, reason, action, meta
+
+    run_dir = cfg.get("run_dir")
+    if action in RECEIPT_REQUIRED:
+        if run_dir is None:
+            return False, "LOOP_GATE_RUN_DIR not set (cannot verify receipt)", action, meta
+        ok_r, reason_r = require_receipt(
+            Path(run_dir),
+            action,
+            repo=meta.get("repo"),
+            number=meta.get("number"),
+            verifier=str(cfg.get("verifier") or ""),
+        )
+        if not ok_r:
+            return False, reason_r, action, meta
+
+    return True, reason, action, meta
+
+
+def install_gh_shim(
+    run_dir: Path,
+    *,
+    tier: str,
+    allowlist: list[str],
+    deny: list[str],
+    verifier: str = "",
+    gate_script: Path | None = None,
+    real_gh: str | None = None,
+) -> dict[str, str]:
+    """Create a PATH-first `gh` shim and return env vars for the runner."""
+    real = real_gh or shutil_which_gh()
+    if not real:
+        raise RuntimeError("real `gh` binary not found on PATH")
+
+    gate_script = gate_script or Path(__file__).resolve()
+    shim_dir = run_dir / ".gate" / "bin"
+    shim_dir.mkdir(parents=True, exist_ok=True)
+    receipts_dir(run_dir)
+
+    shim = shim_dir / "gh"
+    shim.write_text(
+        "#!/usr/bin/env bash\n"
+        "set -euo pipefail\n"
+        f'exec "{sys.executable}" "{gate_script}" -- "$@"\n',
+        encoding="utf-8",
+    )
+    shim.chmod(0o755)
+
+    env = os.environ.copy()
+    env["PATH"] = f"{shim_dir}{os.pathsep}{env.get('PATH', '')}"
+    env["LOOP_GATE_REAL_GH"] = real
+    env["LOOP_GATE_RUN_DIR"] = str(run_dir)
+    env["LOOP_GATE_TIER"] = tier
+    env["LOOP_GATE_ALLOWLIST"] = ",".join(allowlist)
+    env["LOOP_GATE_DENY"] = ",".join(deny)
+    env["LOOP_GATE_VERIFIER"] = verifier
+    env.pop("LOOP_GATE_DISABLED", None)
+    return env
+
+
+def shutil_which_gh() -> str | None:
+    import shutil
+    # Prefer a real gh that is NOT our shim (avoid recursion if already gated).
+    path = os.environ.get("PATH", "")
+    for directory in path.split(os.pathsep):
+        candidate = Path(directory) / "gh"
+        if candidate.is_file() and os.access(candidate, os.X_OK):
+            # Skip if it is our shim (calls loop-gh-gate).
+            try:
+                text = candidate.read_text(encoding="utf-8", errors="ignore")
+            except OSError:
+                text = ""
+            if "loop-gh-gate" in text or "loop_gh_gate" in text:
+                continue
+            return str(candidate)
+    found = shutil.which("gh")
+    return found
+
+
+def main(argv: list[str] | None = None) -> int:
+    argv = list(sys.argv[1:] if argv is None else argv)
+
+    if argv and argv[0] == "--classify":
+        action, meta = classify_gh_argv(argv[1:])
+        print(json.dumps({"action": action, "meta": meta}))
+        return 0
+
+    if argv and argv[0] == "--check":
+        ok, reason, action, meta = check_command(argv[1:])
+        print(json.dumps({"ok": ok, "reason": reason, "action": action, "meta": meta}))
+        return 0 if ok else 2
+
+    # Default: act as gh shim. Expect `--` then gh args, or raw gh args.
+    if argv and argv[0] == "--":
+        gh_args = argv[1:]
+    else:
+        gh_args = argv
+
+    cfg = gate_config_from_env()
+    ok, reason, action, meta = check_command(gh_args, cfg)
+    if not ok:
+        write_denial(
+            cfg.get("run_dir"),
+            {
+                "kind": "denied",
+                "action": action,
+                "reason": reason,
+                "argv": gh_args,
+                "meta": meta,
+                "tier": cfg.get("tier"),
+                "allowlist": cfg.get("allowlist"),
+                "deny": cfg.get("deny"),
+            },
+        )
+        print(f"[loop-gh-gate] DENIED {action or 'unknown'}: {reason}", file=sys.stderr)
+        return 78  # EX_CONFIG — distinctive for gate denial
+
+    real = cfg.get("real_gh") or shutil_which_gh()
+    if not real:
+        print("[loop-gh-gate] real gh not found (LOOP_GATE_REAL_GH unset)", file=sys.stderr)
+        return 127
+
+    if action:
+        # Audit allowed mutations.
+        run_dir = cfg.get("run_dir")
+        if run_dir:
+            audit = Path(run_dir) / "gate-allow.jsonl"
+            with audit.open("a", encoding="utf-8") as fh:
+                fh.write(json.dumps({
+                    "ts": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "kind": "allowed",
+                    "action": action,
+                    "reason": reason,
+                    "argv": gh_args,
+                    "meta": meta,
+                }) + "\n")
+
+    result = subprocess.run([real, *gh_args])
+    return int(result.returncode)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

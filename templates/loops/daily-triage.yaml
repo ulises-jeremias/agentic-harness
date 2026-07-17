@@ -37,7 +37,13 @@ verifier: null
 
 request: |
   You are running the daily-triage loop for this repository.
-  1. List all open issues created in the last 24 hours (use gh cli).
+
+  Style:
+  - Never @mention anyone. Never leave AI-looking comments.
+  - This is L1 observation-only — write report.md only.
+
+  1. List open issues created in the last 24 hours
+     (gh api "repos/$REPO/issues?state=open&sort=created&direction=desc&per_page=50").
   2. For each issue, propose:
      - Priority: critical / high / medium / low
      - Labels: based on content and existing label taxonomy

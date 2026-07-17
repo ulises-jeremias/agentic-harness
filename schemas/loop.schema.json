@@ -29,12 +29,12 @@
     },
     "allowlist": {
       "type": "array",
-      "description": "Actions the loop may take without a human gate.",
+      "description": "Actions the loop may take without a human gate. Runtime hard gate (bin/loop-gh-gate) understands: comment, label, assign, merge, close, approve, push, commit, force-push, delete. Template-level names like create_draft_pr are prompts until mapped to those gh operations.",
       "items": { "type": "string" }
     },
     "deny": {
       "type": "array",
-      "description": "Actions explicitly forbidden.",
+      "description": "Actions explicitly forbidden. Prefer the gate vocabulary above for enforceable denials.",
       "items": { "type": "string" }
     },
     "exit_conditions": {
@@ -80,7 +80,7 @@
         { "type": "string" },
         { "type": "null" }
       ],
-      "description": "Agent or skill name that signs off before write actions."
+      "description": "Agent or skill name recorded on verifier receipts before merge/close (bin/loop-gh-gate)."
     },
     "parallelism": {
       "type": "integer",

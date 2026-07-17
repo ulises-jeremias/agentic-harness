@@ -112,8 +112,9 @@ A **loop** is a recurring goal: you define a purpose and the AI iterates — wit
 | **Worktree isolation** | Each run gets its own git worktree |
 | **Skills** | Reusable task prompts (from `agentic-workstation`) |
 | **Plugins / Connectors** | MCP and CLI reach (GitHub, ClickUp, CI) |
-| **Sub-agents** | Maker (implementer) + Checker (verifier) |
+| **Sub-agents** | Maker (implementer) + Checker (verifier receipt / skill) |
 | **Memory / State spine** | `LOOP.md` (intent) + `STATE.md` (current state) |
+| **Hard gate** | `bin/loop-gh-gate` wraps `gh` during runs (allowlist/deny/receipts) |
 
 ### Rollout tiers
 
@@ -122,8 +123,8 @@ Always start at L1. Graduate to L3 only with a proven allowlist.
 | Tier | Autonomy | When |
 |------|----------|------|
 | **L1** | Report-only | Exploring a new loop pattern |
-| **L2** | PR-gated | Actions verified, but humans merge |
-| **L3** | Unattended on allowlist | High-confidence, narrow scope |
+| **L2** | Assisted (allowlisted mutations) | Actions verified; humans still own merge |
+| **L3** | Unattended on allowlist | High-confidence, narrow scope + hard gate |
 
 ### Quick start
 

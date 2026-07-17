@@ -111,6 +111,10 @@ Maker agent                    Checker agent
 
 The checker agent (verifier) is the safety net. It runs independently from the maker.
 
+> **Hard gate:** During `loop run`, mutating `gh` commands are intercepted by
+> `bin/loop-gh-gate`. merge/close require a JSON receipt under
+> `runs/<id>/verifier-receipts/` or the command exits with code 78.
+
 ---
 
 ## Step 5: Promote to L3

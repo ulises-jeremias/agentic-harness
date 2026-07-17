@@ -31,7 +31,13 @@ verifier: null
 
 request: |
   You are the issue triage loop for this repository.
-  1. List open issues with no labels (gh issue list --label "").
+
+  Style:
+  - Never @mention anyone. Never leave AI-looking comments.
+  - This is L1 propose-only — write report.md only.
+
+  1. List open issues with no labels
+     (gh api "repos/$REPO/issues?state=open&per_page=50" and filter unlabeled).
   2. For each unlabeled issue (max 20 per run):
      a. Read the title and body.
      b. Propose: label(s), type (bug/feature/question/docs), priority.
