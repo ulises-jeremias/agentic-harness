@@ -22,7 +22,7 @@
 
 ```bash
 ./bin/loop init ci-sweeper --template ci-sweeper --tier 1
-```text
+```
 
 The L1 version is configured to **observe only** — no writes. Let it run for a few days so you see what it would do.
 
@@ -32,7 +32,7 @@ The L1 version is configured to **observe only** — no writes. Let it run for a
 
 ```bash
 ./bin/loop run ci-sweeper --verbose
-```text
+```
 
 ```text
 [L1 - OBSERVE ONLY] CI failures detected:
@@ -42,7 +42,7 @@ The L1 version is configured to **observe only** — no writes. Let it run for a
 Would create draft PRs for: 2 failures
 Would open PRs: 0 (L1 — observation only)
 Report saved to: loops/ci-sweeper/report.md
-```text
+```
 
 Review the report. Are these real failures? Are the proposed fixes correct? Running at L1 for a week builds confidence.
 
@@ -55,7 +55,7 @@ After a week of clean L1 reports:
 ```bash
 # Edit LOOP.md: change tier: L1 to tier: L2
 # Add to allowlist: [create_draft_pr, comment]
-```text
+```
 
 ```yaml
 tier: L2
@@ -68,20 +68,20 @@ deny:
   - close
   - force-push
   - delete-branch
-```text
+```
 
 Now the loop creates **draft** PRs:
 
 ```bash
 ./bin/loop run ci-sweeper
-```text
+```
 
 ```text
 [L2 - DRAFT PRs ONLY]
   backend (lint fix): Draft PR #150 created
   frontend (type error): Draft PR #151 created
   Draft PRs require manual review before publishing
-```text
+```
 
 Wait for the CI on the draft PRs to pass. Review them. If they look good after a month, consider L3.
 
@@ -107,7 +107,7 @@ Maker agent                    Checker agent
   │                               │
   │ 10. If approved: mark ready   │
   │ 11. If rejected: rollback     │
-```text
+```
 
 The checker agent (verifier) is the safety net. It runs independently from the maker.
 
@@ -142,7 +142,7 @@ budget:
   max_runs_per_day: 48
   max_wall_seconds: 900
   max_iterations: 3      # Max 3 fix attempts per failure
-```text
+```
 
 ---
 
@@ -150,7 +150,7 @@ budget:
 
 ```bash
 ./bin/loop run ci-sweeper --verbose
-```text
+```
 
 ```text
 [L3 - AUTONOMOUS]
@@ -167,7 +167,7 @@ budget:
 
   Summary: 2 fixes, 2 successful, 0 escalations
   Budget: 78,432 / 100,000 tokens used
-```text
+```
 
 ---
 
@@ -175,7 +175,7 @@ budget:
 
 ```bash
 ./bin/loop schedule ci-sweeper --cron "0 */1 * * *"
-```text
+```
 
 L3 runs every hour — catching failures quickly.
 
@@ -190,7 +190,7 @@ exit_conditions:
   - human_escalation      # Security issue or complex failure → escalate
   - max_iterations        # Tried 3 times, still failing → escalate
   - consecutive_failures  # 3 failures in a row → escalate
-```text
+```
 
 ### When exit conditions trigger
 
@@ -200,7 +200,7 @@ Run 2: 1 failure, fix works         → goal_met → STOP
 Run 3: 1 failure, fix fails         → retry (iteration 2/3)
 Run 4: same failure, fix fails again → retry (iteration 3/3)
 Run 5: still failing                → max_iterations → ESCALATE
-```text
+```
 
 The loop knows when to stop trying. Without exit conditions, a loop would retry forever.
 
@@ -210,7 +210,7 @@ The loop knows when to stop trying. Without exit conditions, a loop would retry 
 
 ```bash
 ./bin/loop cost ci-sweeper --monthly
-```text
+```
 
 ```text
 LOOP: ci-sweeper (L3)
@@ -220,7 +220,7 @@ Per month: ~21,600,000 tokens ~$216.00
 
 Optimization: Only 2-3 runs/day actually have failures.
 Realistic cost: ~$20-30/month.
-```text
+```
 
 ---
 
@@ -251,7 +251,7 @@ Realistic cost: ~$20-30/month.
 ./bin/loop status --tier 3
 ./bin/loop audit ci-sweeper --last 5 --summary
 ./bin/loop cost ci-sweeper --monthly --alert 50.00
-```text
+```
 
 ---
 

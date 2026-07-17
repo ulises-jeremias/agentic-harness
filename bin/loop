@@ -232,10 +232,8 @@ def write_state_md(loop_dir: Path, state: dict[str, Any]) -> None:
             return "true" if v else "false"
         if isinstance(v, (int, float)):
             return str(v)
-        s = str(v)
-        if any(c in s for c in ("#", ":", "\n", '"', "'")) or s.strip() != s:
-            return json.dumps(s)  # double-quoted JSON string
-        return s
+        # Always JSON-quote strings so PyYAML cannot coerce true/null/dates.
+        return json.dumps(str(v), ensure_ascii=False)
 
     lines = ["---"]
     for k, v in state.items():
@@ -337,12 +335,16 @@ def _autonomy_contract(meta: dict[str, Any], loop_dir: Path) -> str:
     lines += [
         "",
         "Hard gate (enforced by PATH shim — not honor-system):",
-        "- Mutating `gh` commands are intercepted. Denied actions exit with code 78.",
-        "- For merge/close: BEFORE calling `gh pr merge|close`, write a receipt JSON:",
+        "- Mutating `gh` commands are intercepted. Denied actions exit with code 78 "
+        "(from the intercepted `gh` process).",
+        "- For merge/close: an *independent* verifier must write a receipt JSON "
+        "(do NOT self-approve as the maker):",
         "  `$OUTPUT_DIR/verifier-receipts/<slug>.json` with keys:",
         '  `action`, `repo` (owner/name), `number`, `approved` (true), '
         f'`verifier` ("{verifier}"), `rationale`, `ts` (ISO8601 Z).',
-        "- Receipts expire after 1 hour. Re-write if needed.",
+        "- When `LOOP_GATE_RECEIPT_SECRET` is set, receipts must include "
+        "`sig` (HMAC-SHA256 hex of the canonical JSON payload).",
+        "- Receipts require exact repo + number + verifier match and expire after 1 hour.",
         "",
         "Before finishing:",
         f"1. Update `{loop_dir / 'STATE.md'}` frontmatter `pending:` and `escalations:` "
@@ -388,13 +390,16 @@ def _gate_script() -> Path:
 
 
 def _runner_env(run_dir: Path, meta: dict[str, Any]) -> dict[str, str]:
-    """Env for runners: PATH-first `gh` shim enforcing allowlist/deny/receipts."""
+    """Env for runners: PATH-first `gh` shim enforcing allowlist/deny/receipts.
+
+    Fails closed: if the gate cannot be installed, raises RuntimeError so the
+    run aborts rather than dispatching with an ungated `gh`.
+    """
     import runpy
 
     gate_path = _gate_script()
     if not gate_path.exists():
-        warn(f"loop-gh-gate missing at {gate_path} — running without hard gate")
-        return os.environ.copy()
+        raise RuntimeError(f"loop-gh-gate missing at {gate_path} — refusing ungated run")
 
     try:
         mod = runpy.run_path(str(gate_path))
@@ -416,8 +421,17 @@ def _runner_env(run_dir: Path, meta: dict[str, Any]) -> dict[str, str]:
         )
         return env
     except Exception as exc:  # noqa: BLE001
-        warn(f"failed to install gh gate ({exc}) — running without hard gate")
-        return os.environ.copy()
+        raise RuntimeError(f"failed to install gh gate ({exc}) — refusing ungated run") from exc
+
+
+def _install_gate_into_environ(run_dir: Path, meta: dict[str, Any]) -> dict[str, str]:
+    """Install the gh gate and apply its env to this process (and return a copy)."""
+    env = _runner_env(run_dir, meta)
+    # Mediate every subsequent child (agentic-workstation runner, etc.).
+    for key, value in env.items():
+        if key.startswith("LOOP_GATE_") or key == "PATH":
+            os.environ[key] = value
+    return env
 
 
 def _try_claude_runner(prompt: str, run_dir: Path, meta: dict[str, Any] | None = None) -> bool:
@@ -426,7 +440,7 @@ def _try_claude_runner(prompt: str, run_dir: Path, meta: dict[str, Any] | None =
     if not claude_bin:
         return False
 
-    env = _runner_env(run_dir, meta or {})
+    env = _install_gate_into_environ(run_dir, meta or {})
     try:
         result = subprocess.run(
             [claude_bin, "--print",
@@ -459,7 +473,7 @@ def _try_opencode_runner(prompt: str, run_dir: Path, meta: dict[str, Any] | None
     if not opencode_bin:
         return False
 
-    env = _runner_env(run_dir, meta or {})
+    env = _install_gate_into_environ(run_dir, meta or {})
     try:
         result = subprocess.run(
             [opencode_bin, "run", "--print-logs"],
@@ -485,7 +499,13 @@ def _try_opencode_runner(prompt: str, run_dir: Path, meta: dict[str, Any] | None
     return False
 
 
-def _queue_via_devcompanion(request: str, run_dir: Path, loop_name: str, rid: str) -> bool:
+def _queue_via_devcompanion(
+    request: str,
+    run_dir: Path,
+    loop_name: str,
+    rid: str,
+    meta: dict[str, Any] | None = None,
+) -> bool:
     """Queue the loop run as a devcompanion job for async processing.
 
     The job will be picked up by the systemd worker (nanlabs-dev-companion-worker)
@@ -494,6 +514,19 @@ def _queue_via_devcompanion(request: str, run_dir: Path, loop_name: str, rid: st
     This avoids the subprocess-in-subprocess problem when running `loop run`
     from within an interactive LLM session (opencode, claude, etc.).
     """
+    # Install gate into this process and persist gate metadata for the worker.
+    gate_meta: dict[str, Any] = {}
+    if meta is not None:
+        env = _install_gate_into_environ(run_dir, meta)
+        gate_meta = {
+            "tier": str(meta.get("tier", "L1")),
+            "allowlist": _as_str_list(meta.get("allowlist")),
+            "deny": _as_str_list(meta.get("deny")),
+            "verifier": str(meta.get("verifier") or ""),
+            "run_dir": str(run_dir),
+            "real_gh": env.get("LOOP_GATE_REAL_GH", ""),
+        }
+
     job_id = f"loop-{loop_name}-{rid}"
     job = {
         "id": job_id,
@@ -507,6 +540,7 @@ def _queue_via_devcompanion(request: str, run_dir: Path, loop_name: str, rid: st
             "max_steps": 25,
         },
         "actions_allowed": ["plan_only"],
+        "loop_gate": gate_meta,
     }
 
     job_file = _QUEUE_PENDING / f"{job_id}.job"
@@ -744,45 +778,59 @@ def cmd_run(args: list[str]) -> int:
             pass
 
     # Dispatch: agentic-workstation → claude CLI → opencode → devcompanion queue → skeleton
+    # Install the hard gate before any runner that can invoke `gh`.
     queued = False
-    if runner_mod is not None:
-        try:
-            job_file = run_dir / "job.json"
-            job_file.write_text(
-                json.dumps({
-                    "id": rid,
-                    "created_at": utc_now(),
-                    "request": prompt,
-                }),
+    try:
+        if runner_mod is not None:
+            _install_gate_into_environ(run_dir, meta)
+            try:
+                job_file = run_dir / "job.json"
+                job_file.write_text(
+                    json.dumps({
+                        "id": rid,
+                        "created_at": utc_now(),
+                        "request": prompt,
+                        "loop_gate": {
+                            "tier": str(meta.get("tier", "L1")),
+                            "allowlist": _as_str_list(meta.get("allowlist")),
+                            "deny": _as_str_list(meta.get("deny")),
+                            "verifier": str(meta.get("verifier") or ""),
+                            "run_dir": str(run_dir),
+                        },
+                    }),
+                    encoding="utf-8",
+                )
+                runner_mod.main(["--job", str(job_file), "--out", str(run_dir)])
+            except Exception as e:
+                err(f"Runner error: {e}")
+        elif _try_claude_runner(prompt, run_dir, meta):
+            pass  # claude runner handled it
+        elif _try_opencode_runner(prompt, run_dir, meta):
+            pass  # opencode runner handled it
+        elif _queue_via_devcompanion(prompt, run_dir, loop_name, rid, meta):
+            queued = True  # queued for async devcompanion processing
+            log("Loop dispatched to devcompanion queue — worker will process asynchronously.")
+        else:
+            warn("No runner found — writing skeleton plan.md")
+            plan_md.write_text(
+                f"# Loop Run: {loop_name}\n\n"
+                f"**Run ID**: {rid}  \n"
+                f"**Tier**: {tier}  \n"
+                f"**Started**: {utc_now()}  \n\n"
+                "## Goal\n\n"
+                f"{meta.get('goal', '(no goal defined in LOOP.md)')}\n\n"
+                "## Status\n\n"
+                "⚠ No runner found. Options:\n"
+                "  1. Install Claude Code CLI (`claude` in PATH) for native execution.\n"
+                "  2. Install opencode CLI (`opencode` in PATH) for headless execution.\n"
+                "  3. Install agentic-workstation and set HARNESS_RUNNER_DIR.\n"
+                "See: https://github.com/ulises-jeremias/agentic-workstation\n",
                 encoding="utf-8",
             )
-            runner_mod.main(["--job", str(job_file), "--out", str(run_dir)])
-        except Exception as e:
-            err(f"Runner error: {e}")
-    elif _try_claude_runner(prompt, run_dir, meta):
-        pass  # claude runner handled it
-    elif _try_opencode_runner(prompt, run_dir, meta):
-        pass  # opencode runner handled it
-    elif _queue_via_devcompanion(prompt, run_dir, loop_name, rid):
-        queued = True  # queued for async devcompanion processing
-        log("Loop dispatched to devcompanion queue — worker will process asynchronously.")
-    else:
-        warn("No runner found — writing skeleton plan.md")
-        plan_md.write_text(
-            f"# Loop Run: {loop_name}\n\n"
-            f"**Run ID**: {rid}  \n"
-            f"**Tier**: {tier}  \n"
-            f"**Started**: {utc_now()}  \n\n"
-            "## Goal\n\n"
-            f"{meta.get('goal', '(no goal defined in LOOP.md)')}\n\n"
-            "## Status\n\n"
-            "⚠ No runner found. Options:\n"
-            "  1. Install Claude Code CLI (`claude` in PATH) for native execution.\n"
-            "  2. Install opencode CLI (`opencode` in PATH) for headless execution.\n"
-            "  3. Install agentic-workstation and set HARNESS_RUNNER_DIR.\n"
-            "See: https://github.com/ulises-jeremias/agentic-workstation\n",
-            encoding="utf-8",
-        )
+    except RuntimeError as gate_exc:
+        err(str(gate_exc))
+        finalize_run(loop_dir, run_dir, rid, worktree_path, trace_file, "gate_failed")
+        return 2
 
     # Update state — preserve pending/escalations/notes the agent wrote (or prior)
     run_status = "queued" if queued else "completed"
