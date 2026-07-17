@@ -185,10 +185,15 @@ verifier fails, the run is marked `verifier_failed` and escalated.
 > `gh` shim (`bin/loop-gh-gate`) that intercepts mutating commands. Actions must
 > be on `allowlist`, not on `deny`, and compatible with the loop tier. **merge**
 > and **close** additionally require a JSON verifier receipt under
-> `runs/<id>/verifier-receipts/` (see prompt contract). Denied calls exit with
-> code `78` and append to `gate-denials.jsonl`. Read-only `gh` commands pass
-> through. A separate verifier *agent process* is still optional — the receipt
-> is the enforceable check-off.
+> `runs/<id>/verifier-receipts/` bound to exact `repo` + `number` + `verifier`
+> (and HMAC `sig` when `LOOP_GATE_RECEIPT_SECRET` is set). Denied calls exit
+> with code `78` from the intercepted `gh` process and append to
+> `gate-denials.jsonl`. Read-only `gh` commands pass through.
+>
+> An independent verifier (separate agent/skill) is **mandatory** for merge/close
+> until authenticated receipts are in use: the maker must not self-approve.
+> Unsigned receipts are trust-on-filesystem only — set `LOOP_GATE_RECEIPT_SECRET`
+> in production so the gate rejects unsigned maker-written files.
 
 ---
 

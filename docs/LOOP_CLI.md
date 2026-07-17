@@ -80,7 +80,7 @@ bin/loop run <name> [flags]
 | Flag | Type | Default | Description |
 |------|------|---------|-------------|
 | `--dry-run` | flag | false | Preview what would happen without executing |
-| `--force` | flag | false | Bypass `max_runs_per_day` budget gate (and run even if exit conditions are met) |
+| `--force` | flag | false | Bypass `max_runs_per_day` budget gate |
 | `--verbose` | flag | false | Print detailed execution logs |
 
 ### Examples
@@ -109,7 +109,7 @@ bin/loop run ci-sweeper --verbose
 | 3 | Loop skipped — exit condition prevented execution |
 | 4 | Invalid loop — LOOP.md missing or malformed |
 | 5 | Tier violation — attempted Tier 3 operation on Tier 1 loop |
-| 78 | Hard gate denial — `gh` mutation blocked by `bin/loop-gh-gate` (allowlist/deny/receipt) |
+| — | Exit code `78` is returned by the intercepted `gh` process (`bin/loop-gh-gate`) on hard-gate denial (allowlist/deny/receipt). It is not currently propagated as the `loop run` process exit code. |
 
 ---
 

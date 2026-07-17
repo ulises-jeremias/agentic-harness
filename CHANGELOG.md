@@ -22,6 +22,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- Loop hard gate follow-up (CodeRabbit on #166): fail-closed gate install, stricter `gh` mutation classification, redacted audit argv, HMAC receipt binding, always-quoted STATE strings, docs/workshop fence fixes
+
 - `bin/loop` no longer wiped `pending`/`escalations` after every run
 - ISO timestamps in STATE.md parsed as datetime by PyYAML no longer crash the budget gate
 - Duplicate `_try_opencode_runner` definition removed

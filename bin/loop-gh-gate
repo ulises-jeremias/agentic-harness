@@ -18,6 +18,7 @@ Environment (set by bin/loop):
   LOOP_GATE_ALLOWLIST     Comma-separated allowlisted actions
   LOOP_GATE_DENY          Comma-separated denied actions
   LOOP_GATE_VERIFIER      Verifier skill/agent name (optional)
+  LOOP_GATE_RECEIPT_SECRET  If set, verifier receipts must carry a matching HMAC
   LOOP_GATE_DISABLED      If "1", pass through without checks (tests only)
 
 Usage (normally via shim):
@@ -27,6 +28,8 @@ Usage (normally via shim):
 """
 from __future__ import annotations
 
+import hashlib
+import hmac
 import json
 import os
 import re
@@ -72,14 +75,47 @@ def gate_config_from_env() -> dict[str, Any]:
         "allowlist": _split_csv(os.environ.get("LOOP_GATE_ALLOWLIST")),
         "deny": _split_csv(os.environ.get("LOOP_GATE_DENY")),
         "verifier": os.environ.get("LOOP_GATE_VERIFIER") or "",
+        "receipt_secret": os.environ.get("LOOP_GATE_RECEIPT_SECRET") or "",
         "disabled": os.environ.get("LOOP_GATE_DISABLED") == "1",
     }
+
+
+_SENSITIVE_FLAGS = frozenset({
+    "-H", "--header", "-b", "--body", "--body-file", "-F", "-f",
+    "--raw-field", "--field", "--input", "-i", "--jq",
+})
+
+
+def redact_argv(argv: list[str]) -> list[str]:
+    """Return argv with secret-bearing values replaced by <redacted>."""
+    out: list[str] = []
+    skip_next = False
+    for a in argv:
+        if skip_next:
+            out.append("<redacted>")
+            skip_next = False
+            continue
+        if a in _SENSITIVE_FLAGS:
+            out.append(a)
+            skip_next = True
+            continue
+        if "=" in a and a.startswith("-"):
+            flag, _, _val = a.partition("=")
+            # Redact inline sensitive values (Authorization headers, body=, etc.)
+            low = flag.lower()
+            if any(s in low for s in ("header", "body", "field", "input", "token", "auth")):
+                out.append(f"{flag}=<redacted>")
+                continue
+        out.append(a)
+    return out
 
 
 def classify_gh_argv(argv: list[str]) -> tuple[str | None, dict[str, Any]]:
     """Classify a `gh` argv into an action + metadata.
 
     Returns (action_or_None_if_readonly, meta).
+    Unknown mutating forms return a gated action (typically ``push``) rather
+    than falling through as read-only.
     """
     args = [a for a in argv if a != "--"]
     meta: dict[str, Any] = {"repo": None, "number": None, "raw": list(args)}
@@ -87,7 +123,7 @@ def classify_gh_argv(argv: list[str]) -> tuple[str | None, dict[str, Any]]:
     if not args:
         return None, meta
 
-    # Strip global flags we don't care about for classification.
+    # Collect --repo / -R anywhere in argv (gh accepts them mid-command).
     i = 0
     while i < len(args):
         a = args[i]
@@ -99,16 +135,27 @@ def classify_gh_argv(argv: list[str]) -> tuple[str | None, dict[str, Any]]:
             meta["repo"] = a.split("=", 1)[1]
             i += 1
             continue
+        i += 1
+
+    # Strip leading global flags for subcommand detection.
+    i = 0
+    while i < len(args):
+        a = args[i]
+        if a in ("-R", "--repo") and i + 1 < len(args):
+            i += 2
+            continue
+        if a.startswith("--repo="):
+            i += 1
+            continue
         break
 
     rest = args[i:]
     if not rest:
         return None, meta
 
-    # gh pr merge|close|comment|edit|review ...
+    # gh pr ...
     if rest[0] == "pr" and len(rest) >= 2:
         sub = rest[1]
-        # number often follows: gh pr merge 123
         if len(rest) >= 3 and rest[2].isdigit():
             meta["number"] = int(rest[2])
         if sub == "merge":
@@ -117,39 +164,71 @@ def classify_gh_argv(argv: list[str]) -> tuple[str | None, dict[str, Any]]:
             return "close", meta
         if sub == "comment":
             return "comment", meta
+        if sub == "create":
+            return "push", meta  # opening a PR is a write
         if sub == "review":
             joined = " ".join(rest)
             if "--approve" in rest or " --approve" in f" {joined}":
                 return "approve", meta
             return "comment", meta  # request-changes / comment reviews
         if sub == "edit":
-            joined = " ".join(rest)
             if "--add-label" in rest or "--remove-label" in rest:
                 return "label", meta
             if "--add-assignee" in rest or "--remove-assignee" in rest:
                 return "assign", meta
+            # title/body/base/state edits are mutating but not label/assign
+            if any(
+                f in rest or any(a.startswith(f"{f}=") for a in rest)
+                for f in ("--title", "--body", "--body-file", "--base", "--state")
+            ):
+                return "push", meta
+            return "push", meta  # unknown pr edit → deny by default (fail closed)
+        if sub in ("ready", "reopen", "lock", "unlock", "delete"):
+            return "push" if sub != "delete" else "delete", meta
+        if sub in ("list", "view", "status", "diff", "checks"):
             return None, meta
+        return "push", meta  # unknown pr subcommand → treat as mutating
 
-    # gh issue comment|edit ...
+    # gh issue ...
     if rest[0] == "issue" and len(rest) >= 2:
         sub = rest[1]
         if len(rest) >= 3 and rest[2].isdigit():
             meta["number"] = int(rest[2])
         if sub == "comment":
             return "comment", meta
+        if sub == "create":
+            if "--label" in rest or "-l" in rest:
+                return "label", meta
+            return "push", meta
         if sub == "edit":
             if "--add-assignee" in rest or "--remove-assignee" in rest:
                 return "assign", meta
             if "--add-label" in rest or "--remove-label" in rest:
                 return "label", meta
+            # --state closed / --state open
+            for i, a in enumerate(rest):
+                if a == "--state" and i + 1 < len(rest) and rest[i + 1] == "closed":
+                    return "close", meta
+                if a.startswith("--state=") and a.split("=", 1)[1] == "closed":
+                    return "close", meta
+            if any(
+                f in rest or any(a.startswith(f"{f}=") for a in rest)
+                for f in ("--title", "--body", "--body-file")
+            ):
+                return "push", meta
+            return "push", meta
+        if sub in ("close",):
+            return "close", meta
+        if sub in ("list", "view", "status"):
             return None, meta
-        if sub == "create" and ("--label" in rest or "-l" in rest):
-            return "label", meta
+        return "push", meta
 
-    # gh api mutating methods
+    # gh api ...
     if rest[0] == "api":
         method = "GET"
+        method_explicit = False
         path = ""
+        has_field = False
         skip_next = False
         for a in rest[1:]:
             if skip_next:
@@ -160,11 +239,15 @@ def classify_gh_argv(argv: list[str]) -> tuple[str | None, dict[str, Any]]:
                 continue
             if a.startswith("--method="):
                 method = a.split("=", 1)[1].upper()
+                method_explicit = True
                 continue
             if a.startswith("-"):
-                # flag possibly with inline value; skip value-taking flags lightly
-                if a in ("-F", "-f", "-H", "--header", "--input", "-i"):
+                if a in ("-F", "-f", "--field", "--raw-field", "-H", "--header", "--input", "-i"):
+                    if a in ("-F", "-f", "--field", "--raw-field"):
+                        has_field = True
                     skip_next = True
+                elif a.startswith(("-F", "-f")) and "=" in a:
+                    has_field = True
                 continue
             if not path:
                 path = a
@@ -172,8 +255,13 @@ def classify_gh_argv(argv: list[str]) -> tuple[str | None, dict[str, Any]]:
         for i, a in enumerate(rest[1:], 1):
             if a in ("-X", "--method") and i + 1 < len(rest):
                 method = rest[i + 1].upper()
+                method_explicit = True
             elif a.startswith("--method="):
                 method = a.split("=", 1)[1].upper()
+                method_explicit = True
+        # gh api switches to POST when -f/-F are present unless method is set.
+        if has_field and not method_explicit:
+            method = "POST"
         if method in ("POST", "PUT", "PATCH", "DELETE"):
             if "/merge" in path:
                 return "merge", meta
@@ -186,10 +274,18 @@ def classify_gh_argv(argv: list[str]) -> tuple[str | None, dict[str, Any]]:
             if re.search(r"/pulls/\d+$", path) and method == "PATCH":
                 return "close", meta
             if re.search(r"/issues/\d+$", path) and method == "PATCH":
-                return "assign", meta
+                # Could be close or assign; treat as push unless assignees/labels
+                return "push", meta
             if method == "DELETE":
                 return "delete", meta
             return "push", meta  # unknown mutating API → typically denied
+        return None, meta
+
+    # Other top-level mutating commands
+    if rest[0] in ("release", "gist", "repo", "secret", "variable", "workflow"):
+        if len(rest) >= 2 and rest[1] in ("list", "view", "status", "get"):
+            return None, meta
+        return "push", meta
 
     return None, meta
 
@@ -238,9 +334,42 @@ def write_denial(run_dir: Path | None, record: dict[str, Any]) -> None:
     if run_dir is None:
         return
     path = run_dir / "gate-denials.jsonl"
+    if "argv" in record:
+        record = {**record, "argv": redact_argv(list(record["argv"]))}
     record = {**record, "ts": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")}
     with path.open("a", encoding="utf-8") as fh:
         fh.write(json.dumps(record) + "\n")
+
+
+def receipt_canonical_payload(data: dict[str, Any]) -> str:
+    """Stable JSON payload used for HMAC (excludes `sig`)."""
+    payload = {
+        "action": data.get("action"),
+        "repo": data.get("repo"),
+        "number": data.get("number"),
+        "approved": bool(data.get("approved")),
+        "verifier": data.get("verifier"),
+        "rationale": data.get("rationale"),
+        "ts": data.get("ts"),
+    }
+    return json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+
+
+def sign_receipt(data: dict[str, Any], secret: str) -> str:
+    digest = hmac.new(
+        secret.encode("utf-8"),
+        receipt_canonical_payload(data).encode("utf-8"),
+        hashlib.sha256,
+    ).hexdigest()
+    return digest
+
+
+def verify_receipt_signature(data: dict[str, Any], secret: str) -> bool:
+    expected = data.get("sig")
+    if not expected or not isinstance(expected, str):
+        return False
+    actual = sign_receipt(data, secret)
+    return hmac.compare_digest(actual, expected)
 
 
 def find_verifier_receipt(
@@ -249,6 +378,8 @@ def find_verifier_receipt(
     *,
     repo: str | None = None,
     number: int | None = None,
+    verifier: str = "",
+    receipt_secret: str = "",
     max_age_sec: int = RECEIPT_MAX_AGE_SEC,
 ) -> dict[str, Any] | None:
     """Find a matching approved receipt for this action/target."""
@@ -265,28 +396,30 @@ def find_verifier_receipt(
             continue
         if not data.get("approved"):
             continue
-        if number is not None and data.get("number") not in (None, number):
+        # Exact binding when the command targets a specific repo/number.
+        if number is not None and data.get("number") != number:
             continue
-        if repo is not None and data.get("repo") not in (None, repo):
+        if repo is not None and data.get("repo") != repo:
+            continue
+        if verifier and data.get("verifier") != verifier:
             continue
         ts_raw = data.get("ts") or ""
         try:
             ts = datetime.fromisoformat(str(ts_raw).replace("Z", "+00:00"))
         except ValueError:
             continue
-        if (now - ts).total_seconds() > max_age_sec:
+        if ts.tzinfo is None:
+            continue
+        if (now - ts).total_seconds() > max_age_sec or (now - ts).total_seconds() < -60:
+            continue
+        if receipt_secret and not verify_receipt_signature(data, receipt_secret):
             continue
         candidates.append((ts, path, data))
 
     if not candidates:
         return None
-    # Prefer the most specific (has number+repo), then newest.
-    def score(item: tuple[datetime, Path, dict[str, Any]]) -> tuple[int, float]:
-        ts, _, data = item
-        specificity = int(data.get("number") is not None) + int(bool(data.get("repo")))
-        return (specificity, ts.timestamp())
-
-    candidates.sort(key=score, reverse=True)
+    # Prefer newest when multiple match.
+    candidates.sort(key=lambda item: item[0].timestamp(), reverse=True)
     return candidates[0][2]
 
 
@@ -297,24 +430,30 @@ def require_receipt(
     repo: str | None,
     number: int | None,
     verifier: str,
+    receipt_secret: str = "",
 ) -> tuple[bool, str]:
     if action not in RECEIPT_REQUIRED:
         return True, "receipt not required"
-    receipt = find_verifier_receipt(run_dir, action, repo=repo, number=number)
+    if repo is None or number is None:
+        return False, f"merge/close require --repo and PR/issue number for receipt binding"
+    receipt = find_verifier_receipt(
+        run_dir,
+        action,
+        repo=repo,
+        number=number,
+        verifier=verifier,
+        receipt_secret=receipt_secret,
+    )
     if receipt is None:
+        sig_hint = ', "sig":"<hmac-sha256>"' if receipt_secret else ""
         return (
             False,
-            f"missing verifier receipt for {action}"
-            + (f" {repo}" if repo else "")
-            + (f"#{number}" if number is not None else "")
+            f"missing verifier receipt for {action} {repo}#{number}"
             + f" — write {run_dir / 'verifier-receipts'}/<id>.json "
-            f'{{"action":"{action}","repo":"{repo or "owner/repo"}",'
-            f'"number":{number if number is not None else "123"},'
+            f'{{"action":"{action}","repo":"{repo}","number":{number},'
             f'"approved":true,"verifier":"{verifier or "configured-verifier"}",'
-            f'"rationale":"...","ts":"<ISO8601>Z"}}',
+            f'"rationale":"...","ts":"<ISO8601>Z"{sig_hint}}}',
         )
-    if verifier and receipt.get("verifier") and receipt["verifier"] != verifier:
-        return False, f"receipt verifier mismatch: got {receipt.get('verifier')!r}, expected {verifier!r}"
     return True, "receipt ok"
 
 
@@ -350,6 +489,7 @@ def check_command(
             repo=meta.get("repo"),
             number=meta.get("number"),
             verifier=str(cfg.get("verifier") or ""),
+            receipt_secret=str(cfg.get("receipt_secret") or ""),
         )
         if not ok_r:
             return False, reason_r, action, meta
@@ -394,6 +534,9 @@ def install_gh_shim(
     env["LOOP_GATE_ALLOWLIST"] = ",".join(allowlist)
     env["LOOP_GATE_DENY"] = ",".join(deny)
     env["LOOP_GATE_VERIFIER"] = verifier
+    # Preserve receipt secret from the parent environment when present.
+    if os.environ.get("LOOP_GATE_RECEIPT_SECRET"):
+        env["LOOP_GATE_RECEIPT_SECRET"] = os.environ["LOOP_GATE_RECEIPT_SECRET"]
     env.pop("LOOP_GATE_DISABLED", None)
     return env
 
@@ -471,8 +614,8 @@ def main(argv: list[str] | None = None) -> int:
                     "kind": "allowed",
                     "action": action,
                     "reason": reason,
-                    "argv": gh_args,
-                    "meta": meta,
+                    "argv": redact_argv(gh_args),
+                    "meta": {k: v for k, v in meta.items() if k != "raw"},
                 }) + "\n")
 
     result = subprocess.run([real, *gh_args])

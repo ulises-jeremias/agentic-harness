@@ -47,17 +47,22 @@ def test_write_state_md_quotes_hash(loop_ns, tmp_path: Path) -> None:
         {
             "last_run": "2026-07-16T12:00:00Z",
             "last_run_status": "completed",
-            "pending": ["nanlabs/backend-reference#136 - isort"],
+            "pending": ["nanlabs/backend-reference#136 - isort", "true", "null"],
             "escalations": [],
         },
     )
     text = (loop_dir / "STATE.md").read_text(encoding="utf-8")
     assert "nanlabs/backend-reference#136" in text
     assert text.split("pending:")[1].splitlines()[1].strip().startswith("- \"")
+    # Always-quoted strings: YAML booleans/nulls must not be unquoted
+    assert '"true"' in text
+    assert '"null"' in text
+    assert '"2026-07-16T12:00:00Z"' in text
     # Round-trip must keep the PR number (not truncate at #)
     loaded = loop_ns["parse_state_md"](loop_dir)
     pending = loaded.get("pending") or []
     assert any("#136" in str(p) for p in pending)
+    assert "true" in [str(p) for p in pending]
 
 
 def test_load_request_body_prefers_request_md(loop_ns, tmp_path: Path) -> None:
