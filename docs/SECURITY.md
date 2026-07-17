@@ -157,30 +157,30 @@ All `devcompanion` jobs log LLM policy decisions to `~/.local/share/agentic-work
 
 ### Tier system
 
-| Tier | Writes | PRs | Comments | Risk |
-|------|-------|-----|----------|------|
-| L1 | None | No | No | Safe: read-only report |
-| L2 | Draft only | Draft only | Draft only | Guarded: human approval required |
-| L3 | Yes | Yes | Yes | Automated: requires maker/checker pattern |
+| Tier | Autonomy | Mutations | Risk |
+|------|----------|-----------|------|
+| L1 | Report-only | None (`allowlist: []`) | Safe: reads + `report.md` only |
+| L2 | Assisted | Only allowlisted actions (typically `comment` / `label` / `assign`) | Guarded: no merge/close |
+| L3 | Unattended on allowlist | Allowlisted only; deny list is absolute | Automated: hard gate + receipts |
+
+### Hard gate (`bin/loop-gh-gate`)
+
+During `bin/loop run`, the runner installs a PATH-first `gh` shim that intercepts
+mutating GitHub CLI commands:
+
+1. Action must match the loop **tier** (L1 blocks all mutations; L2 blocks merge/close/…)
+2. Action must be on **allowlist** and not on **deny**
+3. **merge** and **close** additionally require a verifier receipt JSON under
+   `runs/<id>/verifier-receipts/` (approved, matching repo/number, <1h old)
+4. Denied calls exit with code **78** and append to `gate-denials.jsonl`
+
+Read-only `gh` commands pass through to the real binary.
 
 ### Exit conditions as safety net
 
-Every loop declares exit conditions that stop execution:
-
-```yaml
-
-exit:
-
-  - condition: "cost_exceeds 5.00"
-    action: "pause"
-
-  - condition: "error_rate > 0.1"
-    action: "stop"
-
-  - condition: "consecutive_failures > 3"
-    action: "stop_and_alert"
-
-```
+Every loop declares exit conditions that stop the current run (see `LOOP.md`):
+`goal_met`, `budget_exhausted`, `human_escalation`, and tier-specific conditions
+such as `requires_pr` / `safe_to_commit`.
 
 ### Loop credential isolation
 
@@ -205,7 +205,7 @@ ExecStart=%h/.ai-workspace/bin/loop run daily-triage
 |-------------|------|-----------|
 | Read `knowledge/` | Learn project patterns and processes | Knowledge hygiene checklist (above) |
 | Read `packs/` | Discover repo URLs and project IDs | Don't put secrets in packs |
-| Execute `bin/loop` | Run autonomous loops with your credentials | Loop tier system prevents destructive L3 loops |
+| Execute `bin/loop` | Run autonomous loops with your credentials | Tier system + `bin/loop-gh-gate` hard gate (allowlist/deny/receipts) |
 | Execute `bin/devcompanion` | Queue jobs that consume API tokens | LLM policy per pack prevents unauthorized provider use |
 | Write to `knowledge/` | Inject malicious patterns into future sessions | Review knowledge entries before committing |
 

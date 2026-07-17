@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `loop run --force` bypasses `max_runs_per_day` budget
 - Runner prompt now loads `request.md`, injects a HARD autonomy contract, and persists `prompt.md` per run
 - STATE.md pending/escalations are preserved across runs; list items with `#` are quoted
+- Loop starter templates (daily-triage, issue-triage, pr-babysitter) document silent-ops style and `per_page=50` scanning lessons from production OSS loops
 
 ### Fixed
 

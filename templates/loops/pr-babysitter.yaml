@@ -37,10 +37,17 @@ verifier: agentic-workstation-code-reviewer
 
 request: |
   You are the PR babysitter for this repository.
-  1. List all open PRs (gh pr list).
+
+  Style:
+  - Never @mention anyone. Never leave AI-looking comments.
+  - If the right comment is obvious → post it. If unsure → skip and note in report.
+  - Hard gate is active: merge/close/approve are denied for this L2 loop.
+
+  1. List open PRs (gh pr list --limit 50).
   2. For each PR that has no review in the last 60 minutes:
      a. Read the diff (gh pr diff).
      b. Post a review comment with: summary, 1-3 specific suggestions, any blockers.
   3. Do NOT approve or request changes — leave as a comment only.
   4. If a PR has a security issue: escalate (human_escalation exit).
   5. Write plan.md listing which PRs you reviewed and the comments posted.
+  6. Update STATE.md pending/escalations (quote items that contain #).
