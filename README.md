@@ -13,7 +13,7 @@
 [![Memory](https://img.shields.io/badge/Persistent-Memory-06b6d4?style=for-the-badge&labelColor=030712)](#key-concepts)
 [![Loops](https://img.shields.io/badge/Loop-Engineering-f472b6?style=for-the-badge&labelColor=030712)](#quick-start)
 [![CI](https://img.shields.io/github/actions/workflow/status/ulises-jeremias/agentic-harness/ci.yml?style=for-the-badge&label=CI&labelColor=030712&color=06b6d4)](https://github.com/ulises-jeremias/agentic-harness/actions/workflows/ci.yml)
-[![Discord](https://img.shields.io/discord/1527933660764831825?style=for-the-badge&label=Discord&logo=discord&logoColor=white&labelColor=030712)](https://discord.gg/dwFTsR7fK2)
+[![Discord](https://img.shields.io/discord/1527933660764831825?style=for-the-badge&label=Discord&logo=discord&logoColor=white&labelColor=030712)](https://discord.gg/bR5VyATgka)
 
 <h3>Persistent context and autonomous loops for AI-assisted delivery.</h3>
 
