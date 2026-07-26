@@ -463,7 +463,11 @@ def _try_claude_runner(prompt: str, run_dir: Path, meta: dict[str, Any] | None =
         ok("claude runner completed")
         return True
 
-    warn(f"claude runner exited {result.returncode}: {result.stderr[:200]}")
+    # Claude Code writes auth/error output to stdout, not stderr — show both.
+    error_output = (result.stderr + result.stdout).strip()[:400]
+    warn(f"claude runner exited {result.returncode}: {error_output or '(no output)'}")
+    if result.returncode == 1 and not error_output:
+        warn("  Hint: Claude Code may not be authenticated — run: claude /login")
     return False
 
 
@@ -495,7 +499,8 @@ def _try_opencode_runner(prompt: str, run_dir: Path, meta: dict[str, Any] | None
         ok("opencode runner completed")
         return True
 
-    warn(f"opencode runner exited {result.returncode}: {result.stderr[:200]}")
+    error_output = (result.stderr + result.stdout).strip()[:400]
+    warn(f"opencode runner exited {result.returncode}: {error_output or '(no output)'}")
     return False
 
 
