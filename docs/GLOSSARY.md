@@ -92,4 +92,4 @@ Shared terminology for the AI Workspace + agentic-workstation ecosystem.
 : A detached git checkout created by `bin/loop run` to execute work on a clean copy of the workspace. Automatically removed after the run completes or is cancelled.
 
 **workspace-context**
-: The session snapshot CLI at `bin/workspace-context`. Prints active state, loads packs/personas/profiles, validates schemas, and manages persona handoffs.
+: The session snapshot CLI at `agent-toolkit workspace`. Prints active state, loads packs/personas/profiles, validates schemas, and manages persona handoffs.

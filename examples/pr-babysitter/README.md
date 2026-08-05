@@ -21,7 +21,7 @@ agent-toolkit project clone owner/my-frontend
 
 # 2. Load the multi-repo pack
 cp examples/pr-babysitter/pack.yaml packs/my-project.yaml
-./bin/workspace-context load packs/my-project.yaml
+agent-toolkit workspace load packs/my-project.yaml
 
 # 3. Initialize the loop
 ./bin/loop init pr-babysitter

@@ -21,7 +21,7 @@ graph TB
     end
 
     subgraph "Harness Layer"
-        WCTX[bin/workspace-context<br/>Session Snapshot]
+        WCTX[agent-toolkit workspace<br/>Session Snapshot]
         AMEM[bin/assistant-memory<br/>Knowledge CLI]
         DC[bin/devcompanion<br/>Job Queue]
         PI[agent-toolkit project<br/>Repo Manager]
@@ -104,7 +104,7 @@ graph TB
 
 | Component | Location | Purpose |
 |-----------|----------|---------|
-| **workspace-context** | `bin/workspace-context` | Generates session snapshot: packs, personas, skills, knowledge |
+| **workspace-context** | `agent-toolkit workspace` | Generates session snapshot: packs, personas, skills, knowledge |
 | **assistant-memory** | `bin/assistant-memory` | Search, add, inject, and review knowledge entries |
 | **devcompanion** | `bin/devcompanion` | Background job queue: code reviews, PRs, CI fixes, investigations |
 | **agent-toolkit project** | `agent-toolkit project` | Clone repos and manage symlinks in projects/ |

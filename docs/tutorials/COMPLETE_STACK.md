@@ -69,7 +69,7 @@ Verify:
 
 ```bash
 
-./bin/workspace-context
+agent-toolkit workspace
 
 ```
 
@@ -177,7 +177,7 @@ conventions:
 ```bash
 
 cd ~/.ai-workspace
-./bin/workspace-context load --pack packs/hello-stack.yaml
+agent-toolkit workspace load --pack packs/hello-stack.yaml
 claude  # or opencode / cursor
 
 ```

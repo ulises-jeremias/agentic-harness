@@ -44,7 +44,7 @@
 - For delivery: follow plan → implement → review → PR phases
 - Use `workdir` to change repo context — never `cd && command`
 - Report findings in the user's language; write all output artifacts (PRs, tickets, commits) in English
-- Run `./bin/workspace-context` at session start if available
+- Run `agent-toolkit workspace` at session start if available
 
 **Never:**
 
@@ -152,7 +152,7 @@ Packs bundle context for a specific client or project:
 
 ```bash
 # Load a pack at session start
-./bin/workspace-context load packs/my-client.yaml
+agent-toolkit workspace load packs/my-client.yaml
 ```
 
 → [`docs/PACKS.md`](docs/PACKS.md)

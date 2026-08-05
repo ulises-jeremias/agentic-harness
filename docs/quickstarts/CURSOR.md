@@ -31,7 +31,7 @@ Run workspace-context and assistant-memory inject. What do you know about my pro
 In Cursor's terminal:
 
 ```bash
-./bin/workspace-context load --pack packs/my-project.yaml
+agent-toolkit workspace load --pack packs/my-project.yaml
 ```
 
 Then in AI chat:
@@ -51,7 +51,7 @@ Act as the implementer persona. We're going to build a feature.
 Or load explicitly:
 
 ```bash
-./bin/workspace-context load --persona implementer
+agent-toolkit workspace load --persona implementer
 ```
 
 ## Cursor-Specific Features

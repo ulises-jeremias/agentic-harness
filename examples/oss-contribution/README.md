@@ -22,7 +22,7 @@ agent-toolkit project clone owner/some-oss-project
 #    (creates profiles/oss-contrib.yaml if it doesn't exist)
 cat profiles/oss-contrib.yaml   # review the profile
 
-./bin/workspace-context load --profile oss-contrib
+agent-toolkit workspace load --profile oss-contrib
 
 # 3. Search knowledge for anything we already know
 ./bin/assistant-memory search --tag oss "fork workflow"

@@ -197,7 +197,7 @@ agent-toolkit project list
 ./bin/assistant-memory todo
 
 # Get session context snapshot
-./bin/workspace-context
+agent-toolkit workspace
 
 # Queue a test job (no LLM)
 agent-toolkit devcompanion queue my-project --template code-review

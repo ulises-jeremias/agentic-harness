@@ -23,7 +23,7 @@ Instead of re-explaining context every session, you load a pack.
 ### Load a pack
 
 ```bash
-./bin/workspace-context load packs/my-client.yaml
+agent-toolkit workspace load packs/my-client.yaml
 ```
 
 This outputs the pack contents as context and marks it as the active pack (saved to `.active-pack`).
@@ -31,7 +31,7 @@ This outputs the pack contents as context and marks it as the active pack (saved
 ### See active pack
 
 ```bash
-./bin/workspace-context     # shows active pack in snapshot
+agent-toolkit workspace     # shows active pack in snapshot
 ```
 
 ### Deactivate
@@ -97,7 +97,7 @@ vim packs/my-client.yaml
 1. Load it:
 
 ```bash
-./bin/workspace-context load packs/my-client.yaml
+agent-toolkit workspace load packs/my-client.yaml
 ```
 
 ---

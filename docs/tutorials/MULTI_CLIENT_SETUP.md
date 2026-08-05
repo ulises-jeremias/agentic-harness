@@ -163,10 +163,10 @@ env_file: agency.env
 source ~/.config/agentic-workstation/env.d/acme.env
 
 # Load Acme context
-./bin/workspace-context load --pack packs/acme-corp.yaml
+agent-toolkit workspace load --pack packs/acme-corp.yaml
 
 # Verify
-./bin/workspace-context
+agent-toolkit workspace
 ```
 
 Expected output:
@@ -193,7 +193,7 @@ The AI uses the Jira skill with ACME project context — it won't accidentally q
 source ~/.config/agentic-workstation/env.d/startupx.env
 
 # Switch context
-./bin/workspace-context load --pack packs/startup-x.yaml
+agent-toolkit workspace load --pack packs/startup-x.yaml
 ```
 
 The AI now sees Startup X's repos, ClickUp space, and TypeScript conventions. Acme's Jira context is gone.
@@ -202,7 +202,7 @@ The AI now sees Startup X's repos, ClickUp space, and TypeScript conventions. Ac
 
 ```bash
 source ~/.config/agentic-workstation/env.d/agency.env
-./bin/workspace-context load --pack packs/agency.yaml
+agent-toolkit workspace load --pack packs/agency.yaml
 ```
 
 ---
@@ -341,7 +341,7 @@ done
 Your pack's `jira_project` is incorrect, or you loaded the wrong pack. Verify:
 
 ```bash
-./bin/workspace-context | grep jira
+agent-toolkit workspace | grep jira
 ```
 
 ### "LLM policy blocks my provider"
