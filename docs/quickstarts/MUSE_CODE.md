@@ -4,7 +4,7 @@
 
 ## Prerequisites
 
-- Muse Code installed (`curl -fsSL https://dev.meta.ai/install.sh | bash`)
+- Muse Code installed (`curl -fsSL https://dev.meta.ai/install.sh | bash` — official Meta installer; verifies `x-content-sha256` checksum as documented at https://developer.meta.com/ai/products/muse-code/; alternatively download and inspect `https://dev.meta.ai/install.sh` before execution)
 - agentic-harness cloned to `~/.ai-workspace`
 
 ## Setup
