@@ -942,16 +942,13 @@ def _close_loop(run_dir: Path, rid: str) -> None:
         if event.get("kind") == "decision" and event.get("tag") == "learning":
             content = event.get("content", "")
             if content:
-                add_script = WORKSPACE_ROOT / "bin" / "assistant-memory"
-                if add_script.exists():
-                    subprocess.run(
-                        [sys.executable, str(add_script), "add",
-                         "--type", "learning",
-                         "--from-loop", rid,
-                         content],
-                        capture_output=True,
-                    )
-                    added += 1
+                subprocess.run(
+                    ["agent-toolkit", "memory", "add",
+                     "--type", "learning",
+                     content],
+                    capture_output=True,
+                )
+                added += 1
         if event.get("kind") == "run_start":
             loop_name = event.get("run_id", rid)
 
