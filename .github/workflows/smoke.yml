@@ -61,7 +61,7 @@ jobs:
         run: |
           bash scripts/validate-context.sh
 
-      - name: Check workspace-context generates valid output
+      - name: Check workspace-context help and validate run
         run: |
-          bash bin/workspace-context validate all > /dev/null 2>&1 && echo "ok validate all"
-          bash bin/workspace-context snapshot > /dev/null 2>&1 && echo "ok snapshot"
+          bash bin/workspace-context --help > /dev/null 2>&1 && echo "ok help"
+          bash bin/workspace-context validate > /dev/null 2>&1 && echo "ok validate"

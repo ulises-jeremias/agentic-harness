@@ -133,7 +133,7 @@ See [docs/LOOPS.md](docs/LOOPS.md) for the full loop reference and anti-patterns
       <h3>🧠 Persistent Memory</h3>
       <sub>Your AI remembers across sessions. <code>knowledge/</code> stores processes, learnings, todos, and patterns — indexed, searchable, and version-controlled.</sub>
       <br><br>
-      <sub><code>./bin/assistant-memory search "topic"</code></sub>
+      <sub><code>agent-toolkit memory search "topic"</code></sub>
     </td>
   </tr>
 </table>
@@ -214,7 +214,7 @@ Together, these three projects form my personal workspace: a polished Developer 
 ```bash
 # Verify setup
 ./bin/project-indexer list          # shows indexed repos
-./bin/assistant-memory todo         # shows pending items
+agent-toolkit memory todo         # shows pending items
 ./bin/workspace-context             # session state snapshot
 
 # Queue a test job

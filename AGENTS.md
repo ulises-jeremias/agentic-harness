@@ -100,11 +100,11 @@
 Check `knowledge/` **before asking**. Save discoveries **after learning**.
 
 ```bash
-./bin/assistant-memory search "topic"             # Find existing knowledge
-./bin/assistant-memory add --type learning "..."  # Save new pattern
-./bin/assistant-memory add --type todo "..."      # Track follow-up
-./bin/assistant-memory inject                     # Output context for session start
-./bin/assistant-memory todo                       # Review pending items
+agent-toolkit memory search "topic"             # Find existing knowledge
+agent-toolkit memory add --type learning "..."  # Save new pattern
+agent-toolkit memory add --type todo "..."      # Track follow-up
+agent-toolkit memory inject                     # Output context for session start
+agent-toolkit memory todo                       # Review pending items
 ```
 
 Rules:
