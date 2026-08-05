@@ -231,7 +231,7 @@ Requested: openai. Blocked by strict mode.
 ### Verifying policy
 
 ```bash
-./bin/devcompanion llm-status
+agent-toolkit devcompanion llm-status
 ```
 
 ```text

@@ -1,6 +1,6 @@
 # devcompanion — Operational Guide
 
-`bin/devcompanion` is a standalone Python CLI that manages a background job queue
+`agent-toolkit devcompanion` is a standalone Python CLI that manages a background job queue
 for your AI Workspace. It resolves project paths, queues jobs, runs them (with or
 without an LLM), and keeps `knowledge/todos/pending.md` in sync.
 
@@ -9,7 +9,7 @@ without an LLM), and keeps `knowledge/todos/pending.md` in sync.
 ## Architecture
 
 ```text
-bin/devcompanion  (standalone Python CLI)
+agent-toolkit devcompanion  (standalone Python CLI)
        │
        ├─ reads    projects/              → resolves project name → repo path
        ├─ reads    templates/jobs/        → job templates
@@ -62,26 +62,26 @@ export HARNESS_RUNNER_DIR="$HOME/.local/share/agentic-workstation/dev-companion/
 
 ```bash
 # Using a template
-./bin/devcompanion queue <project> --template <template-name>
+agent-toolkit devcompanion queue <project> --template <template-name>
 
 # Custom request
-./bin/devcompanion queue <project> --request "describe what you want done"
+agent-toolkit devcompanion queue <project> --request "describe what you want done"
 
 # Template + extra context
-./bin/devcompanion queue <project> --template refactor --request "focus on auth module"
+agent-toolkit devcompanion queue <project> --template refactor --request "focus on auth module"
 
 # Skip LLM (skeleton plan only — no API key needed)
-./bin/devcompanion queue <project> --template code-review --no-llm
+agent-toolkit devcompanion queue <project> --template code-review --no-llm
 ```
 
 ### 2. Run the oldest pending job
 
 ```bash
 # Uses LLM if available, skeleton otherwise
-./bin/devcompanion run-once
+agent-toolkit devcompanion run-once
 
 # Force skeleton (no LLM)
-./bin/devcompanion run-once --no-llm
+agent-toolkit devcompanion run-once --no-llm
 ```
 
 Artifacts are written to:
@@ -90,7 +90,7 @@ Artifacts are written to:
 ### 3. Check status
 
 ```bash
-./bin/devcompanion status
+agent-toolkit devcompanion status
 ```
 
 Shows pending / processing / done / failed jobs and indexed projects.
@@ -98,7 +98,7 @@ Shows pending / processing / done / failed jobs and indexed projects.
 ### 4. Mark done
 
 ```bash
-./bin/devcompanion done <job-id>
+agent-toolkit devcompanion done <job-id>
 ```
 
 Moves the job to `done/` and refreshes `knowledge/todos/pending.md`.
@@ -106,7 +106,7 @@ Moves the job to `done/` and refreshes `knowledge/todos/pending.md`.
 ### 5. Sync todos manually
 
 ```bash
-./bin/devcompanion sync-todos
+agent-toolkit devcompanion sync-todos
 ```
 
 Regenerates `knowledge/todos/pending.md` from current queue state.
@@ -116,7 +116,7 @@ Regenerates `knowledge/todos/pending.md` from current queue state.
 ## Available templates
 
 ```bash
-./bin/devcompanion templates
+agent-toolkit devcompanion templates
 ```
 
 | Template | Description |
@@ -161,24 +161,24 @@ Do not edit these manually — they are regenerated on every `queue`, `done`, an
 ### Code review on a project
 
 ```bash
-./bin/devcompanion queue my-project --template code-review
-./bin/devcompanion run-once
+agent-toolkit devcompanion queue my-project --template code-review
+agent-toolkit devcompanion run-once
 ```
 
 ### Investigate a bug
 
 ```bash
-./bin/devcompanion queue my-api --template investigate \
+agent-toolkit devcompanion queue my-api --template investigate \
   --request "GET /users returns 500 on empty database"
-./bin/devcompanion run-once
+agent-toolkit devcompanion run-once
 ```
 
 ### Custom one-off task
 
 ```bash
-./bin/devcompanion queue my-api \
+agent-toolkit devcompanion queue my-api \
   --request "add pagination to GET /users endpoint, follow existing patterns"
-./bin/devcompanion run-once
+agent-toolkit devcompanion run-once
 ```
 
 ---
@@ -210,7 +210,7 @@ export DOTS_AI_DEVCOMPANION_LLM_ALLOWLIST="anthropic"
 export DOTS_AI_DEVCOMPANION_LLM_STRICT="1"
 
 dots-devcompanion llm-status         # verify, never invokes the model
-./bin/devcompanion run-once         # honors the same env vars
+agent-toolkit devcompanion run-once         # honors the same env vars
 ```
 
 Per-job overrides go inside the `.job` file's `llm` block (subset only — a
@@ -254,19 +254,19 @@ for the full reference.
 ### "Project not found"
 
 ```bash
-./bin/devcompanion projects          # list indexed projects
+agent-toolkit devcompanion projects          # list indexed projects
 ./bin/project-indexer clone owner/repo   # add missing project
 ```
 
 ### "No pending jobs"
 
 ```bash
-./bin/devcompanion status            # verify queue state
+agent-toolkit devcompanion status            # verify queue state
 ```
 
 ### "Template not found"
 
 ```bash
-./bin/devcompanion templates         # list available templates
+agent-toolkit devcompanion templates         # list available templates
 ls templates/jobs/                   # check template files
 ```

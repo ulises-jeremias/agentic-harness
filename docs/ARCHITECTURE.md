@@ -23,7 +23,7 @@ graph TB
     subgraph "Harness Layer"
         WCTX[bin/workspace-context<br/>Session Snapshot]
         AMEM[bin/assistant-memory<br/>Knowledge CLI]
-        DC[bin/devcompanion<br/>Job Queue]
+        DC[agent-toolkit devcompanion<br/>Job Queue]
         PI[bin/project-indexer<br/>Repo Manager]
         SCHEMAS[schemas/<br/>JSON Schema Validation]
     end
@@ -106,7 +106,7 @@ graph TB
 |-----------|----------|---------|
 | **workspace-context** | `bin/workspace-context` | Generates session snapshot: packs, personas, skills, knowledge |
 | **assistant-memory** | `bin/assistant-memory` | Search, add, inject, and review knowledge entries |
-| **devcompanion** | `bin/devcompanion` | Background job queue: code reviews, PRs, CI fixes, investigations |
+| **devcompanion** | `agent-toolkit devcompanion` | Background job queue: code reviews, PRs, CI fixes, investigations |
 | **project-indexer** | `bin/project-indexer` | Clone repos and manage symlinks in projects/ |
 | **Schema Validation** | `schemas/` | JSON Schema validation for all context surfaces |
 
@@ -161,7 +161,7 @@ graph TB
       └─ scans issues → updates STATE.md → applies exit conditions
 
 8. Dev companion processes queue
-   └─ bin/devcompanion run-once
+   └─ agent-toolkit devcompanion run-once
       └─ picks up queued jobs → runs LLM-powered worker → updates status
 ```
 

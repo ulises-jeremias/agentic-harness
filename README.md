@@ -127,7 +127,7 @@ See [docs/LOOPS.md](docs/LOOPS.md) for the full loop reference and anti-patterns
       <h3>⏳ DevCompanion Queue</h3>
       <sub>Background job queue for async tasks — code reviews, refactors, CI fixes, investigations. Jobs run in a separate agent session and leave artifacts.</sub>
       <br><br>
-      <sub><code>./bin/devcompanion queue my-project --template code-review</code></sub>
+      <sub><code>agent-toolkit devcompanion queue my-project --template code-review</code></sub>
     </td>
     <td width="50%" valign="top">
       <h3>🧠 Persistent Memory</h3>
@@ -218,8 +218,8 @@ agent-toolkit memory todo         # shows pending items
 ./bin/workspace-context             # session state snapshot
 
 # Queue a test job
-./bin/devcompanion queue my-project --template code-review
-./bin/devcompanion run-once --no-llm
+agent-toolkit devcompanion queue my-project --template code-review
+agent-toolkit devcompanion run-once --no-llm
 ```
 
 ---
@@ -230,7 +230,7 @@ agent-toolkit memory todo         # shows pending items
 |-------|-----|
 | `project-indexer: command not found` | Run `chmod +x ./bin/*` |
 | DevCompanion: "No LLM provider" | Set `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` |
-| Pending jobs stuck | Run `./bin/devcompanion status` |
+| Pending jobs stuck | Run `agent-toolkit devcompanion status` |
 | Skills not loading | Check your AI tool's skill pack configuration |
 
 ---
