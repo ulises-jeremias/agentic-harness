@@ -20,7 +20,7 @@
 
 [Quick Start](#quick-start) · [Key Concepts](#key-concepts) · [Architecture](#architecture) · [Docs](#docs) · [Personal DX Stack](#personal-dx-stack) · [Contributing](CONTRIBUTING.md)
 
-Works with **Claude Code**, **opencode**, **Cursor**, **Gemini CLI**, and **GitHub Copilot**.
+Works with **Claude Code**, **Muse Code**, **opencode**, **Cursor**, **Gemini CLI**, and **GitHub Copilot**.
 
 </div>
 
@@ -78,7 +78,7 @@ agent-toolkit loop status
 agent-toolkit loop audit daily-triage
 
 # 6. Open in your AI tool for interactive sessions
-opencode        # or: claude / cursor / gemini
+muse            # or: claude / opencode / cursor / gemini
 ```
 
 > **The loop runs autonomously between your sessions.** Wire it to a scheduler when you're ready to upgrade to L2 (PR-gated).

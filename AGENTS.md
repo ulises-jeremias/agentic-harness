@@ -227,6 +227,7 @@ inside the IDE with the client's account.
 | AI Tool | Config read |
 |---------|-------------|
 | Claude Code | `AGENTS.md` |
+| Muse Code | `AGENTS.md` (also via `muse` CLI, skills in `~/.config/muse/skills/` / `.agents/skills/`) |
 | opencode / Cursor | `CLAUDE.md` → symlink to `AGENTS.md` |
 | Gemini CLI | `GEMINI.md` → symlink to `AGENTS.md` |
 | GitHub Copilot | `.github/copilot-instructions.md` → symlink to `AGENTS.md` |

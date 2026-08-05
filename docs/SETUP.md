@@ -8,7 +8,7 @@
 
 - Git
 - Bash or Zsh
-- AI tool: OpenCode (recommended), Claude Code, Gemini CLI, GitHub Copilot, or Cursor
+- AI tool: Muse Code (Meta), OpenCode (recommended), Claude Code, Gemini CLI, GitHub Copilot, or Cursor
 
 ---
 
