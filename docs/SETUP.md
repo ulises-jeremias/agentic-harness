@@ -197,7 +197,7 @@ Cursor reads `CLAUDE.md` (symlinked to `AGENTS.md`).
 ./bin/assistant-memory todo
 
 # Get session context snapshot
-./bin/workspace-context
+agent-toolkit workspace
 
 # Queue a test job (no LLM)
 ./bin/devcompanion queue my-project --template code-review

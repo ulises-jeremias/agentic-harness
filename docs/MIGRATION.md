@@ -266,7 +266,7 @@ If upgrading from v0.1: pack format changed. See `schemas/pack.schema.json` for 
 Old harness (< v0.3) used different CLI names:
 
 - `bin/memory` -> `bin/assistant-memory`
-- `bin/context` -> `bin/workspace-context`
+- `bin/context` -> `agent-toolkit workspace`
 - `bin/queue` -> `bin/devcompanion`
 
 ### Repository rename

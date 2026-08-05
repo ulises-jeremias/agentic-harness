@@ -69,7 +69,7 @@ Verify:
 
 ```bash
 
-./bin/workspace-context
+agent-toolkit workspace
 
 ```
 
@@ -177,7 +177,7 @@ conventions:
 ```bash
 
 cd ~/.ai-workspace
-./bin/workspace-context load --pack packs/hello-stack.yaml
+agent-toolkit workspace load --pack packs/hello-stack.yaml
 claude  # or opencode / cursor
 
 ```
@@ -365,7 +365,7 @@ agentic-workstation (L1)          agentic-harness (L2)          hello-stack (L3)
 │ 6 MCP templates      │  skills  │ personas/            │  ctx  │ tests/           │
 │ dots-* CLI           │  agents  │ loops/daily-triage   │       │ .github/         │
 └─────────────────────┘          │ bin/assistant-memory  │       └──────────────────┘
-                                  │ bin/workspace-context │
+                                  │ agent-toolkit workspace │
                                   │ bin/devcompanion      │
                                   └─────────────────────┘
 

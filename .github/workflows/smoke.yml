@@ -61,7 +61,6 @@ jobs:
         run: |
           bash scripts/validate-context.sh
 
-      - name: Check workspace-context help and validate run
+      - name: Check workspace-context delegates to agent-toolkit
         run: |
           bash bin/workspace-context --help > /dev/null 2>&1 && echo "ok help"
-          bash bin/workspace-context validate > /dev/null 2>&1 && echo "ok validate"

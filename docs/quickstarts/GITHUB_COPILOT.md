@@ -31,14 +31,14 @@ Read AGENTS.md. What tools and skills are available?
 In the integrated terminal:
 
 ```bash
-./bin/workspace-context load --pack packs/my-project.yaml
+agent-toolkit workspace load --pack packs/my-project.yaml
 ```
 
 Then in Copilot Chat, paste the workspace context:
 
 ```text
 Here's my current workspace context:
-[paste output of ./bin/workspace-context]
+[paste output of agent-toolkit workspace]
 ```
 
 ## Copilot-Specific Features

@@ -119,7 +119,7 @@ See [docs/LOOPS.md](docs/LOOPS.md) for the full loop reference and anti-patterns
       <h3>📦 Packs</h3>
       <sub>Packs bundle project-specific context (repos, process docs, IDs, credentials) so you can switch between clients or projects with a single command.</sub>
       <br><br>
-      <sub><code>./bin/workspace-context load packs/my-client.yaml</code></sub>
+      <sub><code>agent-toolkit workspace load packs/my-client.yaml</code></sub>
     </td>
   </tr>
   <tr>
@@ -215,7 +215,7 @@ Together, these three projects form my personal workspace: a polished Developer 
 # Verify setup
 ./bin/project-indexer list          # shows indexed repos
 agent-toolkit memory todo         # shows pending items
-./bin/workspace-context             # session state snapshot
+agent-toolkit workspace             # session state snapshot
 
 # Queue a test job
 ./bin/devcompanion queue my-project --template code-review

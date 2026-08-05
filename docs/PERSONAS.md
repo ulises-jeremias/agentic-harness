@@ -35,7 +35,7 @@ Activating a persona prevents scope creep. If you want a review, you don't want 
 ### Activate a persona
 
 ```bash
-./bin/workspace-context use-persona reviewer
+agent-toolkit workspace use-persona reviewer
 ```
 
 This writes `.active-persona` to the workspace root, which `workspace-context` snapshots at session start.
@@ -66,7 +66,7 @@ boundaries for the current session.
 ### List available personas
 
 ```bash
-./bin/workspace-context personas
+agent-toolkit workspace personas
 ```
 
 ### Deactivate

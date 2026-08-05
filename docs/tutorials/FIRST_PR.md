@@ -42,7 +42,7 @@ Expected output:
 ### Step 2: Verify the harness works
 
 ```bash
-./bin/workspace-context
+agent-toolkit workspace
 ```
 
 You should see a snapshot with:
@@ -111,7 +111,7 @@ conventions:
 ### Step 6: Load the pack
 
 ```bash
-./bin/workspace-context load --pack packs/hello-harness.yaml
+agent-toolkit workspace load --pack packs/hello-harness.yaml
 ```
 
 Now tell your AI: "Load this pack context and tell me what you know about the hello-harness project."
@@ -123,7 +123,7 @@ The AI should respond with the repos, conventions, and language from your pack.
 For implementation work, use the implementer persona:
 
 ```bash
-./bin/workspace-context load --persona implementer
+agent-toolkit workspace load --persona implementer
 ```
 
 Or tell your AI: "Switch to implementer persona. We're going to add a feature."
@@ -272,5 +272,5 @@ Make sure you ran `assistant-memory add` (not just thought about it). Check what
 If you're stuck because the persona blocks an action you need:
 
 ```bash
-./bin/workspace-context load --persona implementer  # or just don't load a persona
+agent-toolkit workspace load --persona implementer  # or just don't load a persona
 ```
