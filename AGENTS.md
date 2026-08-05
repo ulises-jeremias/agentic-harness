@@ -81,7 +81,7 @@
 | `ui-ux-pro-max` | UI/UX design, components, layouts |
 | `github-cli-workflow` | Push branch, create draft PR (GitHub) |
 | `gitlab-cli-workflow` | Push branch, create draft MR (GitLab) |
-| `agentic-workstation-workstation-triage` | Workstation health diagnostics |
+| `dots-workstation-triage` | Workstation health diagnostics (agentic-workstation) |
 
 ### Subagents
 
@@ -94,7 +94,7 @@
 | `explore` | Fast codebase search |
 | `docs-lookup` | Documentation and API references |
 
-> **agentic-workstation installs**: agents are deployed with the `agentic-workstation-` prefix by `agentic-workstation` (e.g. `agentic-workstation-code-reviewer`, `agentic-workstation-security-reviewer`). Update this table accordingly. **Add your team's custom skills here** as you configure them.
+> **Skill naming**: `agent-toolkit` skills use bare names (`code-reviewer`, `memory`, etc.). `agentic-workstation` prefixes its bundled local skills with `dots-workstation-` (e.g. `dots-workstation-triage`, `dots-workstation-assistant`). Update this table to match what's installed on your machine.
 
 ---
 
@@ -276,6 +276,31 @@ agent-toolkit doctor                   # verify everything is set up
 1. Run `agent-toolkit workspace context` to get workspace state
 2. Run `agent-toolkit memory inject` to load persistent knowledge
 3. Check `agent-toolkit memory todo` for pending follow-ups
+
+---
+
+## Ecosystem — Three-Tier Model
+
+This workspace is **L3 (project overlay)** in a three-tier personal DX stack:
+
+| Layer | Repo | Role |
+|-------|------|------|
+| **L1** | [agentic-workstation](https://github.com/ulises-jeremias/agentic-workstation) | Machine provisioning — chezmoi, shell, packages, LLM policy |
+| **L1.5** | [agent-toolkit](https://github.com/ulises-jeremias/agent-toolkit) | Capability distribution — 52 skills, loops, profiles, MCP |
+| **L3** | **agentic-harness** (this workspace) | AI workspace scaffold for multi-repo orchestration |
+
+**Install agent-toolkit** (required for all workspace commands):
+
+```bash
+uvx agent-toolkit-cli                         # one-shot, no install required
+uv tool install agent-toolkit-cli             # permanent install via uv
+yay -S agent-toolkit-cli                      # Arch Linux via AUR
+```
+
+## Cross-Repo Links
+
+- **agent-toolkit** → [`AGENTS.md`](https://github.com/ulises-jeremias/agent-toolkit/blob/main/AGENTS.md) | [`README.md`](https://github.com/ulises-jeremias/agent-toolkit)
+- **agentic-workstation** → [`AGENTS.md`](https://github.com/ulises-jeremias/agentic-workstation/blob/main/AGENTS.md) | [`docs/AGENT_TOOLKIT.md`](https://github.com/ulises-jeremias/agentic-workstation/blob/main/docs/AGENT_TOOLKIT.md)
 
 ---
 

@@ -35,7 +35,7 @@ Works with **Claude Code**, **opencode**, **Cursor**, **Gemini CLI**, and **GitH
 This workspace was created with [agent-toolkit](https://github.com/ulises-jeremias/agent-toolkit):
 
 ```bash
-pip install agent-toolkit-cli
+uv tool install agent-toolkit-cli
 agent-toolkit workspace init --dir ~/.ai-workspace
 ```
 
