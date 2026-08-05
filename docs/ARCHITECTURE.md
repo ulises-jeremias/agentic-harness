@@ -2,6 +2,8 @@
 
 > Visual overview of the agentic-harness component architecture and data flow.
 
+![agentic-harness architecture](../static/architecture.svg)
+
 ---
 
 ## High-Level Architecture
@@ -115,7 +117,7 @@ graph TB
 | Component | Location | Purpose |
 |-----------|----------|---------|
 | **loop** | `agent-toolkit loop` | Loop orchestrator: init, run, status, audit, cost estimation |
-| **Loop Templates** | `templates/loops/` | 7 reusable templates: daily-triage, pr-babysitter, ci-sweeper, etc. |
+| **Loop Templates** | `templates/loops/` | 10 reusable templates: daily-triage, pr-babysitter, ci-sweeper, etc. |
 | **Scheduler** | systemd / launchd | OS-level timer integration for autonomous execution |
 
 ---

@@ -1,10 +1,6 @@
 <div align="center">
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="static/hero-banner.svg">
-  <source media="(prefers-color-scheme: light)" srcset="static/hero-banner.svg">
-  <img alt="agentic-harness" src="static/hero-banner.svg" width="100%">
-</picture>
+<img alt="agentic-harness" src="static/hero-banner.svg" width="100%">
 
 <br>
 <br>
@@ -22,7 +18,7 @@
   memory, personas, indexed repos, packs, queues, and feedback loops that keep AI work moving.
 </p>
 
-[Quick Start](#quick-start) · [Key Concepts](#key-concepts) · [Docs](#docs) · [Personal DX Stack](#personal-dx-stack) · [Contributing](CONTRIBUTING.md)
+[Quick Start](#quick-start) · [Key Concepts](#key-concepts) · [Architecture](#architecture) · [Docs](#docs) · [Personal DX Stack](#personal-dx-stack) · [Contributing](CONTRIBUTING.md)
 
 Works with **Claude Code**, **opencode**, **Cursor**, **Gemini CLI**, and **GitHub Copilot**.
 
@@ -127,7 +123,7 @@ See [docs/LOOPS.md](docs/LOOPS.md) for the full loop reference and anti-patterns
       <sub>Personas constrain what the AI <em>does</em> in a session — not who it is. <code>personas/reviewer.md</code> means "analyze and report, no changes".</sub>
       <br><br>
       <sub>Available:<br>
-      🛠️ <code>implementer</code> · 🔍 <code>reviewer</code> · 🔬 <code>researcher</code> · 🏗️ <code>architect</code></sub>
+      🛠️ <code>implementer</code> · 🔍 <code>reviewer</code> · 🔬 <code>researcher</code> · 🏗️ <code>architect</code> · ✍️ <code>writer</code></sub>
     </td>
     <td width="50%" valign="top">
       <h3>📦 Packs</h3>
@@ -162,18 +158,30 @@ agentic-harness/
 ├── CLAUDE.md              # Symlink → AGENTS.md (opencode/Cursor)
 ├── GEMINI.md              # Symlink → AGENTS.md (Gemini CLI)
 ├── bin/
-│   ├── agent-toolkit project    # Clone repos + manage symlinks
-│   ├── assistant-memory   # Knowledge base CLI (search, add, inject)
-│   ├── devcompanion       # Background job queue
-│   └── workspace-context  # Session state snapshot
+│   └── workspace-context  # Session state snapshot helper
 ├── docs/                  # Guides, references, and methodology
 ├── knowledge/             # Persistent AI memory (learnings, todos, patterns)
-├── personas/              # Work mode definitions (implementer, reviewer, etc.)
+├── personas/              # Work mode definitions (implementer, reviewer, writer, …)
 ├── packs/                 # Context bundles per client/project
-├── templates/jobs/        # Job templates for devcompanion
+├── templates/
+│   ├── jobs/              # Job templates for agent-toolkit devcompanion
+│   └── loops/             # 10 loop templates (daily-triage, ci-sweeper, …)
+├── static/                # Banner and architecture diagrams
 ├── projects/              # Symlinks to repos (local, gitignored)
 └── repos/                 # Cloned repos (local, gitignored)
 ```
+
+Primary CLIs come from **agent-toolkit**: `agent-toolkit workspace` · `memory` · `loop` · `devcompanion` · `project`.
+
+---
+
+## Architecture
+
+<div align="center">
+<img src="static/architecture.svg" alt="agentic-harness architecture: context, harness, and loop layers" width="96%">
+</div>
+
+Full component reference and Mermaid diagrams: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 ---
 
@@ -181,6 +189,7 @@ agentic-harness/
 
 | Guide | Description |
 |-------|-------------|
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Component architecture and data flow |
 | [`docs/SETUP.md`](docs/SETUP.md) | Initial setup and AI tool configuration |
 | [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md) | The agentic harness philosophy |
 | [`docs/WORKFLOWS.md`](docs/WORKFLOWS.md) | Task routing and skill usage patterns |
