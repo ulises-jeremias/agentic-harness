@@ -366,7 +366,7 @@ agentic-workstation (L1)          agentic-harness (L2)          hello-stack (L3)
 │ dots-* CLI           │  agents  │ loops/daily-triage   │       │ .github/         │
 └─────────────────────┘          │ bin/assistant-memory  │       └──────────────────┘
                                   │ bin/workspace-context │
-                                  │ bin/devcompanion      │
+                                  │ agent-toolkit devcompanion      │
                                   └─────────────────────┘
 
 ```

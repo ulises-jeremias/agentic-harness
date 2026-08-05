@@ -54,7 +54,7 @@ User Task
 | JIRA tasks | `jira-assistant` skill |
 | ClickUp tasks | `clickup-cli` skill |
 | Confluence | `confluence-assistant` skill |
-| Deferred work | `./bin/devcompanion queue` |
+| Deferred work | `agent-toolkit devcompanion queue` |
 
 > Customize this table in `AGENTS.md` to match your installed skills.
 
@@ -112,8 +112,8 @@ User: "implement feature X"
 ```text
 User: "do a code review of my-project in the background"
 
-1. ./bin/devcompanion queue my-project --template code-review
-2. ./bin/devcompanion run-once
+1. agent-toolkit devcompanion queue my-project --template code-review
+2. agent-toolkit devcompanion run-once
 3. Show generated plan.md artifact to user
 ```
 

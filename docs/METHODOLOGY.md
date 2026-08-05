@@ -215,6 +215,6 @@ agent-toolkit loop audit                         # cost and success rate
 agent-toolkit loop cost daily-triage             # estimate per run
 
 # Background work (one-shot)
-./bin/devcompanion queue my-project --template code-review
-./bin/devcompanion run-once
+agent-toolkit devcompanion queue my-project --template code-review
+agent-toolkit devcompanion run-once
 ```

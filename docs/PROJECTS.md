@@ -94,12 +94,12 @@ User: "work on my-project"
 
 ## projects.yaml
 
-`projects.yaml` is **auto-generated** by `bin/devcompanion` from the
+`projects.yaml` is **auto-generated** by `agent-toolkit devcompanion` from the
 `projects/` symlinks. It is gitignored and should never be edited by hand.
 
 ```bash
 # Regenerate at any time
-./bin/devcompanion projects
+agent-toolkit devcompanion projects
 ```
 
 The file is written with a `# Auto-generated — do not edit manually` header

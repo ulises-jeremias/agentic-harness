@@ -267,7 +267,7 @@ Old harness (< v0.3) used different CLI names:
 
 - `bin/memory` -> `bin/assistant-memory`
 - `bin/context` -> `bin/workspace-context`
-- `bin/queue` -> `bin/devcompanion`
+- `bin/queue` -> `agent-toolkit devcompanion`
 
 ### Repository rename
 
