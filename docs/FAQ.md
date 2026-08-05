@@ -91,7 +91,7 @@ Move to Tier 2 after you've reviewed Tier 1 output for at least a week. Move to 
 
 ### How do loops survive between terminal sessions?
 
-Each loop stores its state in `loops/<name>/STATE.md` (git-tracked). The loop reads its previous state on each run. If you schedule with `bin/loop schedule`, systemd or launchd runs it on a timer — no terminal needed.
+Each loop stores its state in `loops/<name>/STATE.md` (git-tracked). The loop reads its previous state on each run. If you schedule with `agent-toolkit loop schedule`, systemd or launchd runs it on a timer — no terminal needed.
 
 ### How much do loops cost?
 
@@ -103,7 +103,7 @@ Depends on the loop and model. A rough estimate:
 | L2 | PR babysitter (10 PRs) | ~20K | ~$0.20 |
 | L3 | CI sweeper (5 repos) | ~50K | ~$0.50 |
 
-Use `bin/loop cost <name> --monthly` for accurate projections based on actual token usage.
+Use `agent-toolkit loop cost <name> --monthly` for accurate projections based on actual token usage.
 
 ---
 
@@ -154,7 +154,7 @@ Run `workspace-context` and check the output. It prints every loaded context sur
 
 ### My loop stopped working after a repo rename
 
-Loops store repo paths in STATE.md. If you rename or move a repo, update the path in the loop's STATE.md file or re-initialize the loop with `bin/loop init <name> --template <name>`.
+Loops store repo paths in STATE.md. If you rename or move a repo, update the path in the loop's STATE.md file or re-initialize the loop with `agent-toolkit loop init <name> --template <name>`.
 
 ### I get "policy_no_provider_available" from dev companion
 

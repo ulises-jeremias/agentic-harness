@@ -271,7 +271,7 @@ Now that manual workflow works, automate recurring tasks.
 ```bash
 
 cd ~/.ai-workspace
-./bin/loop init daily-triage --template daily-triage --tier 1
+agent-toolkit loop init daily-triage --template daily-triage --tier 1
 
 ```
 
@@ -288,7 +288,7 @@ Run it:
 
 ```bash
 
-./bin/loop run daily-triage
+agent-toolkit loop run daily-triage
 
 ```
 
@@ -304,7 +304,7 @@ Report saved: loops/daily-triage/report.md
 
 ```bash
 
-./bin/loop schedule daily-triage
+agent-toolkit loop schedule daily-triage
 
 ```
 

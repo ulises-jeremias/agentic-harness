@@ -4,7 +4,7 @@
 # Designed for maintainers managing 20-50 repos.
 #
 # Usage:
-#   ./bin/loop init oss-pr-monitor --pack packs/my-ecosystem.yaml
+#   agent-toolkit loop init oss-pr-monitor --pack packs/my-ecosystem.yaml
 
 name: oss-pr-monitor
 description: "Monitor open PRs across OSS ecosystem repos and take action (L2, daily)"

@@ -193,16 +193,16 @@ Replace with loops:
 ```bash
 
 # Auto-scan issues every morning
-bin/loop init daily-triage --template daily-triage --tier 1
-bin/loop schedule daily-triage
+agent-toolkit loop init daily-triage --template daily-triage --tier 1
+agent-toolkit loop schedule daily-triage
 
 # Auto-check PRs every 4 hours
-bin/loop init pr-babysitter --template pr-babysitter --tier 2
-bin/loop schedule pr-babysitter
+agent-toolkit loop init pr-babysitter --template pr-babysitter --tier 2
+agent-toolkit loop schedule pr-babysitter
 
 # Auto-detect CI failures every hour
-bin/loop init ci-sweeper --template ci-sweeper --tier 3
-bin/loop schedule ci-sweeper
+agent-toolkit loop init ci-sweeper --template ci-sweeper --tier 3
+agent-toolkit loop schedule ci-sweeper
 
 ```
 
@@ -280,13 +280,13 @@ The harness was renamed from `ai-workspace` to `agentic-harness`. If your script
 ### If you want to go back
 
 1. Remove the harness directory: `rm -rf ~/.ai-workspace`
-2. Remove scheduled loops: `bin/loop schedule --list | xargs bin/loop schedule --remove`
+2. Remove scheduled loops: `agent-toolkit loop schedule --list | xargs agent-toolkit loop schedule --remove`
 3. Your original setup (Cursor rules, Copilot instructions, Claude projects) is untouched
 
 ### If you want to keep some parts
 
 - **Keep knowledge only**: Delete loop dirs, keep knowledge/ and packs/
-- **Keep context only**: Delete bin/loop, keep everything else
+- **Keep context only**: Remove workspace loops, keep everything else
 - **Keep everything but loops**: Don't schedule loops, use harness interactively
 
 <!-- markdownlint-enable MD024 -->

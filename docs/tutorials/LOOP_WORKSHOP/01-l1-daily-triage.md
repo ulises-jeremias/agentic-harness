@@ -20,7 +20,7 @@
 
 ```bash
 cd ~/.ai-workspace
-./bin/loop init daily-triage --template daily-triage --tier 1
+agent-toolkit loop init daily-triage --template daily-triage --tier 1
 ```
 
 Expected output:
@@ -103,7 +103,7 @@ request: |
 Always dry-run first:
 
 ```bash
-./bin/loop run daily-triage --dry-run --verbose
+agent-toolkit loop run daily-triage --dry-run --verbose
 ```
 
 Expected output:
@@ -122,7 +122,7 @@ Expected output:
 ## Step 4: First Real Run
 
 ```bash
-./bin/loop run daily-triage
+agent-toolkit loop run daily-triage
 ```
 
 Check the output:
@@ -181,7 +181,7 @@ The STATE.md persists between runs. The next run reads this state — it knows w
 Now make it automatic:
 
 ```bash
-./bin/loop schedule daily-triage
+agent-toolkit loop schedule daily-triage
 ```
 
 ```text
@@ -193,7 +193,7 @@ Next run: 2026-07-04 09:00:00 UTC
 Verify:
 
 ```bash
-./bin/loop schedule --list
+agent-toolkit loop schedule --list
 ```
 
 ```text
@@ -226,13 +226,13 @@ daily-triage   every 24h   2026-07-04 09:00    yes
 
 ```bash
 # Check loop status
-./bin/loop status --tier 1
+agent-toolkit loop status --tier 1
 
 # Check last run details
-./bin/loop audit daily-triage --last 1
+agent-toolkit loop audit daily-triage --last 1
 
 # Check cost
-./bin/loop cost daily-triage
+agent-toolkit loop cost daily-triage
 ```
 
 ---

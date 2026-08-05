@@ -57,15 +57,15 @@ cd ~/.agentic-harness
 ./bin/project-indexer clone owner/my-repo
 
 # 3. Start a daily issue triage loop (L1 = observe only, no writes)
-./bin/loop init daily-triage
-./bin/loop run daily-triage
+agent-toolkit loop init daily-triage
+agent-toolkit loop run daily-triage
 
 # 4. Review what the loop found
 cat loops/daily-triage/runs/*/report.md
 
 # 5. Check cost and status
-./bin/loop status
-./bin/loop audit daily-triage
+agent-toolkit loop status
+agent-toolkit loop audit daily-triage
 
 # 6. Open in your AI tool for interactive sessions
 opencode        # or: claude / cursor / gemini

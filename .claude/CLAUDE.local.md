@@ -28,7 +28,7 @@ If the Claude Code Remote MCP is configured:
 ```text
 mcp__claude_ai_Claude_Code_Remote__create_trigger
   cron_expression: "0 8 * * *"
-  prompt: "Run bin/loop run daily-triage"
+  prompt: "Run agent-toolkit loop run daily-triage"
 ```
 
 ---

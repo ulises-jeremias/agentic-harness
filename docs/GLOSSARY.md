@@ -41,7 +41,7 @@ Shared terminology for the AI Workspace + agentic-workstation ecosystem.
 ## L
 
 **loop**
-: A recurring AI-driven process with durable state, safety gates, and cost budgets. Managed by `bin/loop`. Each loop has a LOOP.md definition, STATE.md state, and `runs/` directory with trace artifacts.
+: A recurring AI-driven process with durable state, safety gates, and cost budgets. Managed by `agent-toolkit loop`. Each loop has a LOOP.md definition, STATE.md state, and `runs/` directory with trace artifacts.
 
 **loop run**
 : A single execution of a loop. Creates a run directory with trace.jsonl, plan.md, and any output artifacts. Encoded as `runs/<run-id>/`.
@@ -68,7 +68,7 @@ Shared terminology for the AI Workspace + agentic-workstation ecosystem.
 ## R
 
 **runner**
-: The agentic-workstation dev companion runner — a background process that executes loop jobs. Invoked by `bin/loop run` when available. Falls back to skeleton mode without agentic-workstation.
+: The agentic-workstation dev companion runner — a background process that executes loop jobs. Invoked by `agent-toolkit loop run` when available. Falls back to skeleton mode without agentic-workstation.
 
 ## S
 
@@ -89,7 +89,7 @@ Shared terminology for the AI Workspace + agentic-workstation ecosystem.
 ## W
 
 **worktree**
-: A detached git checkout created by `bin/loop run` to execute work on a clean copy of the workspace. Automatically removed after the run completes or is cancelled.
+: A detached git checkout created by `agent-toolkit loop run` to execute work on a clean copy of the workspace. Automatically removed after the run completes or is cancelled.
 
 **workspace-context**
 : The session snapshot CLI at `bin/workspace-context`. Prints active state, loads packs/personas/profiles, validates schemas, and manages persona handoffs.
