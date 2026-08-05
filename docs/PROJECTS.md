@@ -10,7 +10,7 @@ No aliases — symlinks use the **repo name directly**.
 
 ```bash
 # Clone a repo → symlink created automatically
-./bin/project-indexer clone owner/my-project
+agent-toolkit project clone owner/my-project
 
 # Navigate via symlink
 cd projects/my-project
@@ -37,42 +37,42 @@ agentic-harness/
 ### Initialize
 
 ```bash
-./bin/project-indexer init
+agent-toolkit project init
 # Creates repos/ and projects/ directories
 ```
 
 ### Clone + Symlink
 
 ```bash
-./bin/project-indexer clone owner/my-project
+agent-toolkit project clone owner/my-project
 # Clones repo AND creates symlink automatically
 ```
 
 ### Add existing repo
 
 ```bash
-./bin/project-indexer add ./path/to/existing/repo
+agent-toolkit project add ./path/to/existing/repo
 # Creates symlink with repo name
 ```
 
 ### List
 
 ```bash
-./bin/project-indexer list
+agent-toolkit project list
 # Shows all symlinks
 ```
 
 ### Scan
 
 ```bash
-./bin/project-indexer scan
+agent-toolkit project scan
 # Shows repos and their symlink status
 ```
 
 ### Remove symlink (keeps repo)
 
 ```bash
-./bin/project-indexer remove my-project
+agent-toolkit project remove my-project
 ```
 
 ---
@@ -84,7 +84,7 @@ When asking the AI to work on a project, reference it by its symlink name:
 ```text
 User: "work on my-project"
 
-1. ./bin/project-indexer clone owner/my-project   (if not cloned)
+1. agent-toolkit project clone owner/my-project   (if not cloned)
 2. AI uses workdir="projects/my-project"
 3. AI inspects README → AGENTS.md → conventions
 4. AI works in the repo

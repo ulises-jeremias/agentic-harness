@@ -58,20 +58,20 @@ export CLICKUP_TEAM_ID="..."
 
 ```bash
 # Acme repos
-./bin/project-indexer clone acme-corp/backend
-./bin/project-indexer clone acme-corp/frontend
+agent-toolkit project clone acme-corp/backend
+agent-toolkit project clone acme-corp/frontend
 
 # Startup X repo
-./bin/project-indexer clone startupx/api
+agent-toolkit project clone startupx/api
 
 # Agency repo (already local)
-./bin/project-indexer link ~/projects/agency-tooling agency/tooling
+agent-toolkit project link ~/projects/agency-tooling agency/tooling
 ```
 
 Verify:
 
 ```bash
-./bin/project-indexer list
+agent-toolkit project list
 ```
 
 ```text

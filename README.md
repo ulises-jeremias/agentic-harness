@@ -54,7 +54,7 @@ cd ~/.agentic-harness
 ./scripts/workspace-init.sh
 
 # 2. Index a repo
-./bin/project-indexer clone owner/my-repo
+agent-toolkit project clone owner/my-repo
 
 # 3. Start a daily issue triage loop (L1 = observe only, no writes)
 ./bin/loop init daily-triage
@@ -148,7 +148,7 @@ agentic-harness/
 ├── CLAUDE.md              # Symlink → AGENTS.md (opencode/Cursor)
 ├── GEMINI.md              # Symlink → AGENTS.md (Gemini CLI)
 ├── bin/
-│   ├── project-indexer    # Clone repos + manage symlinks
+│   ├── agent-toolkit project    # Clone repos + manage symlinks
 │   ├── assistant-memory   # Knowledge base CLI (search, add, inject)
 │   ├── devcompanion       # Background job queue
 │   └── workspace-context  # Session state snapshot
@@ -213,7 +213,7 @@ Together, these three projects form my personal workspace: a polished Developer 
 
 ```bash
 # Verify setup
-./bin/project-indexer list          # shows indexed repos
+agent-toolkit project list          # shows indexed repos
 agent-toolkit memory todo         # shows pending items
 ./bin/workspace-context             # session state snapshot
 
@@ -228,7 +228,7 @@ agent-toolkit devcompanion run-once --no-llm
 
 | Issue | Fix |
 |-------|-----|
-| `project-indexer: command not found` | Run `chmod +x ./bin/*` |
+| `agent-toolkit project: command not found` | Run `chmod +x ./bin/*` |
 | DevCompanion: "No LLM provider" | Set `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` |
 | Pending jobs stuck | Run `agent-toolkit devcompanion status` |
 | Skills not loading | Check your AI tool's skill pack configuration |

@@ -145,7 +145,7 @@ Create `AGENTS.md` in the project root:
 ```bash
 
 cd ~/.ai-workspace
-./bin/project-indexer link ~/projects/hello-stack hello-stack
+agent-toolkit project link ~/projects/hello-stack hello-stack
 
 ```
 
@@ -199,7 +199,7 @@ Check if there are any GitHub issues on the hello-stack project.
 
 ```
 
-The AI uses the **project-indexer** to find the repo, then `gh issue list`:
+The AI uses the **agent-toolkit project** to find the repo, then `gh issue list`:
 
 ```text
 

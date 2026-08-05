@@ -186,8 +186,8 @@ agent-toolkit devcompanion status                              # check queue
 agent-toolkit devcompanion done <job-id>                       # mark complete
 
 # Manage repos
-./bin/project-indexer clone owner/my-repo              # clone + symlink
-./bin/project-indexer list                             # list indexed projects
+agent-toolkit project clone owner/my-repo              # clone + symlink
+agent-toolkit project list                             # list indexed projects
 ```
 
 ### Client engagements: lock the LLM before queuing

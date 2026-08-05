@@ -23,8 +23,8 @@ graph TB
     subgraph "Harness Layer"
         WCTX[bin/workspace-context<br/>Session Snapshot]
         AMEM[bin/assistant-memory<br/>Knowledge CLI]
-        DC[agent-toolkit devcompanion<br/>Job Queue]
-        PI[bin/project-indexer<br/>Repo Manager]
+        DC[bin/devcompanion<br/>Job Queue]
+        PI[agent-toolkit project<br/>Repo Manager]
         SCHEMAS[schemas/<br/>JSON Schema Validation]
     end
 
@@ -106,8 +106,8 @@ graph TB
 |-----------|----------|---------|
 | **workspace-context** | `bin/workspace-context` | Generates session snapshot: packs, personas, skills, knowledge |
 | **assistant-memory** | `bin/assistant-memory` | Search, add, inject, and review knowledge entries |
-| **devcompanion** | `agent-toolkit devcompanion` | Background job queue: code reviews, PRs, CI fixes, investigations |
-| **project-indexer** | `bin/project-indexer` | Clone repos and manage symlinks in projects/ |
+| **devcompanion** | `bin/devcompanion` | Background job queue: code reviews, PRs, CI fixes, investigations |
+| **agent-toolkit project** | `agent-toolkit project` | Clone repos and manage symlinks in projects/ |
 | **Schema Validation** | `schemas/` | JSON Schema validation for all context surfaces |
 
 ### Loop Layer (L3)
@@ -207,7 +207,7 @@ Each layer can be adopted independently. You can use context engineering without
 | System | Integration | Where |
 |--------|------------|-------|
 | **agentic-workstation** | Skills, agents, MCP templates, devcompanion runner | `~/.local/share/agentic-workstation/` |
-| **GitHub** | Repositories, PRs, issues | Via `gh` CLI + `project-indexer` |
-| **GitLab** | Repositories, MRs, issues | Via `glab` CLI + `project-indexer` |
+| **GitHub** | Repositories, PRs, issues | Via `gh` CLI + `agent-toolkit project` |
+| **GitLab** | Repositories, MRs, issues | Via `glab` CLI + `agent-toolkit project` |
 | **Jira / ClickUp / Linear** | Task management | Via skills from agentic-workstation |
 | **systemd / launchd** | Loop scheduling | OS-level timer units / plists |
