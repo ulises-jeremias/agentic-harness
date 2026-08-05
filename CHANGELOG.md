@@ -12,6 +12,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 <!-- markdownlint-disable MD024 -->
 ## [Unreleased]
 
+### Added
+
+- **Muse Code support (Meta, <https://developer.meta.com/ai/products/muse-code/>)** — new tool profile `muse` for `muse` CLI (`https://dev.meta.ai/install.sh`). New quickstart `docs/quickstarts/MUSE_CODE.md` (Agent Skills spec: `~/.config/muse/skills/<name>` + `.agents/skills`), updated `README.md`, `AGENTS.md`, and `docs/SETUP.md` prerequisites.
+
 ## [1.1.0] — 2026-08-05
 
 ### Added
