@@ -16,8 +16,8 @@ Every 15 minutes, this loop:
 cd ~/.agentic-harness
 
 # 1. Index both repos
-./bin/project-indexer clone owner/my-api
-./bin/project-indexer clone owner/my-frontend
+agent-toolkit project clone owner/my-api
+agent-toolkit project clone owner/my-frontend
 
 # 2. Load the multi-repo pack
 cp examples/pr-babysitter/pack.yaml packs/my-project.yaml

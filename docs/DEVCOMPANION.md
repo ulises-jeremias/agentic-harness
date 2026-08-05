@@ -255,7 +255,7 @@ for the full reference.
 
 ```bash
 ./bin/devcompanion projects          # list indexed projects
-./bin/project-indexer clone owner/repo   # add missing project
+agent-toolkit project clone owner/repo   # add missing project
 ```
 
 ### "No pending jobs"
