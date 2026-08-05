@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1100" height="520" viewBox="0 0 1100 520" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">agentic-harness architecture</title>
+  <desc id="desc">Context, harness, and loop layers powered by agent-toolkit, with AI clients on the left.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#030712"/>
+      <stop offset="0.55" stop-color="#071026"/>
+      <stop offset="1" stop-color="#12091f"/>
+    </linearGradient>
+    <radialGradient id="aura" cx="78%" cy="18%" r="55%">
+      <stop offset="0" stop-color="#8b5cf6" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#030712" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="stroke" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#06b6d4"/>
+      <stop offset="0.5" stop-color="#8b5cf6"/>
+      <stop offset="1" stop-color="#f472b6"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.12"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0.03"/>
+    </linearGradient>
+    <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M 48 0 L 0 0 0 48" fill="none" stroke="#a5b4fc" stroke-opacity="0.05" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <rect width="1100" height="520" rx="28" fill="url(#bg)"/>
+  <rect width="1100" height="520" rx="28" fill="url(#aura)"/>
+  <rect width="1100" height="520" rx="28" fill="url(#grid)"/>
+
+  <text x="48" y="48" fill="#94a3b8" font-family="Inter, ui-sans-serif, sans-serif" font-size="13" font-weight="700" letter-spacing="2.4">SYSTEM MAP  |  AGENTIC-HARNESS</text>
+  <text x="48" y="78" fill="#ffffff" font-family="Inter, ui-sans-serif, sans-serif" font-size="28" font-weight="800">L2 runtime architecture</text>
+  <text x="48" y="106" fill="#c7d2fe" font-family="Inter, ui-sans-serif, sans-serif" font-size="15">Context  harness CLI  loops, backed by agent-toolkit</text>
+
+  <!-- AI clients -->
+  <g transform="translate(48 140)">
+    <rect width="200" height="320" rx="22" fill="url(#card)" stroke="#a5b4fc" stroke-opacity="0.28"/>
+    <text x="24" y="36" fill="#e0e7ff" font-family="Inter, ui-sans-serif, sans-serif" font-size="14" font-weight="800">AI CLIENTS</text>
+    <text x="24" y="72" fill="#67e8f9" font-family="Inter, ui-sans-serif, sans-serif" font-size="13">Claude Code</text>
+    <text x="24" y="100" fill="#67e8f9" font-family="Inter, ui-sans-serif, sans-serif" font-size="13">Cursor</text>
+    <text x="24" y="128" fill="#67e8f9" font-family="Inter, ui-sans-serif, sans-serif" font-size="13">opencode</text>
+    <text x="24" y="156" fill="#67e8f9" font-family="Inter, ui-sans-serif, sans-serif" font-size="13">Copilot</text>
+    <text x="24" y="184" fill="#67e8f9" font-family="Inter, ui-sans-serif, sans-serif" font-size="13">Gemini CLI</text>
+    <text x="24" y="228" fill="#94a3b8" font-family="Inter, ui-sans-serif, sans-serif" font-size="12">reads AGENTS.md</text>
+    <text x="24" y="250" fill="#94a3b8" font-family="Inter, ui-sans-serif, sans-serif" font-size="12">+ knowledge/</text>
+    <text x="24" y="290" fill="#c4b5fd" font-family="Inter, ui-sans-serif, sans-serif" font-size="12" font-weight="700">session entry</text>
+  </g>
+
+  <!-- Context layer -->
+  <g transform="translate(290 140)">
+    <rect width="240" height="100" rx="20" fill="#0f172a" fill-opacity="0.72" stroke="#06b6d4" stroke-opacity="0.45"/>
+    <text x="20" y="32" fill="#67e8f9" font-family="Inter, ui-sans-serif, sans-serif" font-size="12" font-weight="800" letter-spacing="1.2">CONTEXT LAYER</text>
+    <text x="20" y="56" fill="#e2e8f0" font-family="Inter, ui-sans-serif, sans-serif" font-size="14" font-weight="700">packs  |  personas  |  profiles</text>
+    <text x="20" y="78" fill="#94a3b8" font-family="Inter, ui-sans-serif, sans-serif" font-size="12">knowledge/ persistent memory</text>
+  </g>
+
+  <!-- Harness layer -->
+  <g transform="translate(290 260)">
+    <rect width="240" height="120" rx="20" fill="#0f172a" fill-opacity="0.78" stroke="#8b5cf6" stroke-opacity="0.55" filter="url(#softGlow)"/>
+    <text x="20" y="32" fill="#c4b5fd" font-family="Inter, ui-sans-serif, sans-serif" font-size="12" font-weight="800" letter-spacing="1.2">HARNESS LAYER</text>
+    <text x="20" y="56" fill="#ffffff" font-family="Inter, ui-sans-serif, sans-serif" font-size="14" font-weight="700">agent-toolkit workspace</text>
+    <text x="20" y="78" fill="#e2e8f0" font-family="Inter, ui-sans-serif, sans-serif" font-size="12">memory  |  project  |  schemas</text>
+    <text x="20" y="100" fill="#e2e8f0" font-family="Inter, ui-sans-serif, sans-serif" font-size="12">devcompanion queue</text>
+  </g>
+
+  <!-- Loop layer -->
+  <g transform="translate(290 400)">
+    <rect width="240" height="60" rx="18" fill="#0f172a" fill-opacity="0.72" stroke="#f472b6" stroke-opacity="0.45"/>
+    <text x="20" y="26" fill="#f9a8d4" font-family="Inter, ui-sans-serif, sans-serif" font-size="12" font-weight="800" letter-spacing="1.2">LOOP LAYER</text>
+    <text x="20" y="46" fill="#e2e8f0" font-family="Inter, ui-sans-serif, sans-serif" font-size="13">agent-toolkit loop  |  10 templates</text>
+  </g>
+
+  <!-- agent-toolkit -->
+  <g transform="translate(580 180)">
+    <rect width="230" height="200" rx="22" fill="#111827" fill-opacity="0.85" stroke="#22d3ee" stroke-opacity="0.5"/>
+    <text x="20" y="36" fill="#67e8f9" font-family="Inter, ui-sans-serif, sans-serif" font-size="12" font-weight="800" letter-spacing="1.2">L1.5 CAPABILITY</text>
+    <text x="20" y="68" fill="#ffffff" font-family="Inter, ui-sans-serif, sans-serif" font-size="18" font-weight="800">agent-toolkit</text>
+    <text x="20" y="98" fill="#94a3b8" font-family="Inter, ui-sans-serif, sans-serif" font-size="13">skills  |  agents  |  profiles</text>
+    <text x="20" y="122" fill="#94a3b8" font-family="Inter, ui-sans-serif, sans-serif" font-size="13">loop  |  memory  |  project</text>
+    <text x="20" y="146" fill="#94a3b8" font-family="Inter, ui-sans-serif, sans-serif" font-size="13">devcompanion  |  workspace</text>
+    <rect x="20" y="164" width="190" height="22" rx="11" fill="#0ea5e9" fill-opacity="0.18" stroke="#22d3ee" stroke-opacity="0.4"/>
+    <text x="115" y="179" text-anchor="middle" fill="#a5f3fc" font-family="Inter, ui-sans-serif, sans-serif" font-size="11" font-weight="700">CLI primary interface</text>
+  </g>
+
+  <!-- Infrastructure -->
+  <g transform="translate(850 180)">
+    <rect width="200" height="200" rx="22" fill="url(#card)" stroke="#84cc16" stroke-opacity="0.35"/>
+    <text x="20" y="36" fill="#bef264" font-family="Inter, ui-sans-serif, sans-serif" font-size="12" font-weight="800" letter-spacing="1.2">INFRA</text>
+    <text x="20" y="68" fill="#e2e8f0" font-family="Inter, ui-sans-serif, sans-serif" font-size="13">repos/ clones</text>
+    <text x="20" y="92" fill="#e2e8f0" font-family="Inter, ui-sans-serif, sans-serif" font-size="13">projects/ links</text>
+    <text x="20" y="116" fill="#e2e8f0" font-family="Inter, ui-sans-serif, sans-serif" font-size="13">templates/jobs/</text>
+    <text x="20" y="140" fill="#e2e8f0" font-family="Inter, ui-sans-serif, sans-serif" font-size="13">GitHub / GitLab</text>
+    <text x="20" y="176" fill="#94a3b8" font-family="Inter, ui-sans-serif, sans-serif" font-size="12">indexed work surface</text>
+  </g>
+
+  <!-- Connectors -->
+  <path d="M248 300 H290" stroke="url(#stroke)" stroke-width="2" stroke-opacity="0.7"/>
+  <path d="M530 300 H580" stroke="#22d3ee" stroke-width="2" stroke-opacity="0.55"/>
+  <path d="M810 280 H850" stroke="#84cc16" stroke-width="2" stroke-opacity="0.45"/>
+  <path d="M410 240 V260" stroke="#8b5cf6" stroke-width="2" stroke-opacity="0.55"/>
+  <path d="M410 380 V400" stroke="#f472b6" stroke-width="2" stroke-opacity="0.55"/>
+
+  <path d="M0 516 H1100" stroke="url(#stroke)" stroke-width="4"/>
+</svg>
