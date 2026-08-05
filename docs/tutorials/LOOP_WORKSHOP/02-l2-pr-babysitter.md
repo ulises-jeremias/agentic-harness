@@ -19,7 +19,7 @@
 ## Step 1: Create the Loop
 
 ```bash
-./bin/loop init pr-babysitter --template pr-babysitter --tier 2
+agent-toolkit loop init pr-babysitter --template pr-babysitter --tier 2
 ```text
 
 ---
@@ -70,7 +70,7 @@ The `verifier` is a separate agent that double-checks the loop's output before i
 ## Step 4: Dry-Run
 
 ```bash
-./bin/loop run pr-babysitter --dry-run --verbose
+agent-toolkit loop run pr-babysitter --dry-run --verbose
 ```text
 
 ```text
@@ -88,7 +88,7 @@ The `verifier` is a separate agent that double-checks the loop's output before i
 ## Step 5: First Run
 
 ```bash
-./bin/loop run pr-babysitter
+agent-toolkit loop run pr-babysitter
 ```text
 
 Check the output:
@@ -125,7 +125,7 @@ cat loops/pr-babysitter/plan.md
 L2 loops run more often because review timeliness matters:
 
 ```bash
-./bin/loop schedule pr-babysitter --cron "0 */4 * * *"
+agent-toolkit loop schedule pr-babysitter --cron "0 */4 * * *"
 ```text
 
 ```text
@@ -138,7 +138,7 @@ Runs every 4 hours — matches typical PR review cycle
 ## L2 Cost Considerations
 
 ```bash
-./bin/loop cost pr-babysitter --monthly
+agent-toolkit loop cost pr-babysitter --monthly
 ```text
 
 ```text
@@ -179,9 +179,9 @@ Per month: ~2,700,000 tokens ~$27.00 (180 runs/month)
 ## Verify It Worked
 
 ```bash
-./bin/loop status --tier 2
-./bin/loop audit pr-babysitter --last 1
-./bin/loop cost pr-babysitter --monthly
+agent-toolkit loop status --tier 2
+agent-toolkit loop audit pr-babysitter --last 1
+agent-toolkit loop cost pr-babysitter --monthly
 ```text
 
 ---

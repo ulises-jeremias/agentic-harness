@@ -12,26 +12,26 @@
 
 ```bash
 # Scaffold a new loop from a starter template
-./bin/loop init daily-triage
+agent-toolkit loop init daily-triage
 
 # Run a loop once (manual trigger)
-./bin/loop run daily-triage
+agent-toolkit loop run daily-triage
 
 # Show loop status
-./bin/loop status
+agent-toolkit loop status
 
 # See what a run would cost
-./bin/loop cost daily-triage
+agent-toolkit loop cost daily-triage
 
 # Audit past runs
-./bin/loop audit daily-triage
+agent-toolkit loop audit daily-triage
 ```
 
 ---
 
 ## Runner Hierarchy
 
-`bin/loop run` tries AI runners in this order. The first one found is used:
+`agent-toolkit loop run` tries AI runners in this order. The first one found is used:
 
 | Priority | Runner | When available |
 |----------|--------|----------------|
@@ -124,7 +124,7 @@ escalations: []
 ---
 ```
 
-STATE.md is written by `bin/loop run` after each run. Do not edit manually.
+STATE.md is written by `agent-toolkit loop run` after each run. Do not edit manually.
 It is gitignored by default and machine-local.
 
 ---
@@ -181,8 +181,8 @@ verifier: agentic-workstation-code-reviewer   # default for code-touching loops
 The verifier must sign off before any action not in `allowlist`. If the
 verifier fails, the run is marked `verifier_failed` and escalated.
 
-> **Hard gate (2026-07-17):** During `loop run`, `bin/loop` installs a PATH-first
-> `gh` shim (`bin/loop-gh-gate`) that intercepts mutating commands. Actions must
+> **Hard gate (2026-07-17):** During `loop run`, `agent-toolkit loop` installs a PATH-first
+> `gh` shim (`agent-toolkit loop`) that intercepts mutating commands. Actions must
 > be on `allowlist`, not on `deny`, and compatible with the loop tier. **merge**
 > and **close** additionally require a JSON verifier receipt under
 > `runs/<id>/verifier-receipts/` bound to exact `repo` + `number` + `verifier`
@@ -211,7 +211,7 @@ Adapted from [cobusgreyling/loop-engineering](https://github.com/cobusgreyling/l
 | `post-merge-cleanup` | L2 | 6h | Low | Off-peak housekeeping |
 | `issue-triage` | L1 | 4h | Low | Propose-only labeling |
 
-Get a starter: `./bin/loop init <pattern>`
+Get a starter: `agent-toolkit loop init <pattern>`
 
 ---
 
@@ -240,7 +240,7 @@ WantedBy=timers.target
 ```text
 mcp__claude_ai_Claude_Code_Remote__create_trigger
   cron_expression: "0 8 * * *"
-  prompt: "Run bin/loop run daily-triage in the agentic-harness"
+  prompt: "Run agent-toolkit loop run daily-triage in the agentic-harness"
 ```
 
 ---
@@ -259,4 +259,4 @@ mcp__claude_ai_Claude_Code_Remote__create_trigger
 
 - [docs/METHODOLOGY.md](METHODOLOGY.md) — Ralph Loop philosophy
 - [templates/loops/](../templates/loops/) — starter templates
-- [bin/loop](../bin/loop) — CLI reference (`bin/loop help`)
+- `agent-toolkit loop --help` — CLI reference

@@ -21,7 +21,7 @@
 **Never start a loop at L3.** Begin by observing:
 
 ```bash
-./bin/loop init ci-sweeper --template ci-sweeper --tier 1
+agent-toolkit loop init ci-sweeper --template ci-sweeper --tier 1
 ```
 
 The L1 version is configured to **observe only** — no writes. Let it run for a few days so you see what it would do.
@@ -31,7 +31,7 @@ The L1 version is configured to **observe only** — no writes. Let it run for a
 ## Step 2: Run L1 and Review
 
 ```bash
-./bin/loop run ci-sweeper --verbose
+agent-toolkit loop run ci-sweeper --verbose
 ```
 
 ```text
@@ -73,7 +73,7 @@ deny:
 Now the loop creates **draft** PRs:
 
 ```bash
-./bin/loop run ci-sweeper
+agent-toolkit loop run ci-sweeper
 ```
 
 ```text
@@ -112,7 +112,7 @@ Maker agent                    Checker agent
 The checker agent (verifier) is the safety net. It runs independently from the maker.
 
 > **Hard gate:** During `loop run`, mutating `gh` commands are intercepted by
-> `bin/loop-gh-gate`. merge/close require a JSON receipt under
+> `agent-toolkit loop`. merge/close require a JSON receipt under
 > `runs/<id>/verifier-receipts/` or the command exits with code 78.
 
 ---
@@ -149,7 +149,7 @@ budget:
 ## Step 6: First L3 Run
 
 ```bash
-./bin/loop run ci-sweeper --verbose
+agent-toolkit loop run ci-sweeper --verbose
 ```
 
 ```text
@@ -174,7 +174,7 @@ budget:
 ## Step 7: Schedule Aggressively
 
 ```bash
-./bin/loop schedule ci-sweeper --cron "0 */1 * * *"
+agent-toolkit loop schedule ci-sweeper --cron "0 */1 * * *"
 ```
 
 L3 runs every hour — catching failures quickly.
@@ -209,7 +209,7 @@ The loop knows when to stop trying. Without exit conditions, a loop would retry 
 ## Cost Analysis
 
 ```bash
-./bin/loop cost ci-sweeper --monthly
+agent-toolkit loop cost ci-sweeper --monthly
 ```
 
 ```text
@@ -248,9 +248,9 @@ Realistic cost: ~$20-30/month.
 ## Verify It Worked
 
 ```bash
-./bin/loop status --tier 3
-./bin/loop audit ci-sweeper --last 5 --summary
-./bin/loop cost ci-sweeper --monthly --alert 50.00
+agent-toolkit loop status --tier 3
+agent-toolkit loop audit ci-sweeper --last 5 --summary
+agent-toolkit loop cost ci-sweeper --monthly --alert 50.00
 ```
 
 ---

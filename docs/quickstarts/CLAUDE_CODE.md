@@ -35,7 +35,7 @@ Claude Code will read AGENTS.md (via CLAUDE.md symlink), load workspace context,
 
 ```bash
 # Before starting Claude
-./bin/workspace-context load --pack packs/my-project.yaml
+agent-toolkit workspace load --pack packs/my-project.yaml
 claude
 ```
 
@@ -45,7 +45,7 @@ Claude Code now sees your project repos, conventions, and LLM policy.
 
 ```bash
 # Load persona before starting
-./bin/workspace-context load --persona implementer
+agent-toolkit workspace load --persona implementer
 claude
 ```
 

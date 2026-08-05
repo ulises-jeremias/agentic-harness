@@ -16,9 +16,9 @@
 | Small team (3-5) | 20-50 | Each member has their own harness instance |
 | Agency (10+ clients) | 50-100 | Use packs to load only active client repos |
 
-### When to use project-indexer vs manual cloning
+### When to use agent-toolkit project vs manual cloning
 
-Use `project-indexer` when:
+Use `agent-toolkit project` when:
 
 - You clone repos frequently
 - You want automatic symlink management in `projects/`
@@ -35,7 +35,7 @@ Clone manually when:
 Monorepos (>1GB, >10K files) don't directly impact harness performance since the harness doesn't index file contents. However:
 
 - **workspace-context** reads project metadata only (not file contents)
-- **project-indexer** clones once, manages symlinks thereafter
+- **agent-toolkit project** clones once, manages symlinks thereafter
 - **AI tools** may be slow indexing large repos; this is a tool issue, not a harness issue
 
 ---
@@ -107,20 +107,20 @@ monthly_cost = cost_per_run × runs_per_day × 30
 2. **Batch work**: Run PR reviews once every 4 hours, not on every commit
 3. **Cache results**: If STATE.md hasn't changed since last run, skip with exit condition
 4. **Use max_tokens limits**: Cap output tokens per loop to prevent runaway costs
-5. **Monitor with `bin/loop cost`**: Review monthly and adjust
+5. **Monitor with `agent-toolkit loop cost`**: Review monthly and adjust
 
 ### Cost monitoring
 
 ```bash
 
 # Per-loop cost estimate
-bin/loop cost daily-triage --monthly
+agent-toolkit loop cost daily-triage --monthly
 
 # Audit all loops
-bin/loop audit --summary
+agent-toolkit loop audit --summary
 
 # Set cost alert
-bin/loop cost daily-triage --alert 5.00  # Alert if monthly exceeds $5
+agent-toolkit loop cost daily-triage --alert 5.00  # Alert if monthly exceeds $5
 
 ```text
 

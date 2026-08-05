@@ -19,13 +19,13 @@ cd ~/.agentic-harness
 ./scripts/workspace-init.sh
 
 # 2. Index your repo
-./bin/project-indexer clone owner/my-project
+agent-toolkit project clone owner/my-project
 
 # 3. Initialize the triage loop
-./bin/loop init daily-triage
+agent-toolkit loop init daily-triage
 
 # 4. Run it once to verify
-./bin/loop run daily-triage
+agent-toolkit loop run daily-triage
 
 # 5. Read the output
 cat loops/daily-triage/runs/*/report.md

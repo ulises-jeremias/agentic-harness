@@ -32,14 +32,14 @@ Read GEMINI.md and workspace-context output. What do you know about my setup?
 ## Load a Pack
 
 ```bash
-./bin/workspace-context load --pack packs/my-project.yaml
+agent-toolkit workspace load --pack packs/my-project.yaml
 gemini
 ```
 
 ## Use Personas
 
 ```bash
-./bin/workspace-context load --persona architect
+agent-toolkit workspace load --persona architect
 gemini
 ```
 

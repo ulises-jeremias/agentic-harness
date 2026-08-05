@@ -33,14 +33,14 @@ Run workspace-context and assistant-memory inject. Tell me what you know about m
 
 ```bash
 # Before starting opencode
-./bin/workspace-context load --pack packs/my-project.yaml
+agent-toolkit workspace load --pack packs/my-project.yaml
 opencode
 ```
 
 ## Use Personas
 
 ```bash
-./bin/workspace-context load --persona reviewer
+agent-toolkit workspace load --persona reviewer
 opencode
 ```
 

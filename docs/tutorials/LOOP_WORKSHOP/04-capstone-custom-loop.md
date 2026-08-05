@@ -312,8 +312,8 @@ mkdir -p loops/my-custom-loop
 # Copy and fill in the template above into loops/my-custom-loop/LOOP.md
 
 # Run it
-./bin/loop run my-custom-loop --dry-run
-./bin/loop run my-custom-loop
+agent-toolkit loop run my-custom-loop --dry-run
+agent-toolkit loop run my-custom-loop
 
 # Check results
 cat loops/my-custom-loop/report.md

@@ -82,18 +82,18 @@ cd ~/.agentic-harness
 ./scripts/workspace-init.sh
 
 # 2. Index a repo
-./bin/project-indexer clone owner/my-repo
+agent-toolkit project clone owner/my-repo
 
 # 3. Start a daily issue triage loop (L1 = observe only, no writes)
-./bin/loop init daily-triage
-./bin/loop run daily-triage
+agent-toolkit loop init daily-triage
+agent-toolkit loop run daily-triage
 
 # 4. Review what the loop found
 cat loops/daily-triage/runs/*/report.md
 
 # 5. Check cost and status
-./bin/loop status
-./bin/loop audit daily-triage
+agent-toolkit loop status
+agent-toolkit loop audit daily-triage
 
 # 6. Open in your AI tool for interactive sessions
 opencode        # or: claude / cursor / gemini
@@ -147,7 +147,7 @@ See [docs/LOOPS.md](docs/LOOPS.md) for the full loop reference and anti-patterns
       <h3>📦 Packs</h3>
       <sub>Packs bundle project-specific context (repos, process docs, IDs, credentials) so you can switch between clients or projects with a single command.</sub>
       <br><br>
-      <sub><code>./bin/workspace-context load packs/my-client.yaml</code></sub>
+      <sub><code>agent-toolkit workspace load packs/my-client.yaml</code></sub>
     </td>
   </tr>
   <tr>
@@ -155,13 +155,13 @@ See [docs/LOOPS.md](docs/LOOPS.md) for the full loop reference and anti-patterns
       <h3>⏳ DevCompanion Queue</h3>
       <sub>Background job queue for async tasks — code reviews, refactors, CI fixes, investigations. Jobs run in a separate agent session and leave artifacts.</sub>
       <br><br>
-      <sub><code>./bin/devcompanion queue my-project --template code-review</code></sub>
+      <sub><code>agent-toolkit devcompanion queue my-project --template code-review</code></sub>
     </td>
     <td width="50%" valign="top">
       <h3>🧠 Persistent Memory</h3>
       <sub>Your AI remembers across sessions. <code>knowledge/</code> stores processes, learnings, todos, and patterns — indexed, searchable, and version-controlled.</sub>
       <br><br>
-      <sub><code>./bin/assistant-memory search "topic"</code></sub>
+      <sub><code>agent-toolkit memory search "topic"</code></sub>
     </td>
   </tr>
 </table>
@@ -176,7 +176,7 @@ agentic-harness/
 ├── CLAUDE.md              # Symlink → AGENTS.md (opencode/Cursor)
 ├── GEMINI.md              # Symlink → AGENTS.md (Gemini CLI)
 ├── bin/
-│   ├── project-indexer    # Clone repos + manage symlinks
+│   ├── agent-toolkit project    # Clone repos + manage symlinks
 │   ├── assistant-memory   # Knowledge base CLI (search, add, inject)
 │   ├── devcompanion       # Background job queue
 │   └── workspace-context  # Session state snapshot
@@ -241,13 +241,13 @@ Together, these three projects form my personal workspace: a polished Developer 
 
 ```bash
 # Verify setup
-./bin/project-indexer list          # shows indexed repos
-./bin/assistant-memory todo         # shows pending items
-./bin/workspace-context             # session state snapshot
+agent-toolkit project list          # shows indexed repos
+agent-toolkit memory todo         # shows pending items
+agent-toolkit workspace             # session state snapshot
 
 # Queue a test job
-./bin/devcompanion queue my-project --template code-review
-./bin/devcompanion run-once --no-llm
+agent-toolkit devcompanion queue my-project --template code-review
+agent-toolkit devcompanion run-once --no-llm
 ```
 
 ---
@@ -256,9 +256,9 @@ Together, these three projects form my personal workspace: a polished Developer 
 
 | Issue | Fix |
 |-------|-----|
-| `project-indexer: command not found` | Run `chmod +x ./bin/*` |
+| `agent-toolkit project: command not found` | Run `chmod +x ./bin/*` |
 | DevCompanion: "No LLM provider" | Set `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` |
-| Pending jobs stuck | Run `./bin/devcompanion status` |
+| Pending jobs stuck | Run `agent-toolkit devcompanion status` |
 | Skills not loading | Check your AI tool's skill pack configuration |
 
 ---

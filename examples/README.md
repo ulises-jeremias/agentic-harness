@@ -9,4 +9,4 @@
 | [oss-contribution](oss-contribution/) | OSS contribution workflow with knowledge-driven discovery |
 
 Each example is self-contained: a `setup.sh` you can run, a sample pack YAML,
-and a loop YAML ready to `bin/loop init` from.
+and a loop YAML ready to `agent-toolkit loop init` from.

@@ -9,12 +9,12 @@
 
 ```bash
 # Validate everything
-./bin/workspace-context validate
+agent-toolkit workspace validate
 
 # Validate one surface
-./bin/workspace-context validate packs
-./bin/workspace-context validate jobs
-./bin/workspace-context validate personas
+agent-toolkit workspace validate packs
+agent-toolkit workspace validate jobs
+agent-toolkit workspace validate personas
 ```
 
 ---

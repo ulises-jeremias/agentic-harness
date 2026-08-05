@@ -41,19 +41,19 @@ knowledge/
 
 ```bash
 # Search for existing knowledge before asking
-./bin/assistant-memory search "topic"
+agent-toolkit memory search "topic"
 
 # Add a new learning after a session
-./bin/assistant-memory add --type learning "Pattern: X works better than Y"
+agent-toolkit memory add --type learning "Pattern: X works better than Y"
 
 # Add a pending follow-up
-./bin/assistant-memory add --type todo "Investigate why X behaves differently"
+agent-toolkit memory add --type todo "Investigate why X behaves differently"
 
 # Review pending items at session start
-./bin/assistant-memory todo
+agent-toolkit memory todo
 
 # Show top learnings for context injection
-./bin/assistant-memory inject
+agent-toolkit memory inject
 ```
 
 ---
@@ -63,7 +63,7 @@ knowledge/
 1. **Check before asking** — if we've learned it before, use it
 2. **Save after learning** — if the user teaches something, document it
 3. **Save after discovering** — if a pattern emerges, record it
-4. **Review todos at session start** — check `./bin/assistant-memory todo`
+4. **Review todos at session start** — check `agent-toolkit memory todo`
 
 ---
 

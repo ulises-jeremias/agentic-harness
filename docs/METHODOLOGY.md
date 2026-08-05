@@ -114,7 +114,7 @@ A **loop** is a recurring goal: you define a purpose and the AI iterates — wit
 | **Plugins / Connectors** | MCP and CLI reach (GitHub, ClickUp, CI) |
 | **Sub-agents** | Maker (implementer) + Checker (verifier receipt / skill) |
 | **Memory / State spine** | `LOOP.md` (intent) + `STATE.md` (current state) |
-| **Hard gate** | `bin/loop-gh-gate` wraps `gh` during runs (allowlist/deny/receipts) |
+| **Hard gate** | `agent-toolkit loop` wraps `gh` during runs (allowlist/deny/receipts) |
 
 ### Rollout tiers
 
@@ -130,16 +130,16 @@ Always start at L1. Graduate to L3 only with a proven allowlist.
 
 ```bash
 # Scaffold from a reference pattern
-./bin/loop init daily-triage
+agent-toolkit loop init daily-triage
 
 # Run once to see what it would do (L1 = report only)
-./bin/loop run daily-triage
+agent-toolkit loop run daily-triage
 
 # Review the output
 cat loops/daily-triage/runs/<id>/report.md
 
 # Check cost so far
-./bin/loop audit daily-triage
+agent-toolkit loop audit daily-triage
 ```
 
 See [docs/LOOPS.md](LOOPS.md) for the full reference.
@@ -175,11 +175,11 @@ Session Start
     │
     ▼
 2. Load pack or profile
-    ./bin/workspace-context load --profile oss-contrib
+    agent-toolkit workspace load --profile oss-contrib
     │
     ▼
 3. Prime context
-    ./bin/workspace-context         # state snapshot
+    agent-toolkit workspace         # state snapshot
     ./bin/assistant-memory inject   # knowledge dump
     │
     ▼
@@ -202,19 +202,19 @@ Loop runs autonomously between sessions (if configured)
 
 ```bash
 # Context
-./bin/workspace-context validate          # check schema violations
-./bin/workspace-context load --profile oss-contrib
+agent-toolkit workspace validate          # check schema violations
+agent-toolkit workspace load --profile oss-contrib
 ./bin/assistant-memory search --tag oss "deploy"
 ./bin/assistant-memory review --stale     # check decayed entries
 
 # Loops
-./bin/loop init daily-triage              # scaffold from template
-./bin/loop run daily-triage              # one iteration
-./bin/loop status                        # all loops at a glance
-./bin/loop audit                         # cost and success rate
-./bin/loop cost daily-triage             # estimate per run
+agent-toolkit loop init daily-triage              # scaffold from template
+agent-toolkit loop run daily-triage              # one iteration
+agent-toolkit loop status                        # all loops at a glance
+agent-toolkit loop audit                         # cost and success rate
+agent-toolkit loop cost daily-triage             # estimate per run
 
 # Background work (one-shot)
-./bin/devcompanion queue my-project --template code-review
-./bin/devcompanion run-once
+agent-toolkit devcompanion queue my-project --template code-review
+agent-toolkit devcompanion run-once
 ```

@@ -14,7 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
-- Hard autonomy gate (`bin/loop-gh-gate`): PATH-first `gh` shim during `loop run` that enforces tier/allowlist/deny and requires verifier receipts for merge/close (exit code 78 on denial)
+- Hard autonomy gate (`agent-toolkit loop`): PATH-first `gh` shim during `loop run` that enforces tier/allowlist/deny and requires verifier receipts for merge/close (exit code 78 on denial)
 - `loop run --force` bypasses `max_runs_per_day` budget
 - Runner prompt now loads `request.md`, injects a HARD autonomy contract, and persists `prompt.md` per run
 - STATE.md pending/escalations are preserved across runs; list items with `#` are quoted
@@ -24,7 +24,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - Loop hard gate follow-up (CodeRabbit on #166): fail-closed gate install, stricter `gh` mutation classification, redacted audit argv, HMAC receipt binding, always-quoted STATE strings, docs/workshop fence fixes
 
-- `bin/loop` no longer wiped `pending`/`escalations` after every run
+- `agent-toolkit loop` no longer wiped `pending`/`escalations` after every run
 - ISO timestamps in STATE.md parsed as datetime by PyYAML no longer crash the budget gate
 - Duplicate `_try_opencode_runner` definition removed
 
@@ -35,7 +35,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Loop engineering with L1 (report-only), L2 (PR-gated), L3 (unattended) safety tiers
 - 7 loop templates: daily-triage, issue-triage, pr-babysitter, ci-sweeper, dep-sweeper, changelog-drafter, post-merge-cleanup
 - Dev companion background job queue with 5 templates: code-review, create-pr, fix-ci, investigate, refactor
-- Project indexer with clone + symlink management (`bin/project-indexer`)
+- Project indexer with clone + symlink management (`agent-toolkit project`)
 - Workspace context snapshot generation and validation (`bin/workspace-context`)
 - Persona system with 5 work modes: implementer, reviewer, researcher, architect, writer
 - Pack system for project context switching with YAML-based configuration
@@ -46,7 +46,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Comprehensive documentation: 9 docs covering setup, methodology, workflows, loops, personas, packs, projects, devcompanion, and knowledge
 - Multi-tool portability: symlinks for Claude Code, opencode, Cursor, Gemini CLI, GitHub Copilot
 - Architecture diagram with Mermaid visualizations (`docs/ARCHITECTURE.md`)
-- Full bin/loop CLI reference (`docs/LOOP_CLI.md`)
+- Full agent-toolkit loop CLI reference (`docs/LOOP_CLI.md`)
 - FAQ page covering common questions and scenarios (`docs/FAQ.md`)
 - Security model documentation (`docs/SECURITY.md`)
 - Performance and scaling guidance (`docs/PERFORMANCE.md`)

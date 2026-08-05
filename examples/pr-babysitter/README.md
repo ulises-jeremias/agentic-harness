@@ -16,18 +16,18 @@ Every 15 minutes, this loop:
 cd ~/.agentic-harness
 
 # 1. Index both repos
-./bin/project-indexer clone owner/my-api
-./bin/project-indexer clone owner/my-frontend
+agent-toolkit project clone owner/my-api
+agent-toolkit project clone owner/my-frontend
 
 # 2. Load the multi-repo pack
 cp examples/pr-babysitter/pack.yaml packs/my-project.yaml
-./bin/workspace-context load packs/my-project.yaml
+agent-toolkit workspace load packs/my-project.yaml
 
 # 3. Initialize the loop
-./bin/loop init pr-babysitter
+agent-toolkit loop init pr-babysitter
 
 # 4. Run once (L2 — posts comments but no merges)
-./bin/loop run pr-babysitter
+agent-toolkit loop run pr-babysitter
 ```
 
 ## Sample pack

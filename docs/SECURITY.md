@@ -163,9 +163,9 @@ All `devcompanion` jobs log LLM policy decisions to `~/.local/share/agentic-work
 | L2 | Assisted | Only allowlisted actions (typically `comment` / `label` / `assign`) | Guarded: no merge/close |
 | L3 | Unattended on allowlist | Allowlisted only; deny list is absolute | Automated: hard gate + receipts |
 
-### Hard gate (`bin/loop-gh-gate`)
+### Hard gate (`agent-toolkit loop`)
 
-During `bin/loop run`, the runner installs a PATH-first `gh` shim that intercepts
+During `agent-toolkit loop run`, the runner installs a PATH-first `gh` shim that intercepts
 mutating GitHub CLI commands:
 
 1. Action must match the loop **tier** (L1 blocks all mutations; L2 blocks merge/close/…)
@@ -191,7 +191,7 @@ Loops never have direct access to the harness's environment variables. They inhe
 # systemd service file
 [Service]
 EnvironmentFile=%h/.config/agentic-workstation/env.d/acme.env
-ExecStart=%h/.ai-workspace/bin/loop run daily-triage
+ExecStart=%h/.ai-workspace/agent-toolkit loop run daily-triage
 
 ```
 
@@ -206,7 +206,7 @@ ExecStart=%h/.ai-workspace/bin/loop run daily-triage
 | Read `knowledge/` | Learn project patterns and processes | Knowledge hygiene checklist (above) |
 | Read `packs/` | Discover repo URLs and project IDs | Don't put secrets in packs |
 | Execute `bin/loop` | Run autonomous loops with your credentials | Tier system + `bin/loop-gh-gate` hard gate (allowlist/deny/receipts) |
-| Execute `bin/devcompanion` | Queue jobs that consume API tokens | LLM policy per pack prevents unauthorized provider use |
+| Execute `agent-toolkit devcompanion` | Queue jobs that consume API tokens | LLM policy per pack prevents unauthorized provider use |
 | Write to `knowledge/` | Inject malicious patterns into future sessions | Review knowledge entries before committing |
 
 ### What the harness CANNOT protect against

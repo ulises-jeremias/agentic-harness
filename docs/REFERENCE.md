@@ -92,25 +92,25 @@ Docs:
 
 ```
 
-## `project-indexer`
+## `agent-toolkit project`
 
 ```text
-project-indexer - Simple clone + symlink manager
+agent-toolkit project - Simple clone + symlink manager
 
 Usage:
-  project-indexer init               # Initialize workspace directories
-  project-indexer clone <org/repo>  # Clone repo + create symlink
-  project-indexer add <path>       # Add symlink for existing repo
-  project-indexer remove <repo>     # Remove symlink (keeps repo)
-  project-indexer list              # List all symlinks
-  project-indexer scan              # Scan repos and symlinks
-  project-indexer help             # Show this help
+  agent-toolkit project init               # Initialize workspace directories
+  agent-toolkit project clone <org/repo>  # Clone repo + create symlink
+  agent-toolkit project add <path>       # Add symlink for existing repo
+  agent-toolkit project remove <repo>     # Remove symlink (keeps repo)
+  agent-toolkit project list              # List all symlinks
+  agent-toolkit project scan              # Scan repos and symlinks
+  agent-toolkit project help             # Show this help
 
 Examples:
-  project-indexer init
-  project-indexer clone owner/my-project
-  project-indexer clone owner/my-other-project
-  project-indexer list
+  agent-toolkit project init
+  agent-toolkit project clone owner/my-project
+  agent-toolkit project clone owner/my-other-project
+  agent-toolkit project list
 
 Notes:
   - No aliases - symlinks use the repo name directly

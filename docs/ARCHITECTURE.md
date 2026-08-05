@@ -21,15 +21,15 @@ graph TB
     end
 
     subgraph "Harness Layer"
-        WCTX[bin/workspace-context<br/>Session Snapshot]
+        WCTX[agent-toolkit workspace<br/>Session Snapshot]
         AMEM[bin/assistant-memory<br/>Knowledge CLI]
         DC[bin/devcompanion<br/>Job Queue]
-        PI[bin/project-indexer<br/>Repo Manager]
+        PI[agent-toolkit project<br/>Repo Manager]
         SCHEMAS[schemas/<br/>JSON Schema Validation]
     end
 
     subgraph "Loop Layer"
-        LOOP[bin/loop<br/>Loop Orchestrator]
+        LOOP[agent-toolkit loop<br/>Loop Orchestrator]
         TEMPLATES[templates/loops/<br/>Loop Templates]
         SCHEDULER[Scheduler<br/>systemd / launchd]
     end
@@ -104,17 +104,17 @@ graph TB
 
 | Component | Location | Purpose |
 |-----------|----------|---------|
-| **workspace-context** | `bin/workspace-context` | Generates session snapshot: packs, personas, skills, knowledge |
+| **workspace-context** | `agent-toolkit workspace` | Generates session snapshot: packs, personas, skills, knowledge |
 | **assistant-memory** | `bin/assistant-memory` | Search, add, inject, and review knowledge entries |
 | **devcompanion** | `bin/devcompanion` | Background job queue: code reviews, PRs, CI fixes, investigations |
-| **project-indexer** | `bin/project-indexer` | Clone repos and manage symlinks in projects/ |
+| **agent-toolkit project** | `agent-toolkit project` | Clone repos and manage symlinks in projects/ |
 | **Schema Validation** | `schemas/` | JSON Schema validation for all context surfaces |
 
 ### Loop Layer (L3)
 
 | Component | Location | Purpose |
 |-----------|----------|---------|
-| **loop** | `bin/loop` | Loop orchestrator: init, run, status, audit, cost estimation |
+| **loop** | `agent-toolkit loop` | Loop orchestrator: init, run, status, audit, cost estimation |
 | **Loop Templates** | `templates/loops/` | 7 reusable templates: daily-triage, pr-babysitter, ci-sweeper, etc. |
 | **Scheduler** | systemd / launchd | OS-level timer integration for autonomous execution |
 
@@ -157,11 +157,11 @@ graph TB
 
 ```text
 7. Loops run autonomously (if scheduled)
-   └─ bin/loop run daily-triage
+   └─ agent-toolkit loop run daily-triage
       └─ scans issues → updates STATE.md → applies exit conditions
 
 8. Dev companion processes queue
-   └─ bin/devcompanion run-once
+   └─ agent-toolkit devcompanion run-once
       └─ picks up queued jobs → runs LLM-powered worker → updates status
 ```
 
@@ -207,7 +207,7 @@ Each layer can be adopted independently. You can use context engineering without
 | System | Integration | Where |
 |--------|------------|-------|
 | **agentic-workstation** | Skills, agents, MCP templates, devcompanion runner | `~/.local/share/agentic-workstation/` |
-| **GitHub** | Repositories, PRs, issues | Via `gh` CLI + `project-indexer` |
-| **GitLab** | Repositories, MRs, issues | Via `glab` CLI + `project-indexer` |
+| **GitHub** | Repositories, PRs, issues | Via `gh` CLI + `agent-toolkit project` |
+| **GitLab** | Repositories, MRs, issues | Via `glab` CLI + `agent-toolkit project` |
 | **Jira / ClickUp / Linear** | Task management | Via skills from agentic-workstation |
 | **systemd / launchd** | Loop scheduling | OS-level timer units / plists |

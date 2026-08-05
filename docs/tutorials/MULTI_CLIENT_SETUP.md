@@ -58,20 +58,20 @@ export CLICKUP_TEAM_ID="..."
 
 ```bash
 # Acme repos
-./bin/project-indexer clone acme-corp/backend
-./bin/project-indexer clone acme-corp/frontend
+agent-toolkit project clone acme-corp/backend
+agent-toolkit project clone acme-corp/frontend
 
 # Startup X repo
-./bin/project-indexer clone startupx/api
+agent-toolkit project clone startupx/api
 
 # Agency repo (already local)
-./bin/project-indexer link ~/projects/agency-tooling agency/tooling
+agent-toolkit project link ~/projects/agency-tooling agency/tooling
 ```
 
 Verify:
 
 ```bash
-./bin/project-indexer list
+agent-toolkit project list
 ```
 
 ```text
@@ -163,10 +163,10 @@ env_file: agency.env
 source ~/.config/agentic-workstation/env.d/acme.env
 
 # Load Acme context
-./bin/workspace-context load --pack packs/acme-corp.yaml
+agent-toolkit workspace load --pack packs/acme-corp.yaml
 
 # Verify
-./bin/workspace-context
+agent-toolkit workspace
 ```
 
 Expected output:
@@ -193,7 +193,7 @@ The AI uses the Jira skill with ACME project context — it won't accidentally q
 source ~/.config/agentic-workstation/env.d/startupx.env
 
 # Switch context
-./bin/workspace-context load --pack packs/startup-x.yaml
+agent-toolkit workspace load --pack packs/startup-x.yaml
 ```
 
 The AI now sees Startup X's repos, ClickUp space, and TypeScript conventions. Acme's Jira context is gone.
@@ -202,7 +202,7 @@ The AI now sees Startup X's repos, ClickUp space, and TypeScript conventions. Ac
 
 ```bash
 source ~/.config/agentic-workstation/env.d/agency.env
-./bin/workspace-context load --pack packs/agency.yaml
+agent-toolkit workspace load --pack packs/agency.yaml
 ```
 
 ---
@@ -231,7 +231,7 @@ Requested: openai. Blocked by strict mode.
 ### Verifying policy
 
 ```bash
-./bin/devcompanion llm-status
+agent-toolkit devcompanion llm-status
 ```
 
 ```text
@@ -263,15 +263,15 @@ loops/
 
 ```bash
 # Acme loops run in business hours (UTC-5)
-./bin/loop schedule acme/daily-triage --cron "0 9 * * 1-5"
-./bin/loop schedule acme/pr-babysitter --cron "0 */4 * * 1-5"
+agent-toolkit loop schedule acme/daily-triage --cron "0 9 * * 1-5"
+agent-toolkit loop schedule acme/pr-babysitter --cron "0 */4 * * 1-5"
 
 # Startup X runs 24/7 (global team)
-./bin/loop schedule startupx/daily-triage --cron "0 8 * * *"
-./bin/loop schedule startupx/ci-sweeper --cron "0 */2 * * *"
+agent-toolkit loop schedule startupx/daily-triage --cron "0 8 * * *"
+agent-toolkit loop schedule startupx/ci-sweeper --cron "0 */2 * * *"
 
 # Agency runs weekly
-./bin/loop schedule agency/changelog-drafter --cron "0 9 * * 1"
+agent-toolkit loop schedule agency/changelog-drafter --cron "0 9 * * 1"
 ```
 
 Each loop must be configured to source the correct env file before execution. Edit the systemd service file:
@@ -279,7 +279,7 @@ Each loop must be configured to source the correct env file before execution. Ed
 ```ini
 [Service]
 EnvironmentFile=%h/.config/agentic-workstation/env.d/acme.env
-ExecStart=%h/.ai-workspace/bin/loop run acme/daily-triage
+ExecStart=%h/.ai-workspace/agent-toolkit loop run acme/daily-triage
 ```
 
 ---
@@ -288,16 +288,16 @@ ExecStart=%h/.ai-workspace/bin/loop run acme/daily-triage
 
 ```bash
 # Per-client loop cost
-./bin/loop cost acme/daily-triage --monthly
-./bin/loop cost startupx/daily-triage --monthly
+agent-toolkit loop cost acme/daily-triage --monthly
+agent-toolkit loop cost startupx/daily-triage --monthly
 
 # All loops for one client
-./bin/loop audit acme --summary
+agent-toolkit loop audit acme --summary
 
 # Agency-wide total
 for client in acme startupx agency; do
   echo "=== $client ==="
-  ./bin/loop cost "$client" --monthly --summary
+  agent-toolkit loop cost "$client" --monthly --summary
 done
 ```
 
@@ -341,7 +341,7 @@ done
 Your pack's `jira_project` is incorrect, or you loaded the wrong pack. Verify:
 
 ```bash
-./bin/workspace-context | grep jira
+agent-toolkit workspace | grep jira
 ```
 
 ### "LLM policy blocks my provider"

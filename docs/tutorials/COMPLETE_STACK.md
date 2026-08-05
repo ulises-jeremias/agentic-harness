@@ -69,7 +69,7 @@ Verify:
 
 ```bash
 
-./bin/workspace-context
+agent-toolkit workspace
 
 ```
 
@@ -145,7 +145,7 @@ Create `AGENTS.md` in the project root:
 ```bash
 
 cd ~/.ai-workspace
-./bin/project-indexer link ~/projects/hello-stack hello-stack
+agent-toolkit project link ~/projects/hello-stack hello-stack
 
 ```
 
@@ -177,7 +177,7 @@ conventions:
 ```bash
 
 cd ~/.ai-workspace
-./bin/workspace-context load --pack packs/hello-stack.yaml
+agent-toolkit workspace load --pack packs/hello-stack.yaml
 claude  # or opencode / cursor
 
 ```
@@ -199,7 +199,7 @@ Check if there are any GitHub issues on the hello-stack project.
 
 ```
 
-The AI uses the **project-indexer** to find the repo, then `gh issue list`:
+The AI uses the **agent-toolkit project** to find the repo, then `gh issue list`:
 
 ```text
 
@@ -271,7 +271,7 @@ Now that manual workflow works, automate recurring tasks.
 ```bash
 
 cd ~/.ai-workspace
-./bin/loop init daily-triage --template daily-triage --tier 1
+agent-toolkit loop init daily-triage --template daily-triage --tier 1
 
 ```
 
@@ -288,7 +288,7 @@ Run it:
 
 ```bash
 
-./bin/loop run daily-triage
+agent-toolkit loop run daily-triage
 
 ```
 
@@ -304,7 +304,7 @@ Report saved: loops/daily-triage/report.md
 
 ```bash
 
-./bin/loop schedule daily-triage
+agent-toolkit loop schedule daily-triage
 
 ```
 
@@ -366,7 +366,7 @@ agentic-workstation (L1)          agentic-harness (L2)          hello-stack (L3)
 │ dots-* CLI           │  agents  │ loops/daily-triage   │       │ .github/         │
 └─────────────────────┘          │ bin/assistant-memory  │       └──────────────────┘
                                   │ bin/workspace-context │
-                                  │ bin/devcompanion      │
+                                  │ agent-toolkit devcompanion      │
                                   └─────────────────────┘
 
 ```

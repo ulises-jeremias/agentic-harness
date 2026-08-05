@@ -12,7 +12,7 @@
 - Return meaningful exit codes (0=success, 1=error, 2=validation failure)
 - Use `click.echo()` not `print()` for proper testing support
 
-**Where**: `bin/assistant-memory`, `bin/workspace-context`, `bin/devcompanion`
+**Where**: `agent-toolkit memory`, `bin/workspace-context`, `agent-toolkit devcompanion`
 
 ## 2026-07-02 — Testing conventions with pytest
 
