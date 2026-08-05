@@ -16,7 +16,7 @@ Using the `oss-contrib` profile:
 cd ~/.agentic-harness
 
 # 1. Index the OSS repo you want to contribute to
-./bin/project-indexer clone owner/some-oss-project
+agent-toolkit project clone owner/some-oss-project
 
 # 2. Load the OSS contribution profile
 #    (creates profiles/oss-contrib.yaml if it doesn't exist)
