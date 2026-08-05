@@ -29,7 +29,7 @@ graph TB
     end
 
     subgraph "Loop Layer"
-        LOOP[bin/loop<br/>Loop Orchestrator]
+        LOOP[agent-toolkit loop<br/>Loop Orchestrator]
         TEMPLATES[templates/loops/<br/>Loop Templates]
         SCHEDULER[Scheduler<br/>systemd / launchd]
     end
@@ -114,7 +114,7 @@ graph TB
 
 | Component | Location | Purpose |
 |-----------|----------|---------|
-| **loop** | `bin/loop` | Loop orchestrator: init, run, status, audit, cost estimation |
+| **loop** | `agent-toolkit loop` | Loop orchestrator: init, run, status, audit, cost estimation |
 | **Loop Templates** | `templates/loops/` | 7 reusable templates: daily-triage, pr-babysitter, ci-sweeper, etc. |
 | **Scheduler** | systemd / launchd | OS-level timer integration for autonomous execution |
 
@@ -157,7 +157,7 @@ graph TB
 
 ```text
 7. Loops run autonomously (if scheduled)
-   └─ bin/loop run daily-triage
+   └─ agent-toolkit loop run daily-triage
       └─ scans issues → updates STATE.md → applies exit conditions
 
 8. Dev companion processes queue

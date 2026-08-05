@@ -1,6 +1,6 @@
 # Loop CLI Reference — agentic-harness
 
-> Complete reference for the `bin/loop` CLI — all subcommands, flags, exit codes, and examples.
+> Complete reference for the `agent-toolkit loop` CLI — all subcommands, flags, exit codes, and examples.
 
 ---
 
@@ -9,7 +9,7 @@
 ## Overview
 
 ```text
-bin/loop <subcommand> [options]
+agent-toolkit loop <subcommand> [options]
 
 Subcommands:
   init      Create a new loop from a template
@@ -22,12 +22,12 @@ Subcommands:
 
 ---
 
-## `bin/loop init`
+## `agent-toolkit loop init`
 
 Create a new loop from a template in `templates/loops/`.
 
 ```bash
-bin/loop init <name> [flags]
+agent-toolkit loop init <name> [flags]
 ```
 
 ### Flags
@@ -44,16 +44,16 @@ bin/loop init <name> [flags]
 
 ```bash
 # Create a Tier 1 daily triage loop
-bin/loop init daily-triage --template daily-triage --tier 1 --description "Morning issue scan"
+agent-toolkit loop init daily-triage --template daily-triage --tier 1 --description "Morning issue scan"
 
 # Create a Tier 2 PR reviewer that runs every 4 hours
-bin/loop init pr-babysitter --template pr-babysitter --tier 2 --schedule "0 */4 * * *"
+agent-toolkit loop init pr-babysitter --template pr-babysitter --tier 2 --schedule "0 */4 * * *"
 
 # Create a Tier 3 CI fixer with a description
-bin/loop init ci-sweeper --template ci-sweeper --tier 3 --description "Auto-fix common CI failures"
+agent-toolkit loop init ci-sweeper --template ci-sweeper --tier 3 --description "Auto-fix common CI failures"
 
 # Force overwrite an existing loop
-bin/loop init daily-triage --template daily-triage --force
+agent-toolkit loop init daily-triage --template daily-triage --force
 ```
 
 ### What it creates
@@ -67,12 +67,12 @@ loops/<name>/
 
 ---
 
-## `bin/loop run`
+## `agent-toolkit loop run`
 
 Execute one iteration of a loop.
 
 ```bash
-bin/loop run <name> [flags]
+agent-toolkit loop run <name> [flags]
 ```
 
 ### Flags
@@ -87,16 +87,16 @@ bin/loop run <name> [flags]
 
 ```bash
 # Run a loop iteration
-bin/loop run daily-triage
+agent-toolkit loop run daily-triage
 
 # Dry-run to see what would happen
-bin/loop run daily-triage --dry-run
+agent-toolkit loop run daily-triage --dry-run
 
 # Force run even if today's budget is exhausted
-bin/loop run pr-babysitter --force
+agent-toolkit loop run pr-babysitter --force
 
 # Verbose output for debugging
-bin/loop run ci-sweeper --verbose
+agent-toolkit loop run ci-sweeper --verbose
 ```
 
 ### Exit codes
@@ -109,16 +109,16 @@ bin/loop run ci-sweeper --verbose
 | 3 | Loop skipped — exit condition prevented execution |
 | 4 | Invalid loop — LOOP.md missing or malformed |
 | 5 | Tier violation — attempted Tier 3 operation on Tier 1 loop |
-| — | Exit code `78` is returned by the intercepted `gh` process (`bin/loop-gh-gate`) on hard-gate denial (allowlist/deny/receipt). It is not currently propagated as the `loop run` process exit code. |
+| — | Exit code `78` is returned by the intercepted `gh` process (`agent-toolkit loop`) on hard-gate denial (allowlist/deny/receipt). It is not currently propagated as the `loop run` process exit code. |
 
 ---
 
-## `bin/loop status`
+## `agent-toolkit loop status`
 
 List all loops and their current state.
 
 ```bash
-bin/loop status [flags]
+agent-toolkit loop status [flags]
 ```
 
 ### Flags
@@ -133,16 +133,16 @@ bin/loop status [flags]
 
 ```bash
 # List all loops
-bin/loop status
+agent-toolkit loop status
 
 # Filter by tier
-bin/loop status --tier 2
+agent-toolkit loop status --tier 2
 
 # Show only active loops
-bin/loop status --active
+agent-toolkit loop status --active
 
 # JSON output for scripting
-bin/loop status --json
+agent-toolkit loop status --json
 ```
 
 ### Output format
@@ -157,12 +157,12 @@ changelog-drafter 2     (never)             pending    every 168h
 
 ---
 
-## `bin/loop audit`
+## `agent-toolkit loop audit`
 
 Show detailed run history and state evolution.
 
 ```bash
-bin/loop audit <name> [flags]
+agent-toolkit loop audit <name> [flags]
 ```
 
 ### Flags
@@ -178,16 +178,16 @@ bin/loop audit <name> [flags]
 
 ```bash
 # Audit last 10 runs
-bin/loop audit daily-triage
+agent-toolkit loop audit daily-triage
 
 # Audit last 50 runs
-bin/loop audit daily-triage --last 50
+agent-toolkit loop audit daily-triage --last 50
 
 # Since a specific date
-bin/loop audit pr-babysitter --since 2026-06-01
+agent-toolkit loop audit pr-babysitter --since 2026-06-01
 
 # Summary only
-bin/loop audit ci-sweeper --summary
+agent-toolkit loop audit ci-sweeper --summary
 ```
 
 ### Output format
@@ -207,12 +207,12 @@ Last 5 runs:
 
 ---
 
-## `bin/loop cost`
+## `agent-toolkit loop cost`
 
 Estimate token costs for a loop.
 
 ```bash
-bin/loop cost <name> [flags]
+agent-toolkit loop cost <name> [flags]
 ```
 
 ### Flags
@@ -228,16 +228,16 @@ bin/loop cost <name> [flags]
 
 ```bash
 # Estimate per-run cost
-bin/loop cost daily-triage
+agent-toolkit loop cost daily-triage
 
 # Project monthly cost
-bin/loop cost pr-babysitter --monthly
+agent-toolkit loop cost pr-babysitter --monthly
 
 # Cost alert — exit code 1 if monthly exceeds $10
-bin/loop cost ci-sweeper --monthly --alert 10.00
+agent-toolkit loop cost ci-sweeper --monthly --alert 10.00
 
 # Based on last 30 runs
-bin/loop cost daily-triage --last 30
+agent-toolkit loop cost daily-triage --last 30
 ```
 
 ### Output format
@@ -256,12 +256,12 @@ Model: claude-sonnet-4-20250514 (input: $3/M, output: $15/M)
 
 ---
 
-## `bin/loop schedule`
+## `agent-toolkit loop schedule`
 
 Install or manage OS-level timer for a loop.
 
 ```bash
-bin/loop schedule <name> [flags]
+agent-toolkit loop schedule <name> [flags]
 ```
 
 ### Flags
@@ -287,22 +287,22 @@ bin/loop schedule <name> [flags]
 
 ```bash
 # Schedule a loop with its default cron
-bin/loop schedule daily-triage
+agent-toolkit loop schedule daily-triage
 
 # Schedule with custom cron
-bin/loop schedule pr-babysitter --cron "0 */6 * * *"
+agent-toolkit loop schedule pr-babysitter --cron "0 */6 * * *"
 
 # List all scheduled loops
-bin/loop schedule --list
+agent-toolkit loop schedule --list
 
 # Check schedule health
-bin/loop schedule --status
+agent-toolkit loop schedule --status
 
 # Remove a schedule
-bin/loop schedule daily-triage --remove
+agent-toolkit loop schedule daily-triage --remove
 
 # Dry-run — print timer files without installing
-bin/loop schedule ci-sweeper --dry-run
+agent-toolkit loop schedule ci-sweeper --dry-run
 ```
 
 ### Output (schedule)
@@ -413,57 +413,57 @@ On macOS, only interval-based scheduling is supported:
 
 ```bash
 # 1. Create from template
-bin/loop init daily-triage --template daily-triage --tier 1
+agent-toolkit loop init daily-triage --template daily-triage --tier 1
 
 # 2. Dry-run to preview
-bin/loop run daily-triage --dry-run
+agent-toolkit loop run daily-triage --dry-run
 
 # 3. First real run
-bin/loop run daily-triage
+agent-toolkit loop run daily-triage
 
 # 4. Check results
-bin/loop audit daily-triage --last 1
+agent-toolkit loop audit daily-triage --last 1
 
 # 5. Schedule for automation
-bin/loop schedule daily-triage
+agent-toolkit loop schedule daily-triage
 
 # 6. Verify it's scheduled
-bin/loop schedule --list
+agent-toolkit loop schedule --list
 ```
 
 ### Debug a failing loop
 
 ```bash
 # 1. Check status
-bin/loop status --active
+agent-toolkit loop status --active
 
 # 2. Audit recent runs
-bin/loop audit ci-sweeper --last 5
+agent-toolkit loop audit ci-sweeper --last 5
 
 # 3. Run with verbose output
-bin/loop run ci-sweeper --verbose --force
+agent-toolkit loop run ci-sweeper --verbose --force
 
 # 4. Check exit conditions in STATE.md
 cat loops/ci-sweeper/STATE.md
 
 # 5. Check cost impact
-bin/loop cost ci-sweeper --monthly
+agent-toolkit loop cost ci-sweeper --monthly
 ```
 
 ### Promote a loop to a higher tier
 
 ```bash
 # 1. Review current tier performance
-bin/loop audit pr-babysitter --summary
+agent-toolkit loop audit pr-babysitter --summary
 
 # 2. Edit LOOP.md: change tier: 2 -> tier: 3
 #    (manual edit required — no CLI command for tier promotion)
 
 # 3. Run with verbose to verify
-bin/loop run pr-babysitter --verbose --dry-run
+agent-toolkit loop run pr-babysitter --verbose --dry-run
 
 # 4. Schedule with new tier
-bin/loop schedule pr-babysitter --cron "0 */2 * * *"
+agent-toolkit loop schedule pr-babysitter --cron "0 */2 * * *"
 ```
 
 <!-- markdownlint-enable MD024 -->

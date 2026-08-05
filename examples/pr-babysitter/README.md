@@ -24,10 +24,10 @@ cp examples/pr-babysitter/pack.yaml packs/my-project.yaml
 agent-toolkit workspace load packs/my-project.yaml
 
 # 3. Initialize the loop
-./bin/loop init pr-babysitter
+agent-toolkit loop init pr-babysitter
 
 # 4. Run once (L2 — posts comments but no merges)
-./bin/loop run pr-babysitter
+agent-toolkit loop run pr-babysitter
 ```
 
 ## Sample pack

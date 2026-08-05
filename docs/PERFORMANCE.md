@@ -107,20 +107,20 @@ monthly_cost = cost_per_run × runs_per_day × 30
 2. **Batch work**: Run PR reviews once every 4 hours, not on every commit
 3. **Cache results**: If STATE.md hasn't changed since last run, skip with exit condition
 4. **Use max_tokens limits**: Cap output tokens per loop to prevent runaway costs
-5. **Monitor with `bin/loop cost`**: Review monthly and adjust
+5. **Monitor with `agent-toolkit loop cost`**: Review monthly and adjust
 
 ### Cost monitoring
 
 ```bash
 
 # Per-loop cost estimate
-bin/loop cost daily-triage --monthly
+agent-toolkit loop cost daily-triage --monthly
 
 # Audit all loops
-bin/loop audit --summary
+agent-toolkit loop audit --summary
 
 # Set cost alert
-bin/loop cost daily-triage --alert 5.00  # Alert if monthly exceeds $5
+agent-toolkit loop cost daily-triage --alert 5.00  # Alert if monthly exceeds $5
 
 ```text
 

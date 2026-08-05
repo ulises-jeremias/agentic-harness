@@ -163,9 +163,9 @@ All `devcompanion` jobs log LLM policy decisions to `~/.local/share/agentic-work
 | L2 | Assisted | Only allowlisted actions (typically `comment` / `label` / `assign`) | Guarded: no merge/close |
 | L3 | Unattended on allowlist | Allowlisted only; deny list is absolute | Automated: hard gate + receipts |
 
-### Hard gate (`bin/loop-gh-gate`)
+### Hard gate (`agent-toolkit loop`)
 
-During `bin/loop run`, the runner installs a PATH-first `gh` shim that intercepts
+During `agent-toolkit loop run`, the runner installs a PATH-first `gh` shim that intercepts
 mutating GitHub CLI commands:
 
 1. Action must match the loop **tier** (L1 blocks all mutations; L2 blocks merge/close/…)
@@ -191,7 +191,7 @@ Loops never have direct access to the harness's environment variables. They inhe
 # systemd service file
 [Service]
 EnvironmentFile=%h/.config/agentic-workstation/env.d/acme.env
-ExecStart=%h/.ai-workspace/bin/loop run daily-triage
+ExecStart=%h/.ai-workspace/agent-toolkit loop run daily-triage
 
 ```
 
