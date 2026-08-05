@@ -75,5 +75,5 @@ devcompanion:
       2. Verify before queuing jobs (no model call):
            dots-devcompanion llm-status
       3. If using Cursor/Copilot only: prefer
-           ./bin/devcompanion run-once --no-llm
+           agent-toolkit devcompanion run-once --no-llm
          and drive the LLM inside the IDE with the client's account.

@@ -161,7 +161,7 @@ graph TB
       └─ scans issues → updates STATE.md → applies exit conditions
 
 8. Dev companion processes queue
-   └─ bin/devcompanion run-once
+   └─ agent-toolkit devcompanion run-once
       └─ picks up queued jobs → runs LLM-powered worker → updates status
 ```
 

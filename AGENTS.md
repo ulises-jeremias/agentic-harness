@@ -28,7 +28,7 @@
 | JIRA tasks | `jira-assistant` skill |
 | Confluence tasks | `confluence-assistant` skill |
 | ClickUp tasks | `clickup-cli` skill |
-| Deferred / background work | `./bin/devcompanion queue` |
+| Deferred / background work | `agent-toolkit devcompanion queue` |
 
 > **Customize this table** to match your installed skills and team tools.
 > **agentic-workstation installs**: add `agentic-workstation-assistant` as the entry point for agentic-workstation repo work and `agentic-workstation-dev-companion` for generic client delivery.
@@ -161,7 +161,7 @@ Packs bundle context for a specific client or project:
 
 ## devcompanion — when to queue vs interactive
 
-**Queue a job** (use `./bin/devcompanion`) when you hear any of these:
+**Queue a job** (use `agent-toolkit devcompanion`) when you hear any of these:
 
 | User says | Action |
 |-----------|--------|
@@ -174,16 +174,16 @@ Packs bundle context for a specific client or project:
 | "do it in the background" / "async" | `queue <project> --request "..."` |
 | "queue this" / "defer this" | `queue <project> --request "..."` |
 
-After queuing, **always** run `./bin/devcompanion run-once` to process immediately,
+After queuing, **always** run `agent-toolkit devcompanion run-once` to process immediately,
 or tell the user to let the worker pick it up.
 **Always** show the generated `plan.md` artifact to the user.
 
 ```bash
 # Full workflow
-./bin/devcompanion queue <project> --template <name>   # queue
-./bin/devcompanion run-once                            # execute (LLM-powered)
-./bin/devcompanion status                              # check queue
-./bin/devcompanion done <job-id>                       # mark complete
+agent-toolkit devcompanion queue <project> --template <name>   # queue
+agent-toolkit devcompanion run-once                            # execute (LLM-powered)
+agent-toolkit devcompanion status                              # check queue
+agent-toolkit devcompanion done <job-id>                       # mark complete
 
 # Manage repos
 agent-toolkit project clone owner/my-repo              # clone + symlink
@@ -195,7 +195,7 @@ agent-toolkit project list                             # list indexed projects
 Before queuing background jobs for a client repo, **verify the active LLM
 policy** so the runner cannot fall back to OpenCode / Ollama / agentic-workstation
 credentials. The policy is read by both `dots-devcompanion` (workstation) and
-this workspace's `bin/devcompanion` when wired to the workstation runner.
+this workspace's `agent-toolkit devcompanion` when wired to the workstation runner.
 
 ```bash
 # 1. Wire the workspace CLI to the workstation runner (one-time per machine).
@@ -212,7 +212,7 @@ dots-devcompanion llm-status
 
 If `llm-status` does not show the expected provider, **stop and fix the
 policy**; do not queue jobs. Cursor/Copilot-only engagements: use
-`./bin/devcompanion run-once --no-llm` (skeleton plan) and drive the LLM
+`agent-toolkit devcompanion run-once --no-llm` (skeleton plan) and drive the LLM
 inside the IDE with the client's account.
 
 → [`docs/PROJECTS.md`](docs/PROJECTS.md) · [`docs/DEVCOMPANION.md`](docs/DEVCOMPANION.md) · [`agentic-workstation: DEV_COMPANION_LLM.md`](https://github.com/ulises-jeremias/agentic-workstation/blob/main/docs/DEV_COMPANION_LLM.md)
