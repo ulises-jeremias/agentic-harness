@@ -219,8 +219,8 @@ The AI should recall:
 If you have agentic-workstation's dev companion:
 
 ```bash
-./bin/devcompanion queue hello-harness --template code-review
-./bin/devcompanion run-once
+agent-toolkit devcompanion queue hello-harness --template code-review
+agent-toolkit devcompanion run-once
 ```
 
 This runs an automated code review in the background and produces a review report.

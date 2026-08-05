@@ -16,9 +16,9 @@
 | Small team (3-5) | 20-50 | Each member has their own harness instance |
 | Agency (10+ clients) | 50-100 | Use packs to load only active client repos |
 
-### When to use project-indexer vs manual cloning
+### When to use agent-toolkit project vs manual cloning
 
-Use `project-indexer` when:
+Use `agent-toolkit project` when:
 
 - You clone repos frequently
 - You want automatic symlink management in `projects/`
@@ -35,7 +35,7 @@ Clone manually when:
 Monorepos (>1GB, >10K files) don't directly impact harness performance since the harness doesn't index file contents. However:
 
 - **workspace-context** reads project metadata only (not file contents)
-- **project-indexer** clones once, manages symlinks thereafter
+- **agent-toolkit project** clones once, manages symlinks thereafter
 - **AI tools** may be slow indexing large repos; this is a tool issue, not a harness issue
 
 ---

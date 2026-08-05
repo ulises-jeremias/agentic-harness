@@ -35,8 +35,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Loop engineering with L1 (report-only), L2 (PR-gated), L3 (unattended) safety tiers
 - 7 loop templates: daily-triage, issue-triage, pr-babysitter, ci-sweeper, dep-sweeper, changelog-drafter, post-merge-cleanup
 - Dev companion background job queue with 5 templates: code-review, create-pr, fix-ci, investigate, refactor
-- Project indexer with clone + symlink management (`bin/project-indexer`)
-- Workspace context snapshot generation and validation (`agent-toolkit workspace`)
+- Project indexer with clone + symlink management (`agent-toolkit project`)
+- Workspace context snapshot generation and validation (`bin/workspace-context`)
 - Persona system with 5 work modes: implementer, reviewer, researcher, architect, writer
 - Pack system for project context switching with YAML-based configuration
 - Knowledge base with persistent cross-session AI memory (`knowledge/`)
