@@ -3,6 +3,7 @@
 **Task:** Add pagination to `/api/users` without breaking public contract.
 
 **Run:**
+
 ```bash
 agent-toolkit swarm start --recipe team --ui herdr --runner skeleton "Add pagination to /api/users"
 # Run: 20260806T121000Z-bb1234, awaiting_plan_approval
@@ -12,6 +13,7 @@ agent-toolkit swarm approve 20260806T121000Z-bb1234 plan
 ```
 
 **Planner artifacts (read-only):**
+
 - `task-contract.md` — paginate with `?page&per_page`, default 20, max 100.
 - `acceptance-criteria.md` — existing clients without pagination still work (default page 1).
 - `risk-assessment.md` — low risk, but public contract change needs architect gate if pagination headers added.
@@ -20,6 +22,7 @@ agent-toolkit swarm approve 20260806T121000Z-bb1234 plan
 **Flow:** planner → implementer (commit) → reviewer (feedback) → architect (batch integration, final report) → human approval.
 
 **Handoff example:**
+
 ```yaml
 type: commit
 from: implementer

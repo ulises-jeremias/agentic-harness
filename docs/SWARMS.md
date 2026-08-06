@@ -6,7 +6,7 @@ This harness is the **L3 demonstration** for Agent Toolkit Swarms. It shows how 
 
 ## Architecture
 
-```
+```text
 agentic-harness/
   .agent-toolkit/swarm.yaml   # sample local config (copy & edit)
   swarms/{pair,team,full}.yaml # example recipe overrides (optional)
@@ -28,7 +28,7 @@ herdr --version; tmux -V
 herdr integration list --json  # check opencode
 ```
 
-Or manually: https://herdr.dev/docs/install/ + `brew install tmux`.
+Or manually: <https://herdr.dev/docs/install/> + `brew install tmux`.
 
 ## Run via Herdr (recommended)
 

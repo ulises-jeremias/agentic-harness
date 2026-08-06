@@ -7,6 +7,7 @@
 **Run:** `agent-toolkit swarm start --recipe full --ui herdr --runner skeleton "Migrate auth to new JWT"`
 
 **Roles activated lazily:**
+
 1. Planner → task-contract + risk (auth change → security risk)
 2. Implementer → commit
 3. Refactorer → clean up legacy issuer
@@ -15,6 +16,7 @@
 6. QA → E2E, smoke, acceptance, final validation.
 
 **Specialist selection (trace):**
+
 ```json
 {"kind":"specialist_selected","role":"hardener","persona":"security-reviewer","reason":"auth JWT change"}
 ```
