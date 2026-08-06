@@ -12,6 +12,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 <!-- markdownlint-disable MD024 -->
 ## [Unreleased]
 
+## [1.3.0] — 2026-08-06
+
+### Added
+
+- **Agent Toolkit Swarms — reference workspace** — Harness now demonstrates Agent Toolkit Swarms: sample config `.agent-toolkit/swarm.yaml`, recipe overrides `swarms/{pair,team,full}.yaml`, examples `examples/swarms/{fix-a-bug,implement-a-feature,review-and-refactor}` (pair/team/full with Herdr vs tmux), sanitized artifacts, `docs/SWARMS.md` (three-repo arch, Herdr/tmux, budgets, gates, offline demo), and offline demo `scripts/demo-swarm.sh` (`--runner skeleton --ui tmux`).
+
 ### Added
 
 - **Muse Code support (Meta, <https://developer.meta.com/ai/products/muse-code/>)** — new tool profile `muse` for `muse` CLI (`https://dev.meta.ai/install.sh`). New quickstart `docs/quickstarts/MUSE_CODE.md` (Agent Skills spec: `~/.config/muse/skills/<name>` + `.agents/skills`), updated `README.md`, `AGENTS.md`, and `docs/SETUP.md` prerequisites.
