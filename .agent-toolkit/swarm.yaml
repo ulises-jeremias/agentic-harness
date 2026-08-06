@@ -1,0 +1,21 @@
+# Agentic Harness — Swarm Config
+# Sample local swarm configuration. Copy to .agent-toolkit/swarm.yaml and customize.
+# See agent-toolkit docs/SWARMS.md for full precedence:
+# CLI flags → project-local → workspace → user ~/.config/agent-toolkit/swarm.yaml → defaults
+recipe: pair
+ui: auto
+runner: opencode
+model_profile: balanced
+# Optional overrides:
+# budget:
+#   max_total_tokens: 900000
+#   max_cost_usd: 4.00
+#   max_wall_seconds: 7200
+#   per_role:
+#     implementer:
+#       max_tokens: 350000
+# model_profiles:
+#   balanced:
+#     planning: anthropic/claude-sonnet-4-20250514
+#     coding: anthropic/claude-sonnet-4-20250514
+#     review: openai/gpt-4o

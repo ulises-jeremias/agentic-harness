@@ -1,0 +1,32 @@
+apiVersion: agent-toolkit.dev/v1alpha1
+kind: SwarmRecipe
+metadata:
+  name: pair-example
+  description: Pair recipe override for harness example — 2 roles, no plan gate
+spec:
+  ui: auto
+  transport: filesystem
+  workspace:
+    strategy: worktree-per-writer
+    base_ref: HEAD
+  execution:
+    max_concurrency: 2
+    lazy_start: true
+    max_role_round_trips: 2
+  budget:
+    max_total_tokens: 300000
+    max_cost_usd: 1.00
+  gates:
+    require_plan_approval: false
+    require_final_approval: true
+  roles:
+    implementer:
+      persona: tdd-guide
+      policy: writer
+      model_profile: coding
+      worktree: implementer
+    reviewer:
+      persona: code-reviewer
+      policy: reviewer-writer
+      model_profile: review
+      worktree: reviewer

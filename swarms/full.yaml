@@ -1,0 +1,53 @@
+apiVersion: agent-toolkit.dev/v1alpha1
+kind: SwarmRecipe
+metadata:
+  name: full-example
+  description: Full recipe — planner → implementer → refactorer → architect → hardener → qa, conditional hardener
+spec:
+  ui: auto
+  transport: filesystem
+  workspace:
+    strategy: worktree-per-writer
+    base_ref: HEAD
+    integration_branch: true
+  execution:
+    max_concurrency: 2
+    lazy_start: true
+    max_role_round_trips: 2
+  budget:
+    max_total_tokens: 900000
+    max_cost_usd: 4.00
+  gates:
+    require_plan_approval: true
+    require_final_approval: true
+  roles:
+    planner:
+      persona: planner
+      policy: read-only
+      model_profile: planning
+    implementer:
+      persona: tdd-guide
+      policy: writer
+      model_profile: coding
+      worktree: implementer
+    refactorer:
+      persona: refactor-cleaner
+      policy: writer
+      model_profile: review
+      worktree: reviewer
+    architect:
+      persona: architect
+      policy: integrator
+      model_profile: architecture
+      worktree: integration
+      receive_mode: batch
+    hardener:
+      persona: security-reviewer  # dynamically specialized: security/database/performance/typescript
+      policy: reviewer-writer
+      model_profile: hardening
+      worktree: hardener
+    qa:
+      persona: e2e-runner
+      policy: reviewer-writer
+      model_profile: qa
+      worktree: qa
