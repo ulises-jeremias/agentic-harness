@@ -1,0 +1,43 @@
+apiVersion: agent-toolkit.dev/v1alpha1
+kind: SwarmRecipe
+metadata:
+  name: team-example
+  description: Team recipe for harness — planner → implementer → reviewer → architect with plan gate
+spec:
+  ui: auto
+  transport: filesystem
+  workspace:
+    strategy: worktree-per-writer
+    base_ref: HEAD
+    integration_branch: true
+  execution:
+    max_concurrency: 2
+    lazy_start: true
+    max_role_round_trips: 2
+  budget:
+    max_total_tokens: 600000
+    max_cost_usd: 2.00
+  gates:
+    require_plan_approval: true
+    require_final_approval: true
+  roles:
+    planner:
+      persona: planner
+      policy: read-only
+      model_profile: planning
+    implementer:
+      persona: tdd-guide
+      policy: writer
+      model_profile: coding
+      worktree: implementer
+    reviewer:
+      persona: code-reviewer
+      policy: reviewer-writer
+      model_profile: review
+      worktree: reviewer
+    architect:
+      persona: architect
+      policy: integrator
+      model_profile: architecture
+      worktree: integration
+      receive_mode: batch
