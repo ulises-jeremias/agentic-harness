@@ -67,7 +67,7 @@ Loaded skills: (none)
 Start your AI tool now. The AI will read `AGENTS.md` and understand the harness routing table.
 
 > [!TIP]
-> Tell the AI: "Load workspace context and prime with assistant-memory inject"
+> Tell the AI: "Load workspace context and prime with agent-toolkit memory inject"
 
 ---
 
@@ -195,9 +195,9 @@ Use the github-cli-workflow skill if available.
 After the PR is created, save the patterns you discovered:
 
 ```bash
-./bin/assistant-memory add --type learning "hello-harness uses argparse for CLI flags"
-./bin/assistant-memory add --type learning "PR titles should follow feat: <description> format"
-./bin/assistant-memory add --type process "Feature workflow: plan -> implement -> review -> PR"
+agent-toolkit memory add --type learning "hello-harness uses argparse for CLI flags"
+agent-toolkit memory add --type learning "PR titles should follow feat: <description> format"
+agent-toolkit memory add --type process "Feature workflow: plan -> implement -> review -> PR"
 ```
 
 ### Step 13: Start a new session
@@ -205,7 +205,7 @@ After the PR is created, save the patterns you discovered:
 Close your AI tool and start a new session. Tell the AI:
 
 ```text
-Run assistant-memory inject and workspace-context. What do you know about my projects?
+Run agent-toolkit memory inject and agent-toolkit workspace. What do you know about my projects?
 ```
 
 The AI should recall:
@@ -247,7 +247,7 @@ You've completed the core workflow. Here's what to explore next:
 
 Make sure you're running your AI tool from the harness directory (`~/.ai-workspace`). AGENTS.md must be in the current working directory.
 
-### "workspace-context command not found"
+### "agent-toolkit workspace command not found"
 
 Run `bash scripts/workspace-init.sh` again — it adds `bin/` to your PATH for the current session.
 
@@ -261,10 +261,10 @@ python3 -c "import yaml; yaml.safe_load(open('packs/hello-harness.yaml'))"
 
 ### "AI doesn't remember from last session"
 
-Make sure you ran `assistant-memory add` (not just thought about it). Check what's stored:
+Make sure you ran `agent-toolkit memory add` (not just thought about it). Check what's stored:
 
 ```bash
-./bin/assistant-memory search "hello"
+agent-toolkit memory search "hello"
 ```
 
 ### "Persona restrictions are too strict"

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://raw.githubusercontent.com/ulises-jeremias/agentic-harness/main/schemas/pack.schema.json",
   "title": "AI Workspace Pack",
-  "description": "Context bundle for a project or client, loaded via bin/workspace-context.",
+  "description": "Context bundle for a project or client, loaded via agent-toolkit workspace.",
   "type": "object",
   "required": ["name", "description"],
   "additionalProperties": true,

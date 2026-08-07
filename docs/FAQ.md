@@ -54,9 +54,9 @@ Create a pack per client and load it at session start:
 
 ```bash
 
-workspace-context load --pack packs/acme-corp.yaml
+agent-toolkit workspace load --pack packs/acme-corp.yaml
 # ... work on Acme tasks ...
-workspace-context load --pack packs/startup-x.yaml
+agent-toolkit workspace load --pack packs/startup-x.yaml
 # ... switch to Startup X ...
 
 ```
@@ -111,7 +111,7 @@ Use `agent-toolkit loop cost <name> --monthly` for accurate projections based on
 
 ### How big can knowledge/ get before it causes problems?
 
-The practical limit depends on your AI tool's context window. `assistant-memory inject` outputs all knowledge entries. If your context window is 200K tokens (Claude), you can comfortably store 50-100 knowledge entries before injection dominates the context.
+The practical limit depends on your AI tool's context window. `agent-toolkit memory inject` outputs all knowledge entries. If your context window is 200K tokens (Claude), you can comfortably store 50-100 knowledge entries before injection dominates the context.
 
 For larger knowledge bases:
 
@@ -121,7 +121,7 @@ For larger knowledge bases:
 
 ### How do I prevent knowledge from getting stale?
 
-Use `assistant-memory review --stale` (coming soon) to detect entries older than your threshold. Review the knowledge base monthly. Archive entries that reference tools/processes that no longer exist.
+Use `agent-toolkit memory review --stale` (coming soon) to detect entries older than your threshold. Review the knowledge base monthly. Archive entries that reference tools/processes that no longer exist.
 
 ---
 
@@ -146,7 +146,7 @@ Yes. Use `--no-llm` for a skeleton plan. This is useful for Cursor/Copilot-only 
 
 ### The AI doesn't seem to see my pack/persona/skills
 
-Run `workspace-context` and check the output. It prints every loaded context surface. Missing entries usually mean:
+Run `agent-toolkit workspace` and check the output. It prints every loaded context surface. Missing entries usually mean:
 
 - Pack file has invalid YAML (check with schema validation)
 - Persona frontmatter is malformed

@@ -29,7 +29,7 @@
     },
     "allowlist": {
       "type": "array",
-      "description": "Actions the loop may take without a human gate. Runtime hard gate (bin/loop-gh-gate) understands: comment, label, assign, merge, close, approve, push, commit, force-push, delete. Template-level names like create_draft_pr are prompts until mapped to those gh operations.",
+      "description": "Actions the loop may take without a human gate. Runtime hard gate (agent-toolkit loop) understands: comment, label, assign, merge, close, approve, push, commit, force-push, delete. Template-level names like create_draft_pr are prompts until mapped to those gh operations.",
       "items": { "type": "string" }
     },
     "deny": {
@@ -80,7 +80,7 @@
         { "type": "string" },
         { "type": "null" }
       ],
-      "description": "Agent or skill name recorded on verifier receipts before merge/close (bin/loop-gh-gate)."
+      "description": "Agent or skill name recorded on verifier receipts before merge/close (agent-toolkit loop)."
     },
     "parallelism": {
       "type": "integer",
@@ -97,7 +97,7 @@
     },
     "request": {
       "type": "string",
-      "description": "Default task prompt (may be overridden via bin/loop run --request)."
+      "description": "Default task prompt (may be overridden via agent-toolkit loop run --request)."
     }
   }
 }

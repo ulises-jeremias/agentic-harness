@@ -254,7 +254,7 @@ for the full reference.
 ### "Project not found"
 
 ```bash
-./bin/devcompanion projects          # list indexed projects
+agent-toolkit devcompanion projects          # list indexed projects
 agent-toolkit project clone owner/repo   # add missing project
 ```
 

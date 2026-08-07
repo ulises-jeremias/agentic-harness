@@ -33,7 +33,7 @@ muse
 In Muse Code, start with:
 
 ```text
-Run workspace-context and assistant-memory inject. What do you know about my setup?
+Run agent-toolkit workspace and agent-toolkit memory inject. What do you know about my setup?
 ```
 
 Muse Code will read `AGENTS.md`, load workspace context, and inject any saved knowledge entries.
@@ -42,7 +42,7 @@ Muse Code will read `AGENTS.md`, load workspace context, and inject any saved kn
 
 ```bash
 # Before starting Muse
-./bin/workspace-context load --pack packs/my-project.yaml
+agent-toolkit workspace load --pack packs/my-project.yaml
 muse
 ```
 
@@ -52,7 +52,7 @@ Muse Code now sees your project repos, conventions, and LLM policy.
 
 ```bash
 # Load persona before starting
-./bin/workspace-context load --persona implementer
+agent-toolkit workspace use-persona implementer
 muse
 ```
 

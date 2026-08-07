@@ -79,5 +79,5 @@ Ask Copilot Chat: "What's in the AGENTS.md routing table?"
 
 ## Troubleshooting
 
-- **"Copilot doesn't read harness context"**: Copilot doesn't auto-load harness files — paste workspace-context output into Chat
+- **"Copilot doesn't read harness context"**: Copilot doesn't auto-load harness files — paste agent-toolkit workspace output into Chat
 - **"Symlink broken"**: Run `bash scripts/workspace-init.sh` to recreate the `.github/copilot-instructions.md` symlink

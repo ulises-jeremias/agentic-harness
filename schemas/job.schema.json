@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://raw.githubusercontent.com/ulises-jeremias/agentic-harness/main/schemas/job.schema.json",
   "title": "AI Workspace Job Template",
-  "description": "A reusable job template for bin/devcompanion queue.",
+  "description": "A reusable job template for agent-toolkit devcompanion queue.",
   "type": "object",
   "required": ["name", "description", "request"],
   "additionalProperties": true,

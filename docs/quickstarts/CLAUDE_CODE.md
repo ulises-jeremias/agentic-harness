@@ -26,7 +26,7 @@ claude
 In Claude Code, start with:
 
 ```text
-Run workspace-context and assistant-memory inject. What do you know about my setup?
+Run agent-toolkit workspace and agent-toolkit memory inject. What do you know about my setup?
 ```
 
 Claude Code will read AGENTS.md (via CLAUDE.md symlink), load workspace context, and inject any saved knowledge entries.

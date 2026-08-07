@@ -26,7 +26,7 @@ gemini
 Start with:
 
 ```text
-Read GEMINI.md and workspace-context output. What do you know about my setup?
+Read GEMINI.md and agent-toolkit workspace output. What do you know about my setup?
 ```
 
 ## Load a Pack

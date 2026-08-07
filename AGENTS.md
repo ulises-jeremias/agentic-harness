@@ -135,7 +135,7 @@ personas/architect.md      # System design, tradeoffs, ADRs
 
 ### Persona enforcement
 
-When `workspace-context` runs with an active persona (via `use-persona`), the
+When `agent-toolkit workspace` runs with an active persona (via `use-persona`), the
 snapshot emits a `<persona-constraints>` XML block detailing the persona's
 allow/deny action list, output format, and handoff rules.
 

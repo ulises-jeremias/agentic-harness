@@ -38,11 +38,11 @@ Activating a persona prevents scope creep. If you want a review, you don't want 
 agent-toolkit workspace use-persona reviewer
 ```
 
-This writes `.active-persona` to the workspace root, which `workspace-context` snapshots at session start.
+This writes `.active-persona` to the workspace root, which `agent-toolkit workspace` snapshots at session start.
 
 ### Persona enforcement
 
-When a persona is active, `workspace-context` emits a `<persona-constraints>`
+When a persona is active, `agent-toolkit workspace` emits a `<persona-constraints>`
 block in the session snapshot with the persona's allow/deny lists, output
 format, and handoff rules:
 

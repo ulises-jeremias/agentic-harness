@@ -12,11 +12,11 @@ single command:
 
 ```bash
 # Before profiles
-workspace-context load packs/oss.yaml
-workspace-context use-persona implementer
+agent-toolkit workspace load packs/oss.yaml
+agent-toolkit workspace use-persona implementer
 
-# With profiles
-workspace-context load --profile oss-contrib
+# Or with one command:
+agent-toolkit workspace load --profile oss-contrib
 ```
 
 Profiles are YAML files in `profiles/*.yaml` that declare:
@@ -36,10 +36,10 @@ Profiles are YAML files in `profiles/*.yaml` that declare:
 
 ```bash
 # List available profiles
-workspace-context profiles
+agent-toolkit workspace profiles
 
 # Load a profile (activates pack + persona together)
-workspace-context load --profile <name>
+agent-toolkit workspace load --profile <name>
 ```
 
 ---
@@ -70,7 +70,7 @@ pre-commit run check-yaml --files profiles/my-client.yaml
 
 ## Persona transition log
 
-Every time you switch personas (via `workspace-context use-persona`), the
+Every time you switch personas (via `agent-toolkit workspace use-persona`), the
 transition is appended to `.persona-history`:
 
 ```text

@@ -322,9 +322,9 @@ Next run: tomorrow 09:00
 
 ```bash
 
-./bin/assistant-memory add --type learning "hello-stack uses argparse with ArgumentDefaultsHelpFormatter"
-./bin/assistant-memory add --type process "hello-stack workflow: planner → implementer → code-reviewer → github-cli-workflow"
-./bin/assistant-memory add --type todo "Add CI workflow for hello-stack tests"
+agent-toolkit memory add --type learning "hello-stack uses argparse with ArgumentDefaultsHelpFormatter"
+agent-toolkit memory add --type process "hello-stack workflow: planner → implementer → code-reviewer → github-cli-workflow"
+agent-toolkit memory add --type todo "Add CI workflow for hello-stack tests"
 
 ```
 
@@ -333,7 +333,7 @@ Next run: tomorrow 09:00
 ```bash
 
 cd ~/.ai-workspace
-./bin/assistant-memory inject
+agent-toolkit memory inject
 claude
 
 ```
@@ -364,8 +364,8 @@ agentic-workstation (L1)          agentic-harness (L2)          hello-stack (L3)
 │ 13 sub-agents        │──────────│ packs/hello-stack    │───────│ hello.py         │
 │ 6 MCP templates      │  skills  │ personas/            │  ctx  │ tests/           │
 │ dots-* CLI           │  agents  │ loops/daily-triage   │       │ .github/         │
-└─────────────────────┘          │ bin/assistant-memory  │       └──────────────────┘
-                                  │ bin/workspace-context │
+└─────────────────────┘          │ agent-toolkit memory  │       └──────────────────┘
+                                   │ agent-toolkit workspace │
                                   │ agent-toolkit devcompanion      │
                                   └─────────────────────┘
 
