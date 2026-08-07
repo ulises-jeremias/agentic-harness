@@ -13,7 +13,7 @@ This repo is your **personal AI workspace** — a fork-and-own framework. Contri
 | Write a tutorial or guide | Check issues labeled [good first issue](https://github.com/ulises-jeremias/agentic-harness/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) |
 | Improve documentation | See [docs/](docs/) — many docs welcome contributions |
 | Add examples or templates | [templates/](templates/) and [examples/](examples/) directories |
-| Improve CLI tools | [bin/](bin/) — Python and shell scripts |
+| Improve CLI tools | [agent-toolkit](https://github.com/ulises-jeremias/agent-toolkit) — CLI utilities |
 | Design new personas | [personas/](personas/) — work mode definitions |
 | Create loop templates | [templates/loops/](templates/loops/) — reusable loop patterns |
 
@@ -29,7 +29,7 @@ This repo is your **personal AI workspace** — a fork-and-own framework. Contri
 | Workflow and routing patterns | `knowledge/processes/general.md` |
 | New skill discoveries | `knowledge/skills/discovered.md` |
 | Learnings and corrections | `knowledge/learnings/` |
-| CLI tool improvements | `bin/` |
+| CLI tool improvements | `agent-toolkit` |
 | Job templates | `templates/jobs/` |
 | Personas | `personas/` |
 | Context packs | `packs/` |
@@ -83,6 +83,7 @@ Common scopes: `knowledge`, `bin`, `docs`, `templates`, `personas`, `packs`, `ci
 - [ ] CLI scripts are executable (`chmod +x bin/my-script`)
 - [ ] Docs files use UPPERCASE names (`docs/MY-DOC.md`)
 - [ ] No team-specific names, URLs, or tool instances hardcoded
+- [ ] Stale bin/ references replaced with agent-toolkit equivalents
 
 ---
 

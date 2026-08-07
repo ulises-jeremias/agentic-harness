@@ -39,7 +39,7 @@ When you discover something valuable:
 
 ```bash
 # Add to knowledge base
-./bin/assistant-memory add --type learning "New pattern: ..."
+agent-toolkit memory add --type learning "New pattern: ..."
 ```
 
 ### 2. Prepare the Artifact

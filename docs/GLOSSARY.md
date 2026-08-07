@@ -57,13 +57,13 @@ Shared terminology for the AI Workspace + agentic-workstation ecosystem.
 ## P
 
 **pack**
-: A YAML file in `packs/` that bundles context for a specific client, project, or domain. Loaded by `workspace-context load packs/<name>.yaml`. Can be composable with profiles.
+: A YAML file in `packs/` that bundles context for a specific client, project, or domain. Loaded by `agent-toolkit workspace load packs/<name>.yaml`. Can be composable with profiles.
 
 **persona**
-: A work mode defined by a markdown file in `personas/`. Each persona declares allow/deny action lists, output format, and handoff rules. Activated by `workspace-context use-persona <name>`.
+: A work mode defined by a markdown file in `personas/`. Each persona declares allow/deny action lists, output format, and handoff rules. Activated by `agent-toolkit workspace use-persona <name>`.
 
 **profile**
-: A composable configuration that bundles a pack + persona. Listed by `workspace-context profiles` and loaded with `workspace-context load --profile <name>`.
+: A composable configuration that bundles a pack + persona. Listed by `agent-toolkit workspace profiles` and loaded with `agent-toolkit workspace load --profile <name>`.
 
 ## R
 
@@ -79,7 +79,7 @@ Shared terminology for the AI Workspace + agentic-workstation ecosystem.
 : `skill-catalog.yaml` — the agentic-workstation orchestration metadata file that maps skills to domains, responsibilities, roles, and dependency graph.
 
 **snapshot**
-: The output of `workspace-context` — a machine-readable summary of the current session state including active persona, loaded pack, spec hash, and persona constraints.
+: The output of `agent-toolkit workspace` — a machine-readable summary of the current session state including active persona, loaded pack, spec hash, and persona constraints.
 
 ## T
 
@@ -91,5 +91,5 @@ Shared terminology for the AI Workspace + agentic-workstation ecosystem.
 **worktree**
 : A detached git checkout created by `agent-toolkit loop run` to execute work on a clean copy of the workspace. Automatically removed after the run completes or is cancelled.
 
-**workspace-context**
+**agent-toolkit workspace**
 : The session snapshot CLI at `agent-toolkit workspace`. Prints active state, loads packs/personas/profiles, validates schemas, and manages persona handoffs.

@@ -1,6 +1,6 @@
 # Pack: Example Client Project
 # Copy this file to packs/<your-client>.yaml and customize.
-# Load with: ./bin/workspace-context load packs/<your-client>.yaml
+# Load with: agent-toolkit workspace load packs/<your-client>.yaml
 
 name: example-client
 description: Context pack for a typical client project

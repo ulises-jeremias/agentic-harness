@@ -24,8 +24,8 @@ graph TB
 
     subgraph "Harness Layer"
         WCTX[agent-toolkit workspace<br/>Session Snapshot]
-        AMEM[bin/assistant-memory<br/>Knowledge CLI]
-        DC[bin/devcompanion<br/>Job Queue]
+        AMEM[agent-toolkit memory<br/>Knowledge CLI]
+        DC[agent-toolkit devcompanion<br/>Job Queue]
         PI[agent-toolkit project<br/>Repo Manager]
         SCHEMAS[schemas/<br/>JSON Schema Validation]
     end
@@ -107,8 +107,8 @@ graph TB
 | Component | Location | Purpose |
 |-----------|----------|---------|
 | **workspace-context** | `agent-toolkit workspace` | Generates session snapshot: packs, personas, skills, knowledge |
-| **assistant-memory** | `bin/assistant-memory` | Search, add, inject, and review knowledge entries |
-| **devcompanion** | `bin/devcompanion` | Background job queue: code reviews, PRs, CI fixes, investigations |
+| **assistant-memory** | `agent-toolkit memory` | Search, add, inject, and review knowledge entries |
+| **devcompanion** | `agent-toolkit devcompanion` | Background job queue: code reviews, PRs, CI fixes, investigations |
 | **agent-toolkit project** | `agent-toolkit project` | Clone repos and manage symlinks in projects/ |
 | **Schema Validation** | `schemas/` | JSON Schema validation for all context surfaces |
 
@@ -131,12 +131,12 @@ graph TB
    └─ Routing table → which skills to use for each task type
 
 2. Load pack or profile
-   └─ workspace-context load --pack <name>
+   └─ agent-toolkit workspace load --pack <name>
       └─ snapshot includes: repos, conventions, IDs, LLM policy
 
 3. Prime context
-   └─ workspace-context (snapshot)
-   └─ assistant-memory inject (knowledge entries)
+   └─ agent-toolkit workspace (snapshot)
+   └─ agent-toolkit memory inject (knowledge entries)
 ```
 
 ### During Work
@@ -152,7 +152,7 @@ graph TB
    └─ code-reviewer → review changes
 
 6. Save learnings
-   └─ assistant-memory add --type learning "pattern discovered"
+   └─ agent-toolkit memory add --type learning "pattern discovered"
 ```
 
 ### Between Sessions

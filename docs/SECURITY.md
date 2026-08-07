@@ -205,7 +205,7 @@ ExecStart=%h/.ai-workspace/agent-toolkit loop run daily-triage
 |-------------|------|-----------|
 | Read `knowledge/` | Learn project patterns and processes | Knowledge hygiene checklist (above) |
 | Read `packs/` | Discover repo URLs and project IDs | Don't put secrets in packs |
-| Execute `bin/loop` | Run autonomous loops with your credentials | Tier system + `bin/loop-gh-gate` hard gate (allowlist/deny/receipts) |
+| Execute `agent-toolkit loop` | Run autonomous loops with your credentials | Tier system + `agent-toolkit loop` hard gate (allowlist/deny/receipts) |
 | Execute `agent-toolkit devcompanion` | Queue jobs that consume API tokens | LLM policy per pack prevents unauthorized provider use |
 | Write to `knowledge/` | Inject malicious patterns into future sessions | Review knowledge entries before committing |
 

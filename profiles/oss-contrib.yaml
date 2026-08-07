@@ -1,5 +1,5 @@
 # Profile: OSS contribution session
-# Load with: workspace-context load --profile oss-contrib
+# Load with: agent-toolkit workspace load --profile oss-contrib
 #
 # Activates the implementer persona and an optional OSS pack overlay.
 # Designed for open-source contribution workflows (fork → PR).

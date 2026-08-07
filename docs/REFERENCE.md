@@ -5,27 +5,27 @@
 
 ---
 
-## `assistant-memory`
+## `agent-toolkit memory`
 
 ```text
 
-assistant-memory — Manage assistant knowledge base
+agent-toolkit memory — Manage assistant knowledge base
 
 Usage:
-  assistant-memory add --type <type> [--from-skill <name>] [--tags a,b,c] <content>
+  agent-toolkit memory add --type <type> [--from-skill <name>] [--tags a,b,c] <content>
                                                   Add new entry (with optional origin tracking)
-   assistant-memory search [--tag T] [--project P] [--since YYYY-MM-DD]
+   agent-toolkit memory search [--tag T] [--project P] [--since YYYY-MM-DD]
                     [--min-confidence low|med|high] [--semantic] <query>
                                                     Search knowledge base (with filters)
-  assistant-memory index build                              Build semantic index
-  assistant-memory list [type]                   List entries by type
-  assistant-memory todo                          Show pending todos
-  assistant-memory review                        Review key items (session start)
-  assistant-memory review --stale                Review stale entries (interactive batch)
-  assistant-memory review --stale --auto-renew   Auto-extend all stale entries by 1 year
-  assistant-memory review --stale --delete       Delete stale entries (use FORCE=1 to execute)
-  assistant-memory inject                        Output context block for injection
-  assistant-memory help                          Show this help
+  agent-toolkit memory index build                              Build semantic index
+  agent-toolkit memory list [type]                   List entries by type
+  agent-toolkit memory todo                          Show pending todos
+  agent-toolkit memory review                        Review key items (session start)
+  agent-toolkit memory review --stale                Review stale entries (interactive batch)
+  agent-toolkit memory review --stale --auto-renew   Auto-extend all stale entries by 1 year
+  agent-toolkit memory review --stale --delete       Delete stale entries (use FORCE=1 to execute)
+  agent-toolkit memory inject                        Output context block for injection
+  agent-toolkit memory help                          Show this help
 
 Types for add:
   skill      New skill or tool discovery
@@ -38,30 +38,30 @@ Add flags:
   --tags a,b,c          Comma-separated tags (applied to frontmatter for skill type)
 
 Examples:
-  assistant-memory add --type learning "Always run tests before committing"
-  assistant-memory add --type skill --from-skill dots-harness-knowledge-sync --tags jira,workflow "New workflow pattern"
-  assistant-memory add --type todo "Investigate slow query in reports endpoint"
-  assistant-memory search "deploy"
-  assistant-memory list
-  assistant-memory inject   # paste output at end of session
+  agent-toolkit memory add --type learning "Always run tests before committing"
+  agent-toolkit memory add --type skill --from-skill dots-harness-knowledge-sync --tags jira,workflow "New workflow pattern"
+  agent-toolkit memory add --type todo "Investigate slow query in reports endpoint"
+  agent-toolkit memory search "deploy"
+  agent-toolkit memory list
+  agent-toolkit memory inject   # paste output at end of session
 
 ```
 
-## `devcompanion`
+## `agent-toolkit devcompanion`
 
 ```text
 
-devcompanion — standalone background job queue for AI Workspace
+agent-toolkit devcompanion — standalone background job queue for AI Workspace
 
 Usage:
-  devcompanion queue <project> [options]   Queue a job for an indexed project
-  devcompanion run-once [--no-llm]         Run oldest pending job
-  devcompanion status                      Show queue state and indexed projects
-  devcompanion sync-todos                  Regenerate knowledge/todos/pending.md from queue
-  devcompanion done <job-id>               Move a job to done
-  devcompanion templates                   List available job templates
-  devcompanion projects                    List indexed projects
-  devcompanion help                        Show this help
+  agent-toolkit devcompanion queue <project> [options]   Queue a job for an indexed project
+  agent-toolkit devcompanion run-once [--no-llm]         Run oldest pending job
+  agent-toolkit devcompanion status                      Show queue state and indexed projects
+  agent-toolkit devcompanion sync-todos                  Regenerate knowledge/todos/pending.md from queue
+  agent-toolkit devcompanion done <job-id>               Move a job to done
+  agent-toolkit devcompanion templates                   List available job templates
+  agent-toolkit devcompanion projects                    List indexed projects
+  agent-toolkit devcompanion help                        Show this help
 
 queue options:
   --template <name>    Use a predefined job template
@@ -74,18 +74,18 @@ Queue path:
   (override with HARNESS_DC_HOME env var)
 
 Examples:
-  devcompanion queue my-api --template code-review
-  devcompanion queue my-api --template investigate --request "slow response on /users"
-  devcompanion queue my-api --request "add pagination to GET /users"
-  devcompanion run-once
-  devcompanion run-once --no-llm    # skeleton plan, no LLM needed
-  devcompanion status
-  devcompanion done my-api-20260406-120000
+  agent-toolkit devcompanion queue my-api --template code-review
+  agent-toolkit devcompanion queue my-api --template investigate --request "slow response on /users"
+  agent-toolkit devcompanion queue my-api --request "add pagination to GET /users"
+  agent-toolkit devcompanion run-once
+  agent-toolkit devcompanion run-once --no-llm    # skeleton plan, no LLM needed
+  agent-toolkit devcompanion status
+  agent-toolkit devcompanion done my-api-20260406-120000
 
 Workflow:
-  1. devcompanion queue <project> --template <template>
-  2. devcompanion run-once            (or: let a background worker pick it up)
-  3. devcompanion done <job-id>
+  1. agent-toolkit devcompanion queue <project> --template <template>
+  2. agent-toolkit devcompanion run-once            (or: let a background worker pick it up)
+  3. agent-toolkit devcompanion done <job-id>
 
 Docs:
   docs/DEVCOMPANION.md
@@ -117,20 +117,20 @@ Notes:
   - ./repos/ and ./projects/ are gitignored
 ```
 
-## `workspace-context`
+## `agent-toolkit workspace`
 
 ```text
-workspace-context — AI Workspace session state snapshot
+agent-toolkit workspace — AI Workspace session state snapshot
 
 Usage:
-  workspace-context                         Print session context snapshot
-  workspace-context snapshot                Same as above
-  workspace-context load packs/<pack>.yaml  Load a context pack
-  workspace-context personas                List available personas
-  workspace-context use-persona <name>      Activate a persona
+  agent-toolkit workspace                         Print session context snapshot
+  agent-toolkit workspace snapshot                Same as above
+  agent-toolkit workspace load packs/<pack>.yaml  Load a context pack
+  agent-toolkit workspace personas                List available personas
+  agent-toolkit workspace use-persona <name>      Activate a persona
 
 Examples:
-  workspace-context
-  workspace-context load packs/my-client.yaml
-  workspace-context use-persona reviewer
+  agent-toolkit workspace
+  agent-toolkit workspace load packs/my-client.yaml
+  agent-toolkit workspace use-persona reviewer
 ```

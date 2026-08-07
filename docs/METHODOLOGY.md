@@ -61,10 +61,10 @@ Context engineering is the practice of giving the agent exactly the right inform
 
 ### Rules for good context engineering
 
-1. **Validate every surface** — use `workspace-context validate` to catch schema violations before they confuse the agent
+1. **Validate every surface** — use `agent-toolkit workspace validate` to catch schema violations before they confuse the agent
 2. **Tag knowledge entries** — `tags`, `project`, `created`, `stale_after` let you filter at retrieval time
 3. **Keep personas narrow** — a reviewer persona that can accidentally commit is a safety hazard
-4. **Load before you work** — `workspace-context load --profile <name>` is one command to prime the session
+4. **Load before you work** — `agent-toolkit workspace load --profile <name>` is one command to prime the session
 
 ---
 
@@ -79,9 +79,9 @@ The harness is the scaffolding that wraps the agent: routing, telemetry, contrac
 | Component | Role |
 |-----------|------|
 | `AGENTS.md` routing table | Dispatch the right skill or sub-agent per task type |
-| `workspace-context` snapshot | Record the spec hash and active pack at session start |
+| `agent-toolkit workspace` snapshot | Record the spec hash and active pack at session start |
 | Job templates (`templates/jobs/`) | Declared contract: inputs, outputs, exit criteria |
-| `devcompanion` job queue | Background work with artifact output |
+| `agent-toolkit devcompanion` job queue | Background work with artifact output |
 | Schema validation CI | Catch malformed context before it reaches the agent |
 
 ### The AGENTS.md spec hash
@@ -180,14 +180,14 @@ Session Start
     ▼
 3. Prime context
     agent-toolkit workspace         # state snapshot
-    ./bin/assistant-memory inject   # knowledge dump
+    agent-toolkit memory inject   # knowledge dump
     │
     ▼
 4. Work (discover → delegate → implement)
     │
     ▼
 5. Save
-    ./bin/assistant-memory add --type learning "..."
+    agent-toolkit memory add --type learning "..."
     │
     ▼
 Session End
@@ -204,8 +204,8 @@ Loop runs autonomously between sessions (if configured)
 # Context
 agent-toolkit workspace validate          # check schema violations
 agent-toolkit workspace load --profile oss-contrib
-./bin/assistant-memory search --tag oss "deploy"
-./bin/assistant-memory review --stale     # check decayed entries
+agent-toolkit memory search --tag oss "deploy"
+agent-toolkit memory review --stale     # check decayed entries
 
 # Loops
 agent-toolkit loop init daily-triage              # scaffold from template

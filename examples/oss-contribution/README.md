@@ -25,7 +25,7 @@ cat profiles/oss-contrib.yaml   # review the profile
 agent-toolkit workspace load --profile oss-contrib
 
 # 3. Search knowledge for anything we already know
-./bin/assistant-memory search --tag oss "fork workflow"
+agent-toolkit memory search --tag oss "fork workflow"
 
 # 4. Open your AI tool — implementer persona is already active
 opencode   # or: claude / cursor / gemini
@@ -46,8 +46,8 @@ See `profile.yaml` — a copy of `profiles/oss-contrib.yaml`.
 After your first contribution, save what you learned:
 
 ```bash
-./bin/assistant-memory add --type learning "OSS project X uses pnpm, not npm"
-./bin/assistant-memory add --type process "Always run their pre-commit before opening a PR"
+agent-toolkit memory add --type learning "OSS project X uses pnpm, not npm"
+agent-toolkit memory add --type process "Always run their pre-commit before opening a PR"
 ```
 
 Next time, the AI already knows.

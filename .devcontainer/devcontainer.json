@@ -12,7 +12,7 @@
       "upgradePackages": true
     }
   },
-  "postCreateCommand": "python3 -m pip install --user jsonschema pyyaml && bash scripts/workspace-init.sh && ./bin/workspace-context",
+  "postCreateCommand": "python3 -m pip install --user jsonschema pyyaml && bash scripts/workspace-init.sh && agent-toolkit workspace",
   "customizations": {
     "vscode": {
       "extensions": [

@@ -177,8 +177,8 @@ knowledge/
 ```
 
 ```bash
-./bin/assistant-memory add --type learning "Pattern: always run X before Y in this repo"
-./bin/assistant-memory add --type todo "Follow up: migrate auth to new pattern"
+agent-toolkit memory add --type learning "Pattern: always run X before Y in this repo"
+agent-toolkit memory add --type todo "Follow up: migrate auth to new pattern"
 ```
 
 ---
