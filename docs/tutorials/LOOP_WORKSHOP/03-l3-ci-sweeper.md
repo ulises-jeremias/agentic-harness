@@ -113,7 +113,7 @@ The checker agent (verifier) is the safety net. It runs independently from the m
 
 > **Hard gate:** During `loop run`, mutating `gh` commands are intercepted by
 > `agent-toolkit loop`. merge/close require a JSON receipt under
-> `runs/<id>/verifier-receipts/` or the command exits with code 78.
+> `runs/<id>/verifier-receipts/` or the command exits with code 2.
 
 ---
 
