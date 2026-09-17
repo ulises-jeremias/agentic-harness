@@ -148,7 +148,7 @@ agent-toolkit swarm models --runner opencode --profile balanced --json
 opencode models  # runner-native discovery
 ```
 
-- Other runners work identically (`--runner claude|codex|cursor|copilot|muse`), but examples and `scripts/demo-swarm.sh` use `opencode` and `skeleton`.
+- Other runners work identically (`--runner claude|codex|cursor|copilot|muse|pi`), but examples and `scripts/demo-swarm.sh` use `opencode` and `skeleton`.
 - `skeleton` is the offline fake runner — no LLM call, `0 tokens, $0.00`, ideal for CI, docs, and recording prep (see [Demo](#demo-no-llm-cost)).
 - Validate `provider/model` format before start; per-role model override is allowed via config.
 - Pricing is stored separately and updateable; unknown pricing is reported honestly, never silently swapped.
