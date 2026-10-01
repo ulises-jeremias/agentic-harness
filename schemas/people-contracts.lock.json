@@ -1,0 +1,18 @@
+{
+  "files": {
+    "schemas/people-bindings.schema.json": {
+      "sha256": "22fcd961e494e848dbfaaaafb822747eadf212923e75960d01b004e864de9044",
+      "source": "schemas/people-bindings.schema.json"
+    },
+    "schemas/person.schema.json": {
+      "sha256": "9bbb84ee3734a3c32fa0b73259bb81f529eaf382e0550f1822d22ff7d367fbe7",
+      "source": "schemas/person.schema.json"
+    },
+    "scripts/validate-people.py": {
+      "sha256": "e054044cfc195b0edbc58a65431f0ae07a73b8557de7921bc17a785a5460fc78",
+      "source": "scripts/workspace/validate-people.py"
+    }
+  },
+  "source": "https://github.com/ulises-jeremias/agent-toolkit",
+  "spec": "agent-toolkit/people-contracts-lock@1"
+}
