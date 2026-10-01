@@ -162,6 +162,7 @@ agentic-harness/
 ├── docs/                  # Guides, references, and methodology
 ├── knowledge/             # Persistent AI memory (learnings, todos, patterns)
 ├── personas/              # Workspace persona selections (from Toolkit catalog)
+├── people/                # Durable collaborators (one JSON per Person; roster stays empty until human review)
 ├── packs/                 # Workspace context bundles per client/project
 ├── profiles/              # Session profiles: pack + persona + skills
 ├── schemas/               # JSON Schema validation for context surfaces
@@ -202,6 +203,7 @@ Full component reference and Mermaid diagrams: [`docs/ARCHITECTURE.md`](docs/ARC
 | [`docs/DEVCOMPANION.md`](docs/DEVCOMPANION.md) | Background job queue guide |
 | [`docs/KNOWLEDGE.md`](docs/KNOWLEDGE.md) | Knowledge base usage |
 | [`docs/PERSONAS.md`](docs/PERSONAS.md) | Persona catalog and lifecycle (workspace selections) |
+| [`docs/PEOPLE.md`](docs/PEOPLE.md) | Durable People (identity model, schema rules, gaps) |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | How to extend and contribute |
 
 ---

@@ -1,0 +1,4 @@
+# People role preferences (agent-toolkit/people-bindings@1).
+# Roles stay empty until you add People; see people/README.md.
+spec: agent-toolkit/people-bindings@1
+roles: {}

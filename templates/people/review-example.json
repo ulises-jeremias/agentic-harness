@@ -1,0 +1,12 @@
+{
+  "spec": "agent-toolkit/person@1",
+  "id": "review-example",
+  "name": "Review Example",
+  "role": "reviewer",
+  "goal": "Example template only. Copy, review, and adapt before configuring a Person in your workspace.",
+  "archived": true,
+  "preferred_provider": "anthropic",
+  "preferred_model": "claude-sonnet-4-5",
+  "skills": ["quality/deep-review", "quality/blast-radius"],
+  "isolation": "worktree"
+}

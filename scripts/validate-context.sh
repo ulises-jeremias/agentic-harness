@@ -7,7 +7,7 @@
 #   ./scripts/validate-context.sh                  # validate everything
 #   ./scripts/validate-context.sh --surface packs  # validate one surface
 #
-# Surfaces: packs | jobs | personas | all (default)
+# Surfaces: packs | jobs | personas | knowledge | loops | people | all (default)
 
 set -euo pipefail
 
@@ -26,7 +26,7 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --surface) SURFACE="$2"; shift 2 ;;
     -h|--help)
-      echo "Usage: $0 [--surface packs|jobs|personas|knowledge|loops|all]"
+      echo "Usage: $0 [--surface packs|jobs|personas|knowledge|loops|people|all]"
       exit 0 ;;
     *) echo "Unknown flag: $1" >&2; exit 1 ;;
   esac
@@ -214,6 +214,23 @@ run_loops() {
   if [[ $found -eq 0 ]]; then ok "templates/loops/ (no files)"; fi
 }
 
+run_people() {
+  info "Validating people/ ..."
+  if [[ ! -d "${WORKSPACE_ROOT}/people" ]]; then
+    ok "people/ (no directory)"
+    return 0
+  fi
+  # Canonical offline validator (mirrored from agent-toolkit): verifies the
+  # schema mirrors against the lock before parsing any schema, then checks
+  # every people/*.json and people/bindings.yaml.
+  if python3 "${WORKSPACE_ROOT}/scripts/validate-people.py" --workspace "${WORKSPACE_ROOT}" 2>&1; then
+    ok "people/ declarations + contract mirrors"
+  else
+    fail "people/ — validation failed (static diagnostic; run scripts/validate-people.py for the message)"
+    ERRORS=$((ERRORS + 1))
+  fi
+}
+
 # ── dispatch ──────────────────────────────────────────────────────────────────
 echo ""
 echo "Context Validation"
@@ -225,7 +242,8 @@ case "$SURFACE" in
   personas) run_personas ;;
   knowledge) run_knowledge ;;
   loops)    run_loops ;;
-  all)      run_packs; run_jobs; run_personas; run_knowledge; run_loops ;;
+  people)   run_people ;;
+  all)      run_packs; run_jobs; run_personas; run_knowledge; run_loops; run_people ;;
   *)        echo "Unknown surface: $SURFACE" >&2; exit 1 ;;
 esac
 

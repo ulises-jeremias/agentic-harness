@@ -21,12 +21,12 @@ repos:
   - repo: local
     hooks:
       - id: validate-context
-        name: Validate context schemas (packs, jobs, personas)
+        name: Validate context schemas (packs, jobs, personas, people)
         language: python
         additional_dependencies: [jsonschema, PyYAML]
         entry: bash scripts/validate-context.sh
         pass_filenames: false
-        files: "^(packs/|templates/jobs/|personas/|schemas/)"
+        files: "^(packs/|templates/jobs/|personas/|people/|schemas/)"
 
   # shellcheck disabled - bin/* are Python scripts, not shell scripts
   # - repo: https://github.com/shellcheck-py/shellcheck-py

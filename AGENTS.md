@@ -152,6 +152,24 @@ violating constraints.
 
 ---
 
+## People
+
+Durable collaborators live in `people/<id>.json` (`agent-toolkit/person@1`).
+This workspace is the harness reference: fictional examples live in
+`templates/people/` (validated, never configured), and the active roster in
+`people/` stays empty until a human reviews and copies one. A Person is a
+character you chose and reviewed, not a running session and not an agent
+definition. Validate with `python3 scripts/validate-people.py --workspace .`
+(also wired into `validate-context.sh --surface people`).
+
+People CRUD, import review, Start, session binding and the swarm role picker
+are not implemented. Import of `munder-difflin/hire@1` is contract-only:
+review required, no auto-spawn, no auto-install, no live sync.
+
+→ [`docs/PEOPLE.md`](docs/PEOPLE.md) for the identity model and gaps.
+
+---
+
 ## Packs
 
 Workspace packs bundle context for a specific client or project (distinct from Toolkit capability packs):
