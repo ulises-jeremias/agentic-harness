@@ -1,281 +1,62 @@
-# Loop Engineering Primer
+# Loops in an Agent Toolkit workspace
 
-> Loops are recurring AI-driven processes with durable state, safety gates, and
-> cost budgets. Inspired by Boris Cherny (Anthropic), Peter Steinberger, Addy
-> Osmani, and Cobus Greyling's *Loop Engineering* (2026).
->
-> **The shift**: you stop prompting agents and start designing loops that prompt them.
+Loops are reusable, budgeted workflows owned and executed by Agent Toolkit.
+This repository supplies reference workspace loop definitions in
+`loops/<name>/loop.yaml`; it is not a separate runner. `loop.yaml` is the sole
+definition source. Runtime state and reports are local artifacts and should
+not be confused with the definition.
 
----
-
-## Quick Start
+## Inspect before running
 
 ```bash
-# Scaffold a new loop from a starter template
-agent-toolkit loop init daily-triage
-
-# Run a loop once (manual trigger)
-agent-toolkit loop run daily-triage
-
-# Show loop status
+agent-toolkit loop templates
+agent-toolkit loop list
 agent-toolkit loop status
-
-# See what a run would cost
-agent-toolkit loop cost daily-triage
-
-# Audit past runs
-agent-toolkit loop audit daily-triage
+agent-toolkit loop cost <name>
+agent-toolkit loop schedule <name> --dry-run
 ```
 
----
+Read the selected `loops/<name>/loop.yaml` completely before running it. Check
+its tier, allowlist, denylist, request, targets, budget, verifier and current
+state. A loop can call external tools; a scheduled loop can repeat that work.
+Do not enable a schedule or run a mutating loop until its effects and target
+repositories are understood. Prefer an L1 report-only loop for first use.
 
-## Runner Hierarchy
+## Definition format
 
-`agent-toolkit loop run` tries AI runners in this order. The first one found is used:
+Each `loop.yaml` declares the name, goal, autonomy tier, allowed and denied
+actions, exit conditions, budget, optional schedule/verifier, and the request
+prompt. Keep secrets out of the file. Bind targets narrowly and state which
+operations require human review. The toolkit hard gate is authoritative; prose
+in the request cannot grant an action missing from the definition.
 
-| Priority | Runner | When available |
-|----------|--------|----------------|
-| 1 | **agentic-workstation runner** | `HARNESS_RUNNER_DIR` points to runner dir; provides multi-provider LLM selection (Anthropic, OpenAI, Ollama, OpenCode) with policy enforcement |
-| 2 | **`claude --print`** (Claude Code CLI) | `claude` is in `PATH`; works out of the box for Claude Code users, no extra setup |
-| 3 | **Skeleton plan** | Always available; writes a `plan.md` stub with no AI execution |
+The engine's current canonical schema and behavior live in the
+[Agent Toolkit loop guide](https://github.com/ulises-jeremias/agent-toolkit/blob/main/docs/LOOPS.md)
+and [loop implementation notes](https://github.com/ulises-jeremias/agent-toolkit/blob/main/docs/v/loop.md).
+Avoid copying CLI internals into this reference repo; link to canonical docs
+when the implementation changes.
 
-**Claude Code users** (most common case): loops work natively as long as `claude` is in your PATH.
+## Autonomy and safety
 
-**For multi-provider support**: install [agentic-workstation](https://github.com/ulises-jeremias/agentic-workstation) and set:
+- **L1** is read-only/report-oriented. Use it to establish a safe baseline.
+- **L2** permits only controlled allowlisted mutations; review the exact
+  consequences before enabling it.
+- **L3** is high-autonomy and can permit merge/close only when explicitly
+  configured and guarded by the toolkit's verifier receipt. Do not treat a
+  green CI result or loop prompt as permission to bypass repository policy.
 
-```bash
-export HARNESS_RUNNER_DIR="$HOME/.local/share/agentic-workstation/dev-companion/runner"
-```
+User confirmation, branch protection, repository permissions, and the toolkit
+hard gate remain in force. A loop definition is not authorization to ignore
+them. For this example workspace, keep community maintenance observation-only
+by default and create PRs for human review rather than merging or closing
+third-party work automatically.
 
----
+## Local runtime artifacts
 
-## Loop Directory Contract
+`STATE.md`, reports, traces and run directories are runtime evidence. They can
+contain repository names and issue/PR details, so keep them local unless they
+are deliberately curated for publication. Workspace `.gitignore` rules cover
+machine-local state; verify before committing any report.
 
-Every loop lives in `loops/<loop-name>/`:
-
-```text
-loops/daily-triage/
-├── LOOP.md        ← declared intent (mostly immutable)
-├── STATE.md       ← mutated state (one per run)
-└── runs/          ← run artifacts and traces
-    └── <run-id>/
-        ├── trace.jsonl    ← structured execution log
-        ├── plan.md        ← what the agent planned to do
-        ├── report.md      ← L1: observation output
-        └── diff.patch     ← L2/L3: code changes
-```
-
-### LOOP.md (declared intent)
-
-```yaml
----
-name: daily-triage
-tier: L1
-cadence: 1d
-goal: Triage new issues and apply labels
-allowlist:
-  - label
-  - comment
-deny:
-  - merge
-  - close
-  - force-push
-  - delete
-exit_conditions:
-  - goal_met
-  - budget_exhausted
-  - human_escalation
-budget:
-  max_tokens: 50000
-  max_runs_per_day: 1
-  max_wall_seconds: 600
-verifier: agentic-workstation-code-reviewer
----
-
-# Daily Issue Triage Loop
-
-(narrative goal, escalation rules, examples of good vs. bad output)
-```
-
-**LOOP.md fields**:
-
-| Field | Required | Description |
-|-------|----------|-------------|
-| `name` | ✓ | Kebab-case, matches directory name |
-| `tier` | ✓ | `L1` · `L2` · `L3` (see Rollout Tiers) |
-| `cadence` | ✓ | `15m` · `1h` · `6h` · `1d` · `1w` |
-| `goal` | ✓ | One-sentence objective |
-| `allowlist` | ✓ | Actions the loop may take without a human gate |
-| `deny` | | Actions explicitly forbidden (belt-and-suspenders) |
-| `exit_conditions` | ✓ | When to stop the current run |
-| `budget` | ✓ | `max_tokens`, `max_runs_per_day`, `max_wall_seconds` |
-| `verifier` | | Skill or agent that signs off on write actions |
-| `attribution` | | `true` (default) / `false` / `{enabled, template}` — AI comment disclosure |
-
-### STATE.md (mutated state)
-
-```yaml
----
-last_run: 2026-06-30T01:30:00Z
-last_run_status: success
-last_run_id: 20260630T013000Z-abc123
-runs_today: 1
-pending: []
-escalations: []
----
-```
-
-STATE.md is written by `agent-toolkit loop run` after each run. Do not edit manually.
-It is gitignored by default and machine-local.
-
----
-
-## Rollout Tiers
-
-| Tier | Autonomy | What it does |
-|------|----------|--------------|
-| **L1** | Report-only | Reads, analyzes, writes `report.md`. Never mutates external state. |
-| **L2** | Assisted | Proposes changes as a draft PR. A human must approve before merge. |
-| **L3** | Unattended | May commit/merge for actions in `allowlist`. Everything else escalates. |
-
-> **Principle**: start every new loop at L1. Graduate to L2/L3 only after
-> reviewing 3+ consecutive clean L1 runs.
-
----
-
-## Exit Conditions
-
-```yaml
-exit_conditions:
-  - goal_met          # agent signals objective is satisfied
-  - budget_exhausted  # token/time budget hit
-  - human_escalation  # agent cannot decide; pauses for review
-  - safe_to_commit    # (L3) all actions are allowlisted
-  - requires_pr       # (L2) changes need PR review
-  - max_iterations    # fallback: hard limit on sub-agent calls
-```
-
-Combine with `any` (default) or `all`:
-
-```yaml
-exit_conditions:
-  logic: any    # stop on first condition (default)
-  conditions:
-    - goal_met
-    - budget_exhausted
-```
-
----
-
-## Maker / Checker Pattern
-
-Every loop run dispatches two sub-agents:
-
-1. **Implementer** (maker) — executes the goal, produces artifacts
-2. **Verifier** (checker) — audits artifacts before any write action
-
-```yaml
-verifier: agentic-workstation-code-reviewer   # default for code-touching loops
-# verifier: agentic-workstation-architect     # for design/ADR loops
-```
-
-The verifier must sign off before any action not in `allowlist`. If the
-verifier fails, the run is marked `verifier_failed` and escalated.
-
-> **Hard gate (2026-07-17):** During `loop run`, `agent-toolkit loop` installs a PATH-first
-> `gh` shim (`loop-gh-gate`) that intercepts mutating commands. Actions must
-> be on `allowlist`, not on `deny`, and compatible with the loop tier. **merge**
-> and **close** additionally require a JSON verifier receipt under
-> `runs/<id>/verifier-receipts/` bound to exact `repo` + `number` + `verifier`
-> (and HMAC `sig` when `LOOP_GATE_RECEIPT_SECRET` is set). Denied calls exit
-> with code `78` from the intercepted `gh` process and append to
-> `gate-denials.jsonl`. Read-only `gh` commands pass through.
->
-> An independent verifier (separate agent/skill) is **mandatory** for merge/close
-> until authenticated receipts are in use: the maker must not self-approve.
-> Unsigned receipts are trust-on-filesystem only — set `LOOP_GATE_RECEIPT_SECRET`
-> in production so the gate rejects unsigned maker-written files.
-
-### Comment attribution (default ON)
-
-Outbound `gh` comment/review bodies are prefixed with an AI disclosure when
-missing (enforced by `loop-gh-gate` in agent-toolkit):
-
-```markdown
-> 🤖 AI-assisted message posted as `@your-login` by [agent-toolkit](https://github.com/ulises-jeremias/agent-toolkit) (`loop-name`).
-```
-
-Disable per loop:
-
-```yaml
-attribution: false
-# or
-attribution:
-  enabled: false
-```
-
----
-
-## Reference Patterns
-
-Adapted from [cobusgreyling/loop-engineering](https://github.com/cobusgreyling/loop-engineering):
-
-| Pattern | Tier | Cadence | Cost | Use case |
-|---------|------|---------|------|----------|
-| `daily-triage` | L1 | 1d | Low | Label new issues |
-| `pr-babysitter` | L2 | 15m | High | Comment on open PRs |
-| `ci-sweeper` | L2 | 15m | Very High | Fix failing tests |
-| `dep-sweeper` | L2 | 1d | Medium | Patch dep updates |
-| `changelog-drafter` | L1 | 1d | Low | Draft release notes |
-| `post-merge-cleanup` | L2 | 6h | Low | Off-peak housekeeping |
-| `issue-triage` | L1 | 4h | Low | Propose-only labeling |
-
-Get a starter: `agent-toolkit loop init <pattern>`
-
----
-
-## Scheduling
-
-**systemd timer (Linux)**:
-
-```ini
-# ~/.config/systemd/user/agentic-harness-daily-triage.timer
-[Timer]
-OnCalendar=daily
-[Install]
-WantedBy=timers.target
-```
-
-**launchd (macOS)**:
-
-```xml
-<!-- ~/Library/LaunchAgents/agentic-harness.daily-triage.plist -->
-<key>StartCalendarInterval</key>
-<dict><key>Hour</key><integer>8</integer></dict>
-```
-
-**Claude Code trigger (in-session)**:
-
-```text
-mcp__claude_ai_Claude_Code_Remote__create_trigger
-  cron_expression: "0 8 * * *"
-  prompt: "Run agent-toolkit loop run daily-triage in the agentic-harness"
-```
-
----
-
-## Anti-Patterns
-
-- **Loop creep**: starting at L3 without L1 observation. Always observe first.
-- **No budget**: loops without `max_tokens` run until the context limit.
-- **Weak allowlist**: allowing `merge` without testing runs in staging.
-- **No verifier**: skipping the checker on code-touching L3 loops.
-- **Long cadence + high cost**: `1d` cadence at `very-high` cost tier = expensive surprise.
-
----
-
-## More reading
-
-- [docs/METHODOLOGY.md](METHODOLOGY.md) — Ralph Loop philosophy
-- [templates/loops/](../templates/loops/) — starter templates
-- `agent-toolkit loop --help` — CLI reference
+See [Loop CLI reference](LOOP_CLI.md) for current commands and
+[workspace setup](SETUP.md) for installation.

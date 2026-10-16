@@ -1,6 +1,10 @@
 # The Complete Stack — agentic-workstation + agent-toolkit + agentic-harness
 
-> Integrated tutorial: how the three layers of the Personal DX Stack work together.
+> **Architecture reference:** this is an older walkthrough. Check each
+> repository's current README and the Agent Toolkit guides before executing
+> setup commands; installation surfaces and ownership contracts evolve.
+
+Integrated tutorial: how the three layers of the Personal DX Stack work together.
 
 **Time**: ~2.5 hours | **Prerequisites**: None — starts from zero
 

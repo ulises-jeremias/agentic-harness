@@ -1,6 +1,11 @@
 # Part 4: Capstone — Build Your Own Loop
 
-> Design a custom loop from scratch using the loop engineering discipline.
+> **Historical workshop:** these examples use a retired loop contract. Current
+> Agent Toolkit loops are defined in `loops/<name>/loop.yaml`; do not copy or
+> run commands from this tutorial. Use the [current loop guide](https://github.com/ulises-jeremias/agent-toolkit/blob/main/docs/LOOPS.md)
+> and inspect the installed CLI's `agent-toolkit loop --help` instead.
+
+Design a custom loop from scratch using the loop engineering discipline.
 
 **Time**: 30 minutes | **Tier**: Your choice | **Risk**: Depends on your design
 

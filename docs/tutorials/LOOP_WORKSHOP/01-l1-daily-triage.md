@@ -1,6 +1,11 @@
 # Part 1: L1 — Daily Issue Triage
 
-> Build a read-only loop that scans open issues and writes a morning report.
+> **Historical workshop:** these examples use a retired loop contract. Current
+> Agent Toolkit loops are defined in `loops/<name>/loop.yaml`; do not copy or
+> run commands from this tutorial. Use the [current loop guide](https://github.com/ulises-jeremias/agent-toolkit/blob/main/docs/LOOPS.md)
+> and inspect the installed CLI's `agent-toolkit loop --help` instead.
+
+Build a read-only loop that scans open issues and writes a morning report.
 
 **Time**: 30 minutes | **Tier**: L1 (report-only) | **Risk**: None — read-only
 
