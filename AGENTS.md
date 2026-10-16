@@ -24,10 +24,10 @@
 
 | Task type | Delegate to |
 |-----------|-------------|
-| Discovery / first look at a repo | `dev-assistant` skill |
+| Discovery / first look at a repo | `assistant` skill |
 | Generic delivery workflow | `workflow-generic-project` skill |
-| Code review / refactor / security | `code-reviewer` / `refactor-cleaner` / `security-reviewer` |
-| UI/UX design | `ui-ux-pro-max` skill |
+| Code review / security | `deep-review`, `supply-chain-audit`, `threat-modeling` skills; Toolkit agents are available where the host provides agent delegation |
+| UI/UX design | `frontend-design`, `design-assessment`, `design-improvement` skills |
 | JIRA tasks | `jira-assistant` skill |
 | Confluence tasks | `confluence-assistant` skill |
 | ClickUp tasks | `clickup-cli` skill |
@@ -63,8 +63,9 @@
 
 | Skill | When |
 |-------|------|
-| `dev-assistant` | Repo inspection, discovery, convention verification |
-| `workflow-generic-project` | Delivery phases for any client project |
+| `assistant` | Repo inspection, discovery and convention verification |
+| `workflow-generic-project` | Delivery phases for a client or project |
+| `github-cli-workflow` | GitHub branch and draft PR workflow |
 
 ### Productivity
 
@@ -78,23 +79,32 @@
 
 | Skill | When |
 |-------|------|
-| `ui-ux-pro-max` | UI/UX design, components, layouts |
-| `github-cli-workflow` | Push branch, create draft PR (GitHub) |
+| `deep-review` | Code quality, correctness and security review |
+| `frontend-design` | UI design and implementation |
+| `design-assessment` / `design-improvement` | Evidence-based design review and iteration |
+| `supply-chain-audit` / `threat-modeling` | Dependency and agentic security review |
 | `gitlab-cli-workflow` | Push branch, create draft MR (GitLab) |
-| `dots-workstation-triage` | Workstation health diagnostics (agentic-workstation) |
+| `triage` | Workstation health diagnostics |
 
-### Subagents
+### Capability discovery
 
-| Subagent | When |
-|----------|------|
-| `code-reviewer` | Quality, security, maintainability review |
-| `security-reviewer` | Vulnerability audit |
-| `tdd-guide` | Test-driven development |
-| `refactor-cleaner` | Dead code removal, simplification |
-| `explore` | Fast codebase search |
-| `docs-lookup` | Documentation and API references |
+Do not assume a skill or agent is installed because it appears in an old
+workspace template. Discover the current catalog with:
 
-> **Skill naming**: `agent-toolkit` skills use bare names (`code-reviewer`, `memory`, etc.). `agentic-workstation` prefixes its bundled local skills with `dots-workstation-` (e.g. `dots-workstation-triage`, `dots-workstation-assistant`). Update this table to match what's installed on your machine.
+```bash
+agent-toolkit skills list
+agent-toolkit inventory
+```
+
+Skills are reusable instructions; Agents are named capability definitions
+available to compatible host tools. Whether an Agent can be delegated to is a
+host/client feature, not guaranteed by this workspace. `agent-toolkit` owns the
+catalog and runtime; this repository is an example workspace, not a competing
+capability distribution.
+
+The names above are useful starting points, not a promise that every host has
+each capability installed. Check `agent-toolkit skills list` or the host's
+current skill registry before invoking one.
 
 ---
 
@@ -162,9 +172,12 @@ character you chose and reviewed, not a running session and not an agent
 definition. Validate with `python3 scripts/validate-people.py --workspace .`
 (also wired into `validate-context.sh --surface people`).
 
-People CRUD, import review, Start, session binding and the swarm role picker
-are not implemented. Import of `munder-difflin/hire@1` is contract-only:
-review required, no auto-spawn, no auto-install, no live sync.
+Desktop supports Person roster CRUD, reviewed one-way import of
+`munder-difflin/hire@1`, and starting real local PTY sessions. Session
+continuity across Desktop exit and swarm-role-to-AgentSession/world/terminal
+binding remain partial. A configured Person is not runtime activity: only a
+real live session assigned to a project can create world presence. Import
+requires review and never spawns, installs arbitrary code, or live-syncs.
 
 → [`docs/PEOPLE.md`](docs/PEOPLE.md) for the identity model and gaps.
 

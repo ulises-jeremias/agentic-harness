@@ -1,112 +1,80 @@
-# People — durable collaborators, not running sessions
+# People — durable collaborators, separate from runtime
 
-Status: **CURRENT CONTRACT (partial delivery)** — schemas, storage ownership,
-scaffolding, mirror sync and offline validation are implemented. People CRUD,
-import review, Start, session binding and swarm role selection in Desktop are
-**not implemented**; see [Gaps](#gaps).
+This reference workspace mirrors Agent Toolkit's People contracts and provides
+fictional examples. It does not implement a second People runtime. The current
+Desktop supports roster CRUD, archive/restore, reviewed one-way
+`munder-difflin/hire@1` import, and starting a Person as a real local PTY session.
+Session resume across Desktop exit and full swarm-session identity/world
+integration remain partial; see [current toolkit documentation](https://github.com/ulises-jeremias/agent-toolkit/blob/main/docs/PEOPLE.md).
 
-A Person is a collaborator you have chosen and reviewed. It persists in your
-workspace, not in the toolkit. Configuration alone never creates a character:
-a `people/<id>.json` file is a declaration, and the Desktop world shows only
-runtime truth from `agent-toolkit serve` (ADR-034).
+The active `people/` roster is intentionally empty until a human configures
+collaborators. Example declarations under `templates/people/` are validated
+but are not configured People and never imply runtime activity.
 
 ## Identity model
 
-These five things are different, and the code keeps them different:
-
-| Concept | Where it lives | What it is |
+| Concept | Canonical location | Meaning |
 |---|---|---|
-| **Agent definition** | toolkit `agents/<name>/AGENT.md` | A reusable persona template — how an AI works in a session |
-| **Agent profile** | toolkit `profiles/<target>/` | A per-target adapter/overlay of toolkit capabilities |
-| **Person** | workspace `people/<id>.json` | A durable collaborator you chose and reviewed |
-| **Agent session** | runtime | A live conversation with ephemeral state |
-| **Swarm role** | recipe | A slot in a swarm run, resolved per run |
+| Agent definition | Toolkit `agents/<name>/AGENT.md` | Reusable behavior and capability template |
+| Person | Workspace `people/<id>.json` | Durable collaborator configuration and appearance |
+| Agent session | Toolkit workspace `.agent-toolkit/sessions/` plus live Electron PTY | Runtime lifecycle evidence tied to a real process |
+| Swarm role | Recipe/run | Temporary responsibility in one orchestration |
+| Workspace persona | Workspace `personas/*.md` | Constraints for a work mode, not a person or agent definition |
 
-Workspace personas (`personas/*.md`) constrain behavior and permissions during
-a session; they are not identity. A Person composes an optional
-`definition_id` reference plus preferences, but is its own durable thing.
+A configured or archived Person is not a worker. The Desktop world may show a
+Person only when a real session is live and associated with a registered
+project. A swarm role binding currently selects launch preferences and records
+the Person ID, but it does not yet create a canonical Person session, terminal
+action, or World character for the swarm process.
 
-## Storage
+## Data and validation
 
-```text
-<workspace>/
-  people/
-    README.md              scaffold (workspace init)
-    <id>.json              one Person per file, spec agent-toolkit/person@1
-    bindings.yaml          optional role preferences, spec agent-toolkit/people-bindings@1
-  scripts/
-    validate-people.py     mirrored offline validator (canonical: toolkit scripts/workspace/validate-people.py)
-  schemas/
-    person.schema.json     mirrored (canonical: toolkit schemas/person.schema.json)
-    people-bindings.schema.json
-    people-contracts.lock.json  SHA256/source lock for the mirrors
-```
+People declarations use `agent-toolkit/person@1`; optional role preferences
+use `agent-toolkit/people-bindings@1`. This repository mirrors the canonical
+schemas and validator under `schemas/` and `scripts/`. The mirror lock records
+source revisions and SHA-256 digests. Update mirrors from the Agent Toolkit
+repository and verify the lock before changing these files; do not hand-edit
+the mirrored contracts.
 
-`workspace init` scaffolds `people/README.md` and rejects symlinked
-destinations before writing anything. The mirrors are written by
-`scripts/sync-people-contracts.py` from the toolkit checkout (atomic
-replacement, so unrelated hardlinked inodes survive) and verified against the
-lock before the validator parses any schema. A drifted mirror fails validation
-with a static message; it never evaluates tampered schemas.
-
-## Schema rules (agent-toolkit/person@1)
-
-- Required: `spec`, `id`, `name`, `role`, `goal`, `archived`.
-- Optional: `definition_id`, `avatar`, `preferred_provider`,
-  `preferred_model`, `capabilities`, `skills`, `mcp_servers`, `isolation`,
-  `budget`, `import_source`.
-- `id` is lowercase `[a-z0-9][a-z0-9_-]*` (max 64) and must match the filename.
-- Reference arrays are bounded at 32 unique entries.
-- No runtime fields, no secrets, no commands, no environment, no grants.
-- Source flags (`import_source.*`) are inert provenance, never instructions.
-- Budget omission means inherited or unknown, never unlimited.
-- `additionalProperties: false` everywhere.
-
-## Imports (munder-difflin/hire@1)
-
-`capabilities/imports/munder-hire-v1.json` is a **contract-only** mapping:
-`review_required: true`, `auto_spawn: false`, `auto_install: false`,
-`live_sync: false`. It maps name/role/goal/provider/model/skills/MCP fields;
-the `definition_id` is chosen during human review. Unknown and unsafe fields
-are blocked. Original character/accent are retained as inert attribution, not
-external art. Never treat `hive/registry.json` as runtime authority; there is
-no live synchronization.
-
-## Validation
+Validate the examples and active roster offline:
 
 ```bash
-python3 scripts/validate-people.py --workspace <workspace>
+python3 scripts/validate-people.py --workspace .
 ```
 
-Offline only: the validator uses a no-network jsonschema registry, rejects
-symlinked directories/files, enforces the 64 KiB declaration limit, the
-id/filename match, finite numbers (rejecting `NaN`/`Infinity`/`1e9999`),
-duplicate keys, and prints a static diagnostic that never echoes values, keys,
-or control bytes. Templates under `templates/people/` are validated but never
-counted as configured people.
+The validator rejects symlinked declarations, invalid or duplicate IDs,
+duplicate keys, non-finite numeric values, oversized files, unknown fields and
+tampered schema mirrors. It prints static diagnostics and does not echo
+declaration contents. Templates are checked without being counted as active
+People.
 
-## Role resolution (contract)
+## Import boundary
 
-When a swarm recipe names a role:
+The Munder adapter is one-way interoperability. Import opens a review flow and
+requires an explicit save. Embedded commands are inert/ignored; importing
+never spawns a session, installs arbitrary code, enables MCP, or establishes
+live sync. Munder's registry is not an Agent Toolkit runtime source of truth.
 
-1. An explicit Person choice is used; an invalid choice fails.
-2. Otherwise the first compatible preferred Person (ordered by
-   `people/bindings.yaml`).
-3. Otherwise an ephemeral canonical session, with role selection before start.
+## Swarm role resolution
 
-Not implemented yet; see below.
+Before start, Desktop can preview role bindings. An explicit Person selection
+wins; saved workspace defaults and compatible People may be considered by the
+backend; unmatched roles remain ephemeral. Runner/model preferences can inform
+role launch configuration. The persisted role Person ID is currently an
+adapter hint, not a canonical session identity. Swarms continue to work with
+no configured People.
 
-## Gaps
+## Operational limits
 
-The following are explicitly **not implemented**. Do not represent schemas or
-file authoring as the user interface:
+- Person start creates a new local PTY session; it does not resume provider
+  conversation history or keep the process alive after Desktop exits.
+- `max_seconds` is enforced for local Person PTYs. Token/cost budgets and
+  non-inherited isolation are disclosed as unsupported in that flow.
+- Cursor and Muse open interactively without a submitted initial task until
+  their runner-specific prompt contracts are verified.
+- Swarm role processes are not yet exposed as Person sessions in Terminal or
+  the semantic World.
 
-- People CRUD in Desktop (create/edit/archive through the GUI).
-- Import review flow in Desktop (reviewing a `munder-difflin/hire@1` payload).
-- Start / session binding (starting a session as a Person).
-- Swarm role picker with pre-start Person selection.
-- Runtime enforcement of the resolution order above.
-
-Until these land, the contract is the schema set, the scaffold, the mirrors
-and the offline validator. Each gap lands with real GUI journeys, not
-documentation-only claims.
+For implementation evidence and the current feature ledger, use Agent
+Toolkit's [People contract](https://github.com/ulises-jeremias/agent-toolkit/blob/main/docs/PEOPLE.md)
+and [Desktop workflow ledger](https://github.com/ulises-jeremias/agent-toolkit/blob/main/docs/desktop/workflows.yaml).

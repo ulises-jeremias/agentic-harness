@@ -1,6 +1,12 @@
 # Part 3: L3 — CI Sweeper
 
-> Build an autonomous loop that detects CI failures and opens fix PRs.
+> **Historical workshop:** these examples use a retired loop contract and are
+> not a safety recommendation. Current Agent Toolkit loops are defined in
+> `loops/<name>/loop.yaml`; do not copy or run these commands. Use the
+> [current loop guide](https://github.com/ulises-jeremias/agent-toolkit/blob/main/docs/LOOPS.md)
+> and keep external mutations behind reviewed human gates.
+
+Build an autonomous loop that detects CI failures and opens fix PRs.
 
 **Time**: 30 minutes | **Tier**: L3 (unattended) | **Risk**: Medium — creates draft PRs
 
