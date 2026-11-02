@@ -12,6 +12,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 <!-- markdownlint-disable MD024 -->
 ## [Unreleased]
 
+## [1.4.0] — 2026-11-02
+
+### Added
+
+- **People reference instance** ([#197](https://github.com/ulises-jeremias/agentic-harness/pull/197)) — adds the `agent-toolkit/person@1` persistence contract, JSON schemas and lock file, a reviewed fictional Person template, validation tooling, and lifecycle guidance. The docs distinguish durable identity records from live agent sessions and document current GUI/runtime limitations.
+- **Automated context and people validation** — CI now runs the Python test suite and validates the People data surface, including schema compatibility and workspace fixtures.
+
+### Changed
+
+- **Toolkit alignment** ([#198](https://github.com/ulises-jeremias/agentic-harness/pull/198)) — refreshes harness guidance to treat Agent Toolkit as the source of truth for skills, agents, profiles, and workflows.
+- **Persistent workspace structure** ([#193](https://github.com/ulises-jeremias/agentic-harness/pull/193)) — normalizes Agentic Harness as a durable workspace overlay and updates repository guidance and examples.
+
 ## [1.3.0] — 2026-08-06
 
 ### Added
@@ -125,7 +137,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
-[Unreleased]: https://github.com/ulises-jeremias/agentic-harness/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/ulises-jeremias/agentic-harness/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/ulises-jeremias/agentic-harness/compare/v1.3.0...v1.4.0
+[1.3.0]: https://github.com/ulises-jeremias/agentic-harness/tree/v1.3.0
 [1.1.0]: https://github.com/ulises-jeremias/agentic-harness/releases/tag/v1.1.0
 [1.0.0]: https://github.com/ulises-jeremias/agentic-harness/releases/tag/v1.0.0
 [0.4.0]: https://github.com/ulises-jeremias/agentic-harness/releases/tag/v0.4.0
